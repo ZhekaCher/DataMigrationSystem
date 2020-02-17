@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context;
@@ -13,31 +14,28 @@ namespace DataMigrationSystem.Services
         private readonly IndividualContext _individualContext;
         private readonly CompanyContext _companyContext;
 
-        public EnforcementDebtMigrationService(WebEnforcementDebtContext enforcementDebtContext, ParsedEnforcementDebtContext parsedEnforcementDebtContext, IndividualContext individualContext, CompanyContext companyContext)
+        public EnforcementDebtMigrationService()
         {
-            _enforcementDebtContext = enforcementDebtContext;
-            _parsedEnforcementDebtContext = parsedEnforcementDebtContext;
-            _individualContext = individualContext;
-            _companyContext = companyContext;
+            _enforcementDebtContext = new WebEnforcementDebtContext();
+            _parsedEnforcementDebtContext = new ParsedEnforcementDebtContext();
+            _individualContext = new IndividualContext();
+            _companyContext = new CompanyContext();
         }
 
         public async Task StartMigratingAsync()
         {
-            var companyDtos = 
-                _parsedEnforcementDebtContext
-                    .EnforcementDebtDtos
-                    .Where(x =>  
-                        _companyContext
-                            .Companies
-                            .Any(company => x.IinBin == company.Bin))
-                    .Include(x=>x.Detail);
+
+            var companyDtos = _parsedEnforcementDebtContext.EnforcementDebtDtos.Include(x => x.DetailDto);
+            
+            var i = 0;
+            
             foreach (var companyDto in companyDtos)
             {
                 var enforcementDebt = await DtoToCompanyEntity(companyDto);
-                var found = await _enforcementDebtContext.EnforcementDebts.FirstOrDefaultAsync(x => x.Uid == enforcementDebt.Uid);
+                var found = await _enforcementDebtContext.CompanyEnforcementDebts.FirstOrDefaultAsync(x => x.Uid == enforcementDebt.Uid);
                 if (found == null)
                 {
-                    await _enforcementDebtContext.EnforcementDebts.AddAsync(enforcementDebt);
+                    await _enforcementDebtContext.CompanyEnforcementDebts.AddAsync(enforcementDebt);
                 }
                 else
                 {
@@ -55,8 +53,11 @@ namespace DataMigrationSystem.Services
                     found.Status = enforcementDebt.Status;
                     found.Number = enforcementDebt.Number;
                 }
-                
-                await _enforcementDebtContext.SaveChangesAsync();
+                i = await _enforcementDebtContext.SaveChangesAsync();
+                if (i == 0)
+                {
+                    Console.ReadLine();
+                }
             }
         }
         private async Task<CompanyEnforcementDebt> DtoToCompanyEntity(EnforcementDebtDto debtDto)
@@ -68,22 +69,24 @@ namespace DataMigrationSystem.Services
                 Date = debtDto.Date,
                 EssenceRequirements = debtDto.EssenceRequirements,
                 Debtor = debtDto.Debtor,
-                Amount = debtDto.Detail.Amount,
-                JudicialDoc = debtDto.Detail.JudicialDoc,
-                History = debtDto.Detail.History,
-                Claimer = debtDto.Detail.Claimer,
-                Number = debtDto.Detail.Number,
                 Uid = debtDto.Uid,
                 IinBin = debtDto.IinBin
             };
-            
-            if (debtDto.Detail.Type != null)
+            if (debtDto.DetailDto != null)
             {
-                enforcementDebt.TypeId = (await _enforcementDebtContext.EnforcementDebtTypes.FirstOrDefaultAsync(x => x.Name == debtDto.Detail.Type)).Id;
-            }
-            else
-            {
-                enforcementDebt.TypeId = null;
+                enforcementDebt.Amount = debtDto.DetailDto.Amount;
+                enforcementDebt.JudicialDoc = debtDto.DetailDto.JudicialDoc;
+                enforcementDebt.History = debtDto.DetailDto.History;
+                enforcementDebt.Claimer = debtDto.DetailDto.Claimer;
+                enforcementDebt.Number = debtDto.DetailDto.Number;
+                if (debtDto.DetailDto.Type != null)
+                {
+                    enforcementDebt.TypeId = (await _enforcementDebtContext.EnforcementDebtTypes.FirstOrDefaultAsync(x => x.Name == debtDto.DetailDto.Type)).Id;
+                }
+                else
+                {
+                    enforcementDebt.TypeId = null;
+                }
             }
             return enforcementDebt;
         }

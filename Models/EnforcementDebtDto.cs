@@ -22,21 +22,22 @@ namespace DataMigrationSystem.Models
         public DateTime? Date { get; set; }
         [Column("iin_bin")]
         public long IinBin { get; set; }
-        public EnforcementDebtDetailDto Detail { get; set; }
+        public EnforcementDebtDetailDto DetailDto { get; set; }
     }
     [Table("enforcement_debt_detail")]
     public class EnforcementDebtDetailDto
     {
         [Key]
+        [ForeignKey("enforcement_debt_detail_enforcement_debt_uid_fk")]
         [Column("uid")]
         public string Uid { get; set; }
         [Column("number")]
         public string Number { get; set; }
-        [Column("uid")]
+        [Column("claimer")]
         public string Claimer { get; set; }
-        [Column("uid")]
+        [Column("amount")]
         public double Amount { get; set; }
-        [Column("uid")]
+        [Column("history")]
         public string History { get; set; }
         [Column("judicial_doc")]
         public string JudicialDoc { get; set; }

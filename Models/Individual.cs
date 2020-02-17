@@ -5,7 +5,7 @@ namespace DataMigrationSystem.Models
 {
     [Table("individuals")]
     public class Individual
-    { 
+    {
         [Key]
         [Column("iin")]
         public long Iin { get; set; }
