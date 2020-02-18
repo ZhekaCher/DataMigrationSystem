@@ -10,4 +10,11 @@ namespace DataMigrationSystem.Models
         [Column("iin")]
         public long Iin { get; set; }
     }
+    [Table("individual")]
+    public class ParsedIndividual
+    {
+        [Key]
+        [Column("iin")]
+        public long Iin { get; set; }
+    }
 }

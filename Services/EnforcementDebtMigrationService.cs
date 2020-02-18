@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context;
 using DataMigrationSystem.Models;
@@ -11,15 +12,11 @@ namespace DataMigrationSystem.Services
     {
         private readonly WebEnforcementDebtContext _enforcementDebtContext;
         private readonly ParsedEnforcementDebtContext _parsedEnforcementDebtContext;
-        private readonly IndividualContext _individualContext;
-        private readonly CompanyContext _companyContext;
 
         public EnforcementDebtMigrationService()
         {
             _enforcementDebtContext = new WebEnforcementDebtContext();
             _parsedEnforcementDebtContext = new ParsedEnforcementDebtContext();
-            _individualContext = new IndividualContext();
-            _companyContext = new CompanyContext();
         }
 
         protected override Logger InitializeLogger()
@@ -30,7 +27,21 @@ namespace DataMigrationSystem.Services
         public override async Task StartMigratingAsync()
         {
 
-            var companyDtos = _parsedEnforcementDebtContext.EnforcementDebtDtos.Include(x => x.DetailDto);
+            var companyDtos = from debtDto in _parsedEnforcementDebtContext.EnforcementDebtDtos
+                join debtDetail in _parsedEnforcementDebtContext.EnforcementDebtDetailDtos
+                    on debtDto.Uid equals debtDetail.Uid
+                join companies in _parsedEnforcementDebtContext.ParsedCompanies
+                    on debtDto.IinBin equals companies.Bin
+                select new EnforcementDebtDto
+                {
+                    DetailDto = debtDetail,
+                    Date = debtDto.Date,
+                    Agency = debtDto.Agency,
+                    Uid = debtDto.Uid,
+                    EssenceRequirements = debtDto.EssenceRequirements,
+                    JudicialExecutor = debtDto.JudicialExecutor,
+                    IinBin = debtDto.IinBin
+                };
             
             var i = 0;
             
@@ -58,11 +69,8 @@ namespace DataMigrationSystem.Services
                     found.Status = enforcementDebt.Status;
                     found.Number = enforcementDebt.Number;
                 }
-                i = await _enforcementDebtContext.SaveChangesAsync();
-                if (i == 0)
-                {
-                    Console.ReadLine();
-                }
+                await _enforcementDebtContext.SaveChangesAsync();
+                Console.WriteLine(i++);
             }
         }
         private async Task<CompanyEnforcementDebt> DtoToCompanyEntity(EnforcementDebtDto debtDto)

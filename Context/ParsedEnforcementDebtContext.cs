@@ -18,6 +18,8 @@ namespace DataMigrationSystem.Context
 
         public DbSet<EnforcementDebtDto> EnforcementDebtDtos { get; set; }    
         public DbSet<EnforcementDebtDetailDto> EnforcementDebtDetailDtos { get; set; }
+        public DbSet<ParsedCompany> ParsedCompanies { get; set; }
+        public DbSet<ParsedIndividual> ParsedIndividuals { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

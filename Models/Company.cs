@@ -10,5 +10,11 @@ namespace DataMigrationSystem.Models
         [Column("biin")]
         public long Bin { get; set; }
     }
-
+    [Table("company")]
+    public class ParsedCompany
+    {
+        [Key]
+        [Column("iin_bin")]
+        public long Bin { get; set; }
+    }
 }
