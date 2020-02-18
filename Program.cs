@@ -7,21 +7,19 @@ using NLog.Config;
 
 namespace DataMigrationSystem
 {
-    class Program
+    internal static class Program
     {
-        static async Task Main(string[] args)
+        private static async Task Main(string[] args)
         {
             Console.InputEncoding = Encoding.UTF8;
             Console.OutputEncoding = Encoding.UTF8;
             Console.Title = "Data Migration System";
-            // LogManager.Configuration = new XmlLoggingConfiguration("NLog.config");
-            // Logger logger = LogManager.GetCurrentClassLogger();
-            // logger.Info("Starting Migration!");
-
-            Console.WriteLine("Starting Migration!");
+            LogManager.Configuration = new XmlLoggingConfiguration("NLog.config");
+            var logger = LogManager.GetCurrentClassLogger();
+            logger.Info("Starting Migration!");
             EnforcementDebtMigrationService enforcementDebtMigrationService = new EnforcementDebtMigrationService();
             await enforcementDebtMigrationService.StartMigratingAsync();
-            Console.WriteLine("Done!");
+            logger.Info("Done!");
         }
     }
 }
