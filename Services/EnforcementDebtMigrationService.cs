@@ -1,13 +1,13 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context;
 using DataMigrationSystem.Models;
 using Microsoft.EntityFrameworkCore;
+using NLog;
 
 namespace DataMigrationSystem.Services
 {
-    public class EnforcementDebtMigrationService
+    public sealed class EnforcementDebtMigrationService : MigrationService
     {
         private readonly WebEnforcementDebtContext _enforcementDebtContext;
         private readonly ParsedEnforcementDebtContext _parsedEnforcementDebtContext;
@@ -22,7 +22,12 @@ namespace DataMigrationSystem.Services
             _companyContext = new CompanyContext();
         }
 
-        public async Task StartMigratingAsync()
+        protected override Logger InitializeLogger()
+        {
+            return LogManager.GetCurrentClassLogger();
+        }
+
+        public override async Task StartMigratingAsync()
         {
 
             var companyDtos = _parsedEnforcementDebtContext.EnforcementDebtDtos.Include(x => x.DetailDto);
