@@ -31,7 +31,7 @@ namespace DataMigrationSystem.Services
         /// </summary>
         /// <returns>Logger</returns>
         /// <code>
-        /// return LogManager.GetCurrentClassLogger();
+        /// Example: return LogManager.GetCurrentClassLogger();
         /// </code>
         protected abstract Logger InitializeLogger();
 
