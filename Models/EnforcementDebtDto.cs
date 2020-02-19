@@ -28,7 +28,6 @@ namespace DataMigrationSystem.Models
     public class EnforcementDebtDetailDto
     {
         [Key]
-        [ForeignKey("enforcement_debt_detail_enforcement_debt_uid_fk")]
         [Column("uid")]
         public string Uid { get; set; }
         [Column("number")]
