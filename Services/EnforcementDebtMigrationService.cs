@@ -26,25 +26,25 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
-            var types = _parsedEnforcementDebtContext.EnforcementDebtDetailDtos.Select(x => x.Type).Distinct();
-            foreach (var type in types)
-            {
-                var found = await _webEnforcementDebtContext.EnforcementDebtTypes.FirstOrDefaultAsync(x => x.Name == type);
-                if (found == null)
-                {
-                    await _webEnforcementDebtContext.EnforcementDebtTypes.AddAsync(new EnforcementDebtType
-                    {
-                        Name = type
-                    });
-                }
-            }
-            await _webEnforcementDebtContext.SaveChangesAsync();
+            // var types = _parsedEnforcementDebtContext.EnforcementDebtDetailDtos.Select(x => x.Type).Distinct();
+            // foreach (var type in types)
+            // {
+            //     var found = await _webEnforcementDebtContext.EnforcementDebtTypes.FirstOrDefaultAsync(x => x.Name == type);
+            //     if (found == null)
+            //     {
+            //         await _webEnforcementDebtContext.EnforcementDebtTypes.AddAsync(new EnforcementDebtType
+            //         {
+            //             Name = type
+            //         });
+            //     }
+            // }
+            // await _webEnforcementDebtContext.SaveChangesAsync();
             
             var companyDtos = from debtDto in _parsedEnforcementDebtContext.EnforcementDebtDtos
                 join debtDetail in _parsedEnforcementDebtContext.EnforcementDebtDetailDtos
                     on debtDto.Uid equals debtDetail.Uid
                 join companies in _parsedEnforcementDebtContext.ParsedCompanies
-                    on debtDto.IinBin equals companies.Bin orderby debtDetail.Amount
+                    on debtDto.IinBin equals companies.Bin orderby debtDto.IinBin
                 select new EnforcementDebtDto
                 {
                     DetailDto = debtDetail,
@@ -55,16 +55,15 @@ namespace DataMigrationSystem.Services
                     JudicialExecutor = debtDto.JudicialExecutor,
                     IinBin = debtDto.IinBin
                 };
-            
             var i = 0;
-            // long newBin = 0;
+            long newBin = 0;
             foreach (var companyDto in companyDtos)
             {
-                // if (newBin != companyDto.IinBin)
-                // {
-                    // await _enforcementDebtContext.Database.ExecuteSqlInterpolatedAsync("");
-                    // newBin = companyDto.IinBin;
-                // }
+                if (newBin != companyDto.IinBin)
+                {
+                    await _webEnforcementDebtContext.Database.ExecuteSqlRawAsync("");
+                    newBin = companyDto.IinBin;
+                }
                 var enforcementDebt = await DtoToCompanyEntity(companyDto);
                 var found = await _webEnforcementDebtContext.CompanyEnforcementDebts.FirstOrDefaultAsync(x => x.Uid == enforcementDebt.Uid);
                 if (found == null)
@@ -88,7 +87,7 @@ namespace DataMigrationSystem.Services
                     found.Number = enforcementDebt.Number;
                 }
                 await _webEnforcementDebtContext.SaveChangesAsync();
-                if (++i == 2000)
+                if (++i== 2000)
                 {
                     return;
                 }

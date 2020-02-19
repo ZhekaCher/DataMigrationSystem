@@ -28,9 +28,16 @@ namespace DataMigrationSystem.Services
                 join companies in _parsedLeavingRestrictionContext.ParsedCompanies
                     on leavingRestrictionDto.IinBin equals companies.Bin
                 orderby leavingRestrictionDto.IinBin
-                select leavingRestrictionDto;
+                select new CompanyLeavingRestriction
+                {
+                    Date = leavingRestrictionDto.Date,
+                    JudicialExecutor = leavingRestrictionDto.JudicialExecutor,
+                    IinBin = leavingRestrictionDto.IinBin,
+                    Debtor = leavingRestrictionDto.Debtor,
+                    RelevanceDate = leavingRestrictionDto.RelevanceDate,
+                    Cause = leavingRestrictionDto.Cause
+                };
 
-            long i = 0;
             long newBin = 0;
             
             foreach (var companyDto in companyDtos)
@@ -42,20 +49,9 @@ namespace DataMigrationSystem.Services
                     await _leavingRestrictionContext.SaveChangesAsync();
                     newBin = companyDto.IinBin;
                 }
-                await _leavingRestrictionContext.CompanyLeavingRestrictions.AddAsync(new CompanyLeavingRestriction
-                {
-                    Date = companyDto.Date,
-                    JudicialExecutor = companyDto.JudicialExecutor,
-                    IinBin = companyDto.IinBin,
-                    Debtor = companyDto.Debtor,
-                    RelevanceDate = companyDto.RelevanceDate,
-                    Cause = companyDto.Cause
-                });
+                await _leavingRestrictionContext.CompanyLeavingRestrictions.AddAsync(companyDto);
                 await _leavingRestrictionContext.SaveChangesAsync();
-                if (++i == 2000)
-                {
-                    return;
-                }
+                
             }
         }
     }

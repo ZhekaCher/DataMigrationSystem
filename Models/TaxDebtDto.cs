@@ -9,7 +9,7 @@ namespace DataMigrationSystem.Models
     public class TaxDebtDto
     {
         [Key]
-        [Column("bin")]
+        [Column("iin_bin")]
         public long IinBin { get; set; }
         [Column("relevance_date")]
         public DateTime? RelevanceDate { get; set; }
@@ -39,22 +39,26 @@ namespace DataMigrationSystem.Models
         public double SocialContribution { get; set; }
         [Column("social_health_insurance")] 
         public double SocialHealthInsurance { get; set; }
-        [Column("bin")] 
+        [Column("iin_bin")] 
         public long IinBin { get; set; }
         public List<TaxDebtPayerDto> TaxDebtPayers { get; set; }
         public TaxDebtDto TaxDebt { get; set; }
+        [Column("name_ru")]
+        public string NameRu { get; set; }
+        [Column("name_kk")]
+        public string NameKk { get; set; }
     }
     
     [Table("tax_debt_payer")]
     public class TaxDebtPayerDto
     {
-        [Column("bin")] 
+        [Column("iin_bin")] 
         public long IinBin { get; set; }
         [Column("total")] 
         public double Total { get; set; }
         [Column("char_code")] 
         public long CharCode { get; set; }
-        [Column("head_bin")] 
+        [Column("head_iin_bin")] 
         public long HeadIinBin { get; set; }
         public List<TaxDebtBccDto> TaxDebtBccs { get; set; }
         public TaxDebtOrgDto TaxDebtOrg { get; set; }
@@ -76,32 +80,13 @@ namespace DataMigrationSystem.Models
         public double Total { get; set; }
         [Column("char_code")]
         public long CharCode { get; set; }
-        [Column("bin")]
+        [Column("iin_bin")] 
         public long IinBin { get; set; }
         public TaxDebtPayerDto TaxDebtPayer { get; set; }
-    }
-    
-    [Table("tax_debt_org_name")]
-    public class TaxDebtOrgNameDto
-    {
-        [Key]
-        [Column("char_code")]
-        public long CharCode { get; set; }
         [Column("name_ru")]
         public string NameRu { get; set; }
         [Column("name_kk")]
         public string NameKk { get; set; }
     }
     
-    [Table("tax_debt_bcc_name")]
-    public class TaxDebtBccNameDto
-    {
-        [Key]
-        [Column("bcc")]
-        public long Bcc { get; set; }
-        [Column("name_ru")]
-        public string NameRu { get; set; }
-        [Column("name_kk")]
-        public string NameKk { get; set; }
-    }
 }

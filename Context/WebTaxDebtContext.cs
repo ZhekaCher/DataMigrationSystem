@@ -12,6 +12,11 @@ namespace DataMigrationSystem.Context
             
         }
 
+        public WebTaxDebtContext()
+        {
+            
+        }
+
         public DbSet<TaxDebt> TaxDebts { get; set; }
         public DbSet<TaxDebtBcc> TaxDebtBccs { get; set; }
         public DbSet<TaxDebtPayer> TaxDebtPayers { get; set; }
@@ -27,6 +32,10 @@ namespace DataMigrationSystem.Context
             modelBuilder.Entity<TaxDebt>().HasMany(x => x.TaxDebtOrgs).WithOne(x=>x.TaxDebt).HasForeignKey(x=> x.IinBin).HasPrincipalKey(x=>x.IinBin).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<TaxDebtOrg>().HasMany(x => x.TaxDebtPayers).WithOne(x=>x.TaxDebtOrg).HasForeignKey(x=> new {x.CharCode, x.HeadIinBin}).HasPrincipalKey(x=>new {x.CharCode, x.IinBin}).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<TaxDebtPayer>().HasMany(x => x.TaxDebtBccs).WithOne(x=>x.TaxDebtPayer).HasForeignKey(x=> new {x.CharCode, x.IinBin}).HasPrincipalKey(x=> new {x.CharCode, x.IinBin}).OnDelete(DeleteBehavior.Cascade);
+        }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseNpgsql("Server = 192.168.1.158; Database = avroradata; Port=5432; User ID = administrator; Password = Z4P6PjEHnJ5nPT; Search Path = avroradata; Integrated Security=true; Pooling=true;");
         }
     }
 }        

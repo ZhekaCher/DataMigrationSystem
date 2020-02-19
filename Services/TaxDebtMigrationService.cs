@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context;
 using DataMigrationSystem.Models;
@@ -12,10 +14,10 @@ namespace DataMigrationSystem.Services
         private readonly ParsedTaxDebtContext _parsedTaxDebtContext;
         private readonly WebTaxDebtContext _webTaxDebtContext;
 
-        public TaxDebtMigrationService(ParsedTaxDebtContext parsedTaxDebtContext, WebTaxDebtContext webTaxDebtContext)
+        public TaxDebtMigrationService()
         {
-            _parsedTaxDebtContext = parsedTaxDebtContext;
-            _webTaxDebtContext = webTaxDebtContext;
+            _parsedTaxDebtContext = new ParsedTaxDebtContext();
+            _webTaxDebtContext = new WebTaxDebtContext();
         }
 
         protected override Logger InitializeLogger()
@@ -26,7 +28,12 @@ namespace DataMigrationSystem.Services
         public override async Task StartMigratingAsync()
         {
             await MigrateReferences();
-            var taxDebtDtos = _parsedTaxDebtContext.TaxDebts.Include(x=>x.TaxDebtOrgs).ThenInclude(x=>x.TaxDebtPayers).ThenInclude(x=>x.TaxDebtBccs);
+            var taxDebtDtos = _parsedTaxDebtContext.TaxDebts
+                .Include(x=>x.TaxDebtOrgs)
+                .ThenInclude(x=>x.TaxDebtPayers)
+                .ThenInclude(x=>x.TaxDebtBccs);
+
+            int i = 0;
             foreach (var taxDebtDto in taxDebtDtos)
             {
                 var taxDebt = await DtoToEntity(taxDebtDto);
@@ -47,16 +54,17 @@ namespace DataMigrationSystem.Services
                     found.SocialHealthInsurance = taxDebt.SocialHealthInsurance;
                     found.RelevanceDate = taxDebt.RelevanceDate;
                     _webTaxDebtContext.TaxDebtOrgs.RemoveRange(found.TaxDebtOrgs);
-                    await _webTaxDebtContext.SaveChangesAsync();
+                    int f = await _webTaxDebtContext.SaveChangesAsync();
                     await _webTaxDebtContext.TaxDebtOrgs.AddRangeAsync(taxDebt.TaxDebtOrgs);
                 }
                 await _webTaxDebtContext.SaveChangesAsync();
+                Console.WriteLine(i++);
             }
         }
         
         private async Task MigrateReferences()
         {
-            var taxDebtOrgs = _parsedTaxDebtContext.TaxDebtOrgNames;
+            var taxDebtOrgs = _parsedTaxDebtContext.TaxDebtOrgs.Select(x=>new {x.CharCode, x.NameKk, x.NameRu}).Distinct();
             foreach (var distinct in taxDebtOrgs)
             {
                 var found = await _webTaxDebtContext.TaxDebtOrgNames.FirstOrDefaultAsync(x =>
@@ -73,7 +81,10 @@ namespace DataMigrationSystem.Services
             }
 
             await _webTaxDebtContext.SaveChangesAsync();
-            var taxDebtBccs = _parsedTaxDebtContext.TaxDebtBccNames;
+            var taxDebtBccs = _parsedTaxDebtContext.TaxDebtBccs.Select(x=> new
+            {
+                x.Bcc, x.NameKk, x.NameRu
+            }).Distinct();
             foreach (var distinct in taxDebtBccs)
             {
                 var found = await _webTaxDebtContext.TaxDebtBccNames.FirstOrDefaultAsync(x =>
