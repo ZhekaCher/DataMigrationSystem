@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context;
@@ -21,15 +22,20 @@ namespace DataMigrationSystem.Services
     /// </summary>
     public class LotGoszakupMigrationService : MigrationService
     {
-        private readonly ParsedLotGoszakupContext _parsedLotsGoszakupContext;
-        private readonly WebLotContext _webLotsContext;
         private readonly string _currentTradingFloor = "goszakup";
+        private int _sTradingFloorId;
+        private int _total;
+        private object _lock = new object();
 
 
-        public LotGoszakupMigrationService()
+        public LotGoszakupMigrationService(int numOfThreads = 30)
         {
-            _parsedLotsGoszakupContext = new ParsedLotGoszakupContext();
-            _webLotsContext = new WebLotContext();
+            NumOfThreads = numOfThreads;
+            using var parsedLotGoszakupContext = new ParsedLotGoszakupContext();
+            using var webLotContext = new WebLotContext();
+            _total = parsedLotGoszakupContext.LotGoszakupDtos.Count();
+            _sTradingFloorId = webLotContext.STradingFloors
+                .FirstOrDefault(x => x.Code.Equals(_currentTradingFloor)).Id;
         }
         protected override Logger InitializeLogger()
         {
@@ -38,24 +44,33 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
-            //TODO
-            await Migrate();
+            Logger.Warn(NumOfThreads);
+            Logger.Info("Start");
+            var tasks = new List<Task>();
+            for (var i = 0; i < NumOfThreads; i++)
+                tasks.Add(Migrate(i));
+
+            await Task.WhenAll(tasks);
+            Logger.Info("Ended");
         }
         
-        private async Task Migrate()
+        private async Task Migrate(int threadNum)
         {
-            Logger.Info("Started loading dtos");
-            var sTradingFloorId = _webLotsContext.STradingFloors.FirstOrDefault(x => x.Code.Equals(_currentTradingFloor)).Id;
-            var parsedLotsGoszakup = _parsedLotsGoszakupContext.LotGoszakupDtos.Take(25).ToList();
-            Logger.Info("Loaded all dtos, starting migration...");
-            foreach (var lotsGoszakupDto in parsedLotsGoszakup)
+            Logger.Info("Started thread");
+
+            await using var webLotContext = new WebLotContext();
+            await using var parsedLotGoszakupContext = new ParsedLotGoszakupContext();
+            foreach (var dto in parsedLotGoszakupContext.LotGoszakupDtos.Where(x =>
+                x.Id % NumOfThreads == threadNum))
             {
-                var lot = LotGoszakupDtoToLot(lotsGoszakupDto);
-                lot.IdTf = sTradingFloorId;
-                InsertOrUpdate(lot, _webLotsContext);
+                var dtoIns = LotGoszakupDtoToLot(dto);
+                dtoIns.IdTf = _sTradingFloorId;
+                await webLotContext.Lots.Upsert(dtoIns).On(x => new {x.IdLot, x.IdTf}).RunAsync();
+                lock (_lock)
+                    Logger.Trace($"Left {--_total}");
             }
-            _webLotsContext.SaveChanges();
-            Logger.Info("Completed loading");
+            
+            Logger.Info("Completed thread");
         }
 
         private Lot LotGoszakupDtoToLot(LotGoszakupDto lotsGoszakupDto)

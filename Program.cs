@@ -18,7 +18,7 @@ namespace DataMigrationSystem
             LogManager.Configuration = new XmlLoggingConfiguration("NLog.config");
             var logger = LogManager.GetCurrentClassLogger();
             logger.Info("Starting Migration!");
-            AnnouncementGoszakupMigrationService migrationService = new AnnouncementGoszakupMigrationService();
+            var migrationService = new LotGoszakupMigrationService(1);
             var lists = new List<MigrationService>();
             lists.Add(migrationService);
             await 

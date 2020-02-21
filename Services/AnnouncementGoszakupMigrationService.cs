@@ -26,9 +26,9 @@ namespace DataMigrationSystem.Services
         private object _lock = new object();
         
 
-        public AnnouncementGoszakupMigrationService()
+        public AnnouncementGoszakupMigrationService(int numOfThreads = 30)
         {
-            // NumOfThreads = numOfThreads;
+            NumOfThreads = numOfThreads;
             using var parsedAnnouncementGoszakupContext = new ParsedAnnouncementGoszakupContext();
             using var webAnnouncementContext = new WebAnnouncementContext();
             _total = parsedAnnouncementGoszakupContext.AnnouncementGoszakupDtos.Count();
@@ -43,7 +43,6 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
-            
             Logger.Warn(NumOfThreads);
             Logger.Info("Start");
             var tasks = new List<Task>();
@@ -51,11 +50,13 @@ namespace DataMigrationSystem.Services
                 tasks.Add(Migrate(i));
 
             await Task.WhenAll(tasks);
-            Logger.Info("Stop");
+            Logger.Info("Ended");
         }
 
         private async Task Migrate(int threadNum)
         {
+            Logger.Info("Started thread");
+            
             await using var webAnnouncementContext = new WebAnnouncementContext();
             await using var parsedAnnouncementGoszakupContext = new ParsedAnnouncementGoszakupContext();
             foreach (var dto in parsedAnnouncementGoszakupContext.AnnouncementGoszakupDtos.Where(x =>
@@ -67,6 +68,8 @@ namespace DataMigrationSystem.Services
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
             }
+            
+            Logger.Info("Completed thread");
         }
 
         private Announcement AnnouncementGoszakupDtoToAnnouncement(AnnouncementGoszakupDto announcementGoszakupDto)
