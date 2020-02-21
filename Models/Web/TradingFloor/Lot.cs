@@ -11,8 +11,8 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
     /// <summary>
     /// 'lots' web table
     /// </summary>
-    [Table("lots")]
-    public class Lots
+    [Table("lot")]
+    public class Lot
     {
         [Key]
         [Column("id")]
@@ -32,7 +32,7 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         [Column("name_en")]
         public string NameEn { get; set; }
         [Column("quantity")]
-        public int? Quantity { get; set; }
+        public double? Quantity { get; set; }
         [Column("price")]
         public double? Price { get; set; }
         [Column("total")]

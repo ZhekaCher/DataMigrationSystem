@@ -13,17 +13,17 @@ namespace DataMigrationSystem.Context.Web.TradingFloor
     /// </summary>
 
 
-    public class WebLotsContext : DbContext
+    public class WebLotContext : DbContext
     {
-        public DbSet<Lots> Lots { get; set; }    
+        public DbSet<Lot> Lots { get; set; }    
         public DbSet<STradingFloor> STradingFloors { get; set; }    
-        public WebLotsContext(DbContextOptions<WebLotsContext> options)
+        public WebLotContext(DbContextOptions<WebLotContext> options)
             : base(options)
         {
             
         }
 
-        public WebLotsContext()
+        public WebLotContext()
         {
            
         }
