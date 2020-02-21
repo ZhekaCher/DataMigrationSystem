@@ -21,8 +21,6 @@ namespace DataMigrationSystem
             var migrationService = new LotGoszakupMigrationService(1);
             var lists = new List<MigrationService>();
             lists.Add(migrationService);
-            await 
-                 lists[0].StartMigratingAsync();
             logger.Info("Done!");
         }
     }

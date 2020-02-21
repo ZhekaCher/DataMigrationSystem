@@ -1,4 +1,3 @@
-using DataMigrationSystem.Models;
 using DataMigrationSystem.Models.Parsed;
 using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +23,5 @@ namespace DataMigrationSystem.Context.Parsed
         public DbSet<CourtCaseDto> CourtCaseDtos { get; set; }    
         public DbSet<CourtCaseEntityDto> CourtCaseEntityDtos { get; set; }    
         public DbSet<ParsedCompany> ParsedCompanies { get; set; }
-        public DbSet<ParsedIndividual> ParsedIndividuals { get; set; }
     }
 }
