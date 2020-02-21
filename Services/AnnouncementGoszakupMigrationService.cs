@@ -1,4 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using DataMigrationSystem.Context.Parsed;
+using DataMigrationSystem.Context.Web.TradingFloor;
+using DataMigrationSystem.Models.Parsed;
 using NLog;
 
 namespace DataMigrationSystem.Services
@@ -14,6 +18,16 @@ namespace DataMigrationSystem.Services
 
     public class AnnouncementGoszakupMigrationService : MigrationService
     {
+
+        private ParsedAnnouncementGoszakupContext _announcementGoszakupContext;
+        private WebAnnouncementContext _webAnnouncementContext;
+
+        public AnnouncementGoszakupMigrationService()
+        {
+            _announcementGoszakupContext = new ParsedAnnouncementGoszakupContext();
+            _webAnnouncementContext = new WebAnnouncementContext();
+        }
+        
         protected override Logger InitializeLogger()
         {
             return LogManager.GetCurrentClassLogger();
@@ -21,6 +35,7 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
+            
         }
     }
 }

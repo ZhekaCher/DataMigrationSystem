@@ -46,7 +46,7 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         public long? IdTenderType { get; set; }
         [Column("add_info")]
         public string AddInfo { get; set; }
-        [Column("aum_tru_no_nds")]
+        [Column("sum_tru_no_nds")]
         public double? SumTruNoNds { get; set; }
         [Column("parent_id")]
         public long ParentId { get; set; }

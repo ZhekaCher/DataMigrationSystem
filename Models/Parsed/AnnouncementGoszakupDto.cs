@@ -17,7 +17,7 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("number_anno")] public string NumberAnno { get; set; }
         [Column("name_ru")] public string NameRu { get; set; }
         [Column("name_kz")] public string NameKz { get; set; }
-        [Column("total_sum")] public long? TotalSum { get; set; }
+        [Column("total_sum")] public double? TotalSum { get; set; }
         [Column("ref_trade_methods_id")] public int? RefTradeMethodsId { get; set; }
         [Column("ref_subject_type_id")] public int? RefSubjectTypeId { get; set; }
         [Column("customer_bin")] public long? CustomerBin { get; set; }
@@ -38,7 +38,7 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("id_supplier")] public int? IdSupplier { get; set; }
         [Column("biin_supplier")] public long? BiinSupplier { get; set; }
         [Column("parent_id")] public int? ParentId { get; set; }
-        [Column("singl_org_sign")] public bool? SinglOrgSign { get; set; }
+        [Column("single_org_sign")] public bool? SingleOrgSign { get; set; }
         [Column("is_light_industry")] public bool? IsLightIndustry { get; set; }
         [Column("is_construction_work")] public bool? IsConstructionWork { get; set; }
         [Column("customer_name_kz")] public string CustomerNameKz { get; set; }
