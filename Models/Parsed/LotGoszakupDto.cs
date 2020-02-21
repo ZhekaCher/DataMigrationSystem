@@ -12,7 +12,7 @@ namespace DataMigrationSystem.Models.Parsed
     /// 'lots_goszakup' parse table
     /// </summary>
     [Table("lots_goszakup")]
-    public class LotsGoszakupDto
+    public class LotGoszakupDto
     {
         [Key]
         [Column("id")]
@@ -71,6 +71,8 @@ namespace DataMigrationSystem.Models.Parsed
         public DateTime? IndexDate { get; set; }
         [Column("system_id")]
         public int? SystemId { get; set; }
+        [Column("relevance")]
+        public DateTime Relevance { get; set; }
         
     }
 }

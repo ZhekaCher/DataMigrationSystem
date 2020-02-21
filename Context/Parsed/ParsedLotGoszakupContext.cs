@@ -12,17 +12,17 @@ namespace DataMigrationSystem.Context.Parsed
     /// Контекст для работы с таблицей 'lots_goszakup'
     /// </summary>
 
-    public class ParsedLotsGoszakupContext : DbContext
+    public class ParsedLotGoszakupContext : DbContext
     {
         
-        public DbSet<LotsGoszakupDto> LotsGoszakupDtos { get; set; }    
-        public ParsedLotsGoszakupContext(DbContextOptions<ParsedLotsGoszakupContext> options)
+        public DbSet<LotGoszakupDto> LotGoszakupDtos { get; set; }    
+        public ParsedLotGoszakupContext(DbContextOptions<ParsedLotGoszakupContext> options)
             : base(options)
         {
 
         }
 
-        public ParsedLotsGoszakupContext()
+        public ParsedLotGoszakupContext()
         {
 
         }

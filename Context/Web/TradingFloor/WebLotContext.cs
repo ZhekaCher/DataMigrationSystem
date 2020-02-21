@@ -13,20 +13,21 @@ namespace DataMigrationSystem.Context.Web.TradingFloor
     /// </summary>
 
 
-    public class WebLotsContext : DbContext
+    public class WebLotContext : DbContext
     {
-        public DbSet<Lots> Lots { get; set; }    
+        public DbSet<Lot> Lots { get; set; }    
         public DbSet<STradingFloor> STradingFloors { get; set; }    
-        public WebLotsContext(DbContextOptions<WebLotsContext> options)
+        public WebLotContext(DbContextOptions<WebLotContext> options)
             : base(options)
         {
             
         }
 
-        public WebLotsContext()
+        public WebLotContext()
         {
            
         }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql("Server = '192.168.1.158'; Database = 'avroradata'; Port='5432'; User ID = 'administrator'; Password = 'Z4P6PjEHnJ5nPT'; Search Path = 'trading_floor'; Integrated Security=true; Pooling=true;");
