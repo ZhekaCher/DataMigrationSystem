@@ -31,20 +31,7 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
-            // var types = _parsedEnforcementDebtContext.EnforcementDebtDetailDtos.Select(x => x.Type).Distinct();
-            // foreach (var type in types)
-            // {
-            //     var found = await _webEnforcementDebtContext.EnforcementDebtTypes.FirstOrDefaultAsync(x => x.Name == type);
-            //     if (found == null)
-            //     {
-            //         await _webEnforcementDebtContext.EnforcementDebtTypes.AddAsync(new EnforcementDebtType
-            //         {
-            //             Name = type
-            //         });
-            //     }
-            // }
-            // await _webEnforcementDebtContext.SaveChangesAsync();
-            
+            await MigrateReferences();
             var companyDtos = from debtDto in _parsedEnforcementDebtContext.EnforcementDebtDtos
                 join debtDetail in _parsedEnforcementDebtContext.EnforcementDebtDetailDtos
                     on debtDto.Uid equals debtDetail.Uid
@@ -60,42 +47,23 @@ namespace DataMigrationSystem.Services
                     JudicialExecutor = debtDto.JudicialExecutor,
                     IinBin = debtDto.IinBin
                 };
-            var i = 0;
-            long newBin = 0;
+            var oldCounter = 0;
+            double oldAmount = 0;
+            long bin = 0;
             foreach (var companyDto in companyDtos)
             {
-                if (newBin != companyDto.IinBin)
+                if (bin != companyDto.IinBin)
                 {
-                    await _webEnforcementDebtContext.Database.ExecuteSqlRawAsync("");
-                    newBin = companyDto.IinBin;
+                    await _webEnforcementDebtContext.Database.ExecuteSqlRawAsync($"select avroradata.enforcement_debt_history({bin}, {oldCounter}, {oldAmount})");
+                    oldCounter = await
+                        _webEnforcementDebtContext.CompanyEnforcementDebts.CountAsync(x => x.IinBin == companyDto.IinBin);
+                    oldAmount = await
+                        _webEnforcementDebtContext.CompanyEnforcementDebts.Where(x => x.IinBin == companyDto.IinBin).SumAsync(x=>x.Amount);
+                    bin = companyDto.IinBin;
+                    await _webEnforcementDebtContext.SaveChangesAsync();
                 }
                 var enforcementDebt = await DtoToCompanyEntity(companyDto);
-                var found = await _webEnforcementDebtContext.CompanyEnforcementDebts.FirstOrDefaultAsync(x => x.Uid == enforcementDebt.Uid);
-                if (found == null)
-                {
-                    await _webEnforcementDebtContext.CompanyEnforcementDebts.AddAsync(enforcementDebt);
-                }
-                else
-                {
-                    found.Agency = enforcementDebt.Agency;
-                    found.Amount = enforcementDebt.Amount;
-                    found.JudicialExecutor = enforcementDebt.JudicialExecutor;
-                    found.JudicialDoc = enforcementDebt.JudicialDoc;
-                    found.History = enforcementDebt.History;
-                    found.Debtor = enforcementDebt.Debtor;
-                    found.Claimer = enforcementDebt.Claimer;
-                    found.Date = enforcementDebt.Date;
-                    found.EssenceRequirements = enforcementDebt.EssenceRequirements;
-                    found.TypeId = enforcementDebt.TypeId;
-                    found.RelevanceDate = enforcementDebt.RelevanceDate;
-                    found.Status = enforcementDebt.Status;
-                    found.Number = enforcementDebt.Number;
-                }
-                await _webEnforcementDebtContext.SaveChangesAsync();
-                if (++i== 2000)
-                {
-                    return;
-                }
+                await _webEnforcementDebtContext.CompanyEnforcementDebts.Upsert(enforcementDebt).On(x => x.Uid).RunAsync();
             }
         }
         private async Task<CompanyEnforcementDebt> DtoToCompanyEntity(EnforcementDebtDto debtDto)
@@ -127,6 +95,17 @@ namespace DataMigrationSystem.Services
                 }
             }
             return enforcementDebt;
+        }
+        private async Task MigrateReferences()
+        {
+            var courts = _parsedEnforcementDebtContext.EnforcementDebtDetailDtos.Select(x => x.Type).Distinct();
+            foreach (var distinct in courts)
+            {
+                await _webEnforcementDebtContext.EnforcementDebtTypes.Upsert(new EnforcementDebtType()
+                {
+                    Name = distinct
+                }).On(x => x.Name).RunAsync();
+            }
         }
     }
 }

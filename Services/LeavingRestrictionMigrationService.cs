@@ -6,6 +6,7 @@ using DataMigrationSystem.Context.Web;
 using DataMigrationSystem.Context.Web.Avroradata;
 using DataMigrationSystem.Models;
 using DataMigrationSystem.Models.Web.Avroradata;
+using Microsoft.EntityFrameworkCore;
 using NLog;
 
 namespace DataMigrationSystem.Services
@@ -42,20 +43,25 @@ namespace DataMigrationSystem.Services
                     Cause = leavingRestrictionDto.Cause
                 };
 
-            long newBin = 0;
-            
+            long i = 0;
+            long bin = 0;
+            int oldCounter = 0;
             foreach (var companyDto in companyDtos)
             {
-                if (newBin != companyDto.IinBin)
-                {
-                    _leavingRestrictionContext.CompanyLeavingRestrictions.RemoveRange(_leavingRestrictionContext.CompanyLeavingRestrictions.Where(x =>
-                        x.IinBin == companyDto.IinBin));
+                if (bin != companyDto.IinBin)
+                { 
+                    await _leavingRestrictionContext.Database.ExecuteSqlRawAsync($"select avroradata.leaving_restriction_history({bin}, {oldCounter})");
+                    oldCounter =
+                        _leavingRestrictionContext.CompanyLeavingRestrictions.Count(x => x.IinBin == companyDto.IinBin);
+                    bin = companyDto.IinBin;
+                    _leavingRestrictionContext.CompanyLeavingRestrictions.RemoveRange(
+                        _leavingRestrictionContext.CompanyLeavingRestrictions.Where(x =>
+                            x.IinBin == companyDto.IinBin));
                     await _leavingRestrictionContext.SaveChangesAsync();
-                    newBin = companyDto.IinBin;
                 }
                 await _leavingRestrictionContext.CompanyLeavingRestrictions.AddAsync(companyDto);
                 await _leavingRestrictionContext.SaveChangesAsync();
-                
+                Logger.Info(i++);
             }
         }
     }
