@@ -26,9 +26,9 @@ namespace DataMigrationSystem.Services
         private object _lock = new object();
         
 
-        public AnnouncementGoszakupMigrationService(int numOfThreads = 30)
+        public AnnouncementGoszakupMigrationService()
         {
-            NumOfThreads = numOfThreads;
+            // NumOfThreads = numOfThreads;
             using var parsedAnnouncementGoszakupContext = new ParsedAnnouncementGoszakupContext();
             using var webAnnouncementContext = new WebAnnouncementContext();
             _total = parsedAnnouncementGoszakupContext.AnnouncementGoszakupDtos.Count();
@@ -41,42 +41,25 @@ namespace DataMigrationSystem.Services
             return LogManager.GetCurrentClassLogger();
         }
 
-        public override async Task StartMigratingAsync(int numOfThreads = 30)
+        public override async Task StartMigratingAsync()
         {
             
-            Logger.Warn(numOfThreads);
+            Logger.Warn(NumOfThreads);
             Logger.Info("Start");
             var tasks = new List<Task>();
-            for (var i = 0; i < numOfThreads; i++)
-                tasks.Add(Migrate(numOfThreads, i));
+            for (var i = 0; i < NumOfThreads; i++)
+                tasks.Add(Migrate(i));
 
             await Task.WhenAll(tasks);
             Logger.Info("Stop");
         }
 
-        private async Task Migrate(int numOfThreads, int threadNum)
+        private async Task Migrate(int threadNum)
         {
             await using var webAnnouncementContext = new WebAnnouncementContext();
             await using var parsedAnnouncementGoszakupContext = new ParsedAnnouncementGoszakupContext();
-
-            var a = parsedAnnouncementGoszakupContext.AnnouncementGoszakupDtos;
-            await foreach (var announcementGoszakupDto in a)
-            {
-                var b = new Announcement();
-                webAnnouncementContext.Announcements.Add()
-                webAnnouncementContext.SaveChanges();
-            }
-            
-            
-            
-            
-            
-            
-            
-            
-            
             foreach (var dto in parsedAnnouncementGoszakupContext.AnnouncementGoszakupDtos.Where(x =>
-                x.Id % numOfThreads == threadNum))
+                x.Id % NumOfThreads == threadNum))
             {
                 var dtoIns = AnnouncementGoszakupDtoToAnnouncement(dto);
                 dtoIns.IdTf = _sTradingFloorId;

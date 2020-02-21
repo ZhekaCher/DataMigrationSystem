@@ -46,6 +46,6 @@ namespace DataMigrationSystem.Services
         /// Метод запускающий процесс миграции
         /// </summary>
         /// <returns>Task</returns>
-        public abstract Task StartMigratingAsync(int numOfThreads = 1);
+        public abstract Task StartMigratingAsync();
     }
 }

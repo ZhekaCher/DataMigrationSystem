@@ -26,7 +26,7 @@ namespace DataMigrationSystem.Services
             return LogManager.GetCurrentClassLogger();
         }
 
-        public override async Task StartMigratingAsync(int numOfThreads = 1)
+        public override async Task StartMigratingAsync()
         {
             var companyDtos = from leavingRestrictionDto in _parsedLeavingRestrictionContext.LeavingRestrictionDtos
                 join companies in _parsedLeavingRestrictionContext.ParsedCompanies

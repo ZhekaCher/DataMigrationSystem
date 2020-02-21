@@ -28,7 +28,7 @@ namespace DataMigrationSystem.Services
             return LogManager.GetCurrentClassLogger();
         }
 
-        public override async Task StartMigratingAsync(int numOfThreads = 1)
+        public override async Task StartMigratingAsync()
         {
             await MigrateReferences();
 
