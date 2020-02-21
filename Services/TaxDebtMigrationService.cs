@@ -30,7 +30,7 @@ namespace DataMigrationSystem.Services
             return LogManager.GetCurrentClassLogger();
         }
 
-        public override async Task StartMigratingAsync()
+        public override async Task StartMigratingAsync(int numOfThreads = 1)
         {
             await MigrateReferences();
             var taxDebtDtos = _parsedTaxDebtContext.TaxDebts

@@ -11,8 +11,10 @@ namespace DataMigrationSystem.Services
     /// </summary>
     public abstract class MigrationService
     {
-        protected MigrationService()
+        protected int NumOfThreads;
+        protected MigrationService(int numOfThreads = 1)
         {
+            NumOfThreads = numOfThreads;
             // ReSharper disable once VirtualMemberCallInConstructor
             Logger = InitializeLogger();
         }
@@ -44,6 +46,6 @@ namespace DataMigrationSystem.Services
         /// Метод запускающий процесс миграции
         /// </summary>
         /// <returns>Task</returns>
-        public abstract Task StartMigratingAsync();
+        public abstract Task StartMigratingAsync(int numOfThreads = 1);
     }
 }

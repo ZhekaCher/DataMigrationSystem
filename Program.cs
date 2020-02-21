@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using DataMigrationSystem.Services;
@@ -17,8 +18,11 @@ namespace DataMigrationSystem
             LogManager.Configuration = new XmlLoggingConfiguration("NLog.config");
             var logger = LogManager.GetCurrentClassLogger();
             logger.Info("Starting Migration!");
-            MigrationService migrationService = new AnnouncementGoszakupMigrationService();
-            await migrationService.StartMigratingAsync();
+            AnnouncementGoszakupMigrationService migrationService = new AnnouncementGoszakupMigrationService();
+            var lists = new List<MigrationService>();
+            lists.Add(migrationService);
+            await 
+                 lists[0].StartMigratingAsync();
             logger.Info("Done!");
         }
     }

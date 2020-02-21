@@ -40,17 +40,19 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         //TODO(token field)
         // [Column("token")]
         // public long? Token { get; set; }
-        [Column("contact_info")]
-        public string ContactInfo { get; set; }
+        //TODO(contact_info field)
+        // [Column("contact_info")]
+        // public string ContactInfo { get; set; }
         [Column("id_tender_type")]
         public long? IdTenderType { get; set; }
-        [Column("add_info")]
-        public string AddInfo { get; set; }
+        //TODO(add_info field)
+        // [Column("add_info")]
+        // public string AddInfo { get; set; }
         [Column("sum_tru_no_nds")]
         public double? SumTruNoNds { get; set; }
         [Column("parent_id")]
-        public long ParentId { get; set; }
+        public long? ParentId { get; set; }
         [Column("relevance_date")]
-        public DateTime RelevanceDate { get; set; }
+        public DateTime? RelevanceDate { get; set; }
     }
 }
