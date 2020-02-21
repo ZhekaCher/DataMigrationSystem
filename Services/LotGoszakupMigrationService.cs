@@ -17,16 +17,16 @@ namespace DataMigrationSystem.Services
     /// @date 21.02.2020 11:08:36
     /// @version 1.0
     /// <summary>
-    /// INPUT
+    /// migration of lots
     /// </summary>
-    public class LotsGoszakupMigrationService : MigrationService
+    public class LotGoszakupMigrationService : MigrationService
     {
         private readonly ParsedLotGoszakupContext _parsedLotsGoszakupContext;
         private readonly WebLotContext _webLotsContext;
         private readonly string _currentTradingFloor = "goszakup";
 
 
-        public LotsGoszakupMigrationService()
+        public LotGoszakupMigrationService()
         {
             _parsedLotsGoszakupContext = new ParsedLotGoszakupContext();
             _webLotsContext = new WebLotContext();

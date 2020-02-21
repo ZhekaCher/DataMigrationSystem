@@ -9,7 +9,7 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
     /// @date 19.02.2020 17:44:59
     /// @version 1.0
     /// <summary>
-    /// 'lots' web table
+    /// 'lot' web table
     /// </summary>
     [Table("lot")]
     public class Lot
