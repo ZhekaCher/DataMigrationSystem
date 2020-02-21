@@ -17,7 +17,7 @@ namespace DataMigrationSystem
             LogManager.Configuration = new XmlLoggingConfiguration("NLog.config");
             var logger = LogManager.GetCurrentClassLogger();
             logger.Info("Starting Migration!");
-            MigrationService migrationService = new TaxDebtMigrationService();
+            MigrationService migrationService = new LotsGoszakupMigrationService();
             await migrationService.StartMigratingAsync();
             logger.Info("Done!");
         }

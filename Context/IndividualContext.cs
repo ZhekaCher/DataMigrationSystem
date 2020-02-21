@@ -1,4 +1,5 @@
 using DataMigrationSystem.Models;
+using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context

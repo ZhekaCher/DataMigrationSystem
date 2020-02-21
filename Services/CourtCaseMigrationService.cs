@@ -1,7 +1,11 @@
+
+
 using System.Linq;
 using System.Threading.Tasks;
-using DataMigrationSystem.Context;
-using DataMigrationSystem.Models;
+using DataMigrationSystem.Context.Parsed;
+using DataMigrationSystem.Context.Web.Avroradata;
+using DataMigrationSystem.Models.Parsed;
+using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -12,7 +16,8 @@ namespace DataMigrationSystem.Services
         private readonly WebCourtCaseContext _webCourtCaseContext;
         private readonly ParsedCourtCaseContext _parsedCourtCaseContext;
 
-        public CourtCaseMigrationService(WebCourtCaseContext webCourtCaseContext, ParsedCourtCaseContext parsedCourtCaseContext)
+        public CourtCaseMigrationService(WebCourtCaseContext webCourtCaseContext,
+            ParsedCourtCaseContext parsedCourtCaseContext)
         {
             _webCourtCaseContext = webCourtCaseContext;
             _parsedCourtCaseContext = parsedCourtCaseContext;
@@ -21,19 +26,18 @@ namespace DataMigrationSystem.Services
         protected override Logger InitializeLogger()
         {
             return LogManager.GetCurrentClassLogger();
-
         }
 
-        public override async  Task StartMigratingAsync()
+        public override async Task StartMigratingAsync()
         {
-            
             await MigrateReferences();
-            
+
             var courtCaseDtos = _parsedCourtCaseContext.CourtCaseDtos;
             foreach (var courtCaseDto in courtCaseDtos)
             {
                 var courtCase = await DtoToEntity(courtCaseDto);
-                var found = await _webCourtCaseContext.CourtCases.FirstOrDefaultAsync(x => x.Number == courtCase.Number);
+                var found = await _webCourtCaseContext.CourtCases.FirstOrDefaultAsync(x =>
+                    x.Number == courtCase.Number);
                 if (found == null)
                 {
                     await _webCourtCaseContext.AddAsync(courtCase);
@@ -42,9 +46,10 @@ namespace DataMigrationSystem.Services
                 {
                     _webCourtCaseContext.Entry(found).CurrentValues.SetValues(courtCase);
                 }
+
                 await _webCourtCaseContext.SaveChangesAsync();
             }
-            
+
             var companyDtos = from courtCaseEntityDto in _parsedCourtCaseContext.CourtCaseEntityDtos
                 join companies in _parsedCourtCaseContext.ParsedCompanies
                     on courtCaseEntityDto.IinBin equals companies.Bin
@@ -62,9 +67,10 @@ namespace DataMigrationSystem.Services
                         Number = companyDto.Number
                     });
                 }
+
                 await _webCourtCaseContext.SaveChangesAsync();
             }
-            
+
             // var individualDtos = from courtCaseEntityDto in _parsedCourtCaseContext.CourtCaseEntityDtos
             //     join individual in _parsedCourtCaseContext.ParsedIndividuals
             //         on courtCaseEntityDto.IinBin equals individual.Iin
@@ -95,7 +101,7 @@ namespace DataMigrationSystem.Services
             var courts = _parsedCourtCaseContext.CourtCaseDtos.Select(x => x.Court).Distinct();
             foreach (var distinct in courts)
             {
-                var found = await _webCourtCaseContext.Courts.FirstOrDefaultAsync(x=>x.Name == distinct);
+                var found = await _webCourtCaseContext.Courts.FirstOrDefaultAsync(x => x.Name == distinct);
                 if (found == null)
                 {
                     await _webCourtCaseContext.Courts.AddAsync(new Court
@@ -109,7 +115,7 @@ namespace DataMigrationSystem.Services
             var caseTypes = _parsedCourtCaseContext.CourtCaseDtos.Select(x => x.CaseType).Distinct();
             foreach (var distinct in caseTypes)
             {
-                var found = await _webCourtCaseContext.CaseTypes.FirstOrDefaultAsync(x=>x.Name == distinct);
+                var found = await _webCourtCaseContext.CaseTypes.FirstOrDefaultAsync(x => x.Name == distinct);
                 if (found == null)
                 {
                     await _webCourtCaseContext.CaseTypes.AddAsync(new CourtCaseType()
@@ -118,11 +124,12 @@ namespace DataMigrationSystem.Services
                     });
                 }
             }
+
             await _webCourtCaseContext.SaveChangesAsync();
             var documentTypes = _parsedCourtCaseContext.CourtCaseDtos.Select(x => x.DocumentType).Distinct();
             foreach (var distinct in documentTypes)
             {
-                var found = await _webCourtCaseContext.DocumentTypes.FirstOrDefaultAsync(x=>x.Name == distinct);
+                var found = await _webCourtCaseContext.DocumentTypes.FirstOrDefaultAsync(x => x.Name == distinct);
                 if (found == null)
                 {
                     await _webCourtCaseContext.DocumentTypes.AddAsync(new CourtCaseDocumentType
@@ -131,11 +138,12 @@ namespace DataMigrationSystem.Services
                     });
                 }
             }
+
             await _webCourtCaseContext.SaveChangesAsync();
             var categories = _parsedCourtCaseContext.CourtCaseDtos.Select(x => x.Category).Distinct();
             foreach (var distinct in categories)
             {
-                var found = await _webCourtCaseContext.CourtCaseCategories.FirstOrDefaultAsync(x=>x.Name == distinct);
+                var found = await _webCourtCaseContext.CourtCaseCategories.FirstOrDefaultAsync(x => x.Name == distinct);
                 if (found == null)
                 {
                     await _webCourtCaseContext.CourtCaseCategories.AddAsync(new CourtCaseCategory
@@ -144,8 +152,10 @@ namespace DataMigrationSystem.Services
                     });
                 }
             }
+
             await _webCourtCaseContext.SaveChangesAsync();
         }
+
         private async Task<CourtCase> DtoToEntity(CourtCaseDto caseDto)
         {
             var courtCase = new CourtCase
@@ -158,41 +168,47 @@ namespace DataMigrationSystem.Services
             };
             if (caseDto.Court != null)
             {
-                courtCase.CourtId = (await _webCourtCaseContext.Courts.FirstOrDefaultAsync(x => x.Name == caseDto.Court))?.Id;
+                courtCase.CourtId =
+                    (await _webCourtCaseContext.Courts.FirstOrDefaultAsync(x => x.Name == caseDto.Court))?.Id;
             }
             else
             {
                 courtCase.CourtId = null;
             }
-            
+
             if (caseDto.CaseType != null)
             {
-                courtCase.CaseTypeId = (await _webCourtCaseContext.CaseTypes.FirstOrDefaultAsync(x => x.Name == caseDto.CaseType))?.Id;
+                courtCase.CaseTypeId =
+                    (await _webCourtCaseContext.CaseTypes.FirstOrDefaultAsync(x => x.Name == caseDto.CaseType))?.Id;
             }
             else
             {
                 courtCase.CaseTypeId = null;
             }
-            
-            
+
+
             if (caseDto.DocumentType != null)
             {
-                courtCase.DocumentTypeId = (await _webCourtCaseContext.DocumentTypes.FirstOrDefaultAsync(x => x.Name == caseDto.DocumentType))?.Id;
+                courtCase.DocumentTypeId =
+                    (await _webCourtCaseContext.DocumentTypes.FirstOrDefaultAsync(x => x.Name == caseDto.DocumentType))
+                    ?.Id;
             }
             else
             {
                 courtCase.DocumentTypeId = null;
             }
-            
+
             if (caseDto.Category != null)
             {
-                courtCase.CategoryId = (await _webCourtCaseContext.CourtCaseCategories.FirstOrDefaultAsync(x => x.Name == caseDto.Category))?.Id;
+                courtCase.CategoryId =
+                    (await _webCourtCaseContext.CourtCaseCategories.FirstOrDefaultAsync(x => x.Name == caseDto.Category)
+                    )?.Id;
             }
             else
             {
                 courtCase.CategoryId = null;
             }
-            
+
             return courtCase;
         }
     }

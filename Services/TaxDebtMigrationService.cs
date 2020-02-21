@@ -3,7 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context;
+using DataMigrationSystem.Context.Parsed;
+using DataMigrationSystem.Context.Web;
+using DataMigrationSystem.Context.Web.Avroradata;
 using DataMigrationSystem.Models;
+using DataMigrationSystem.Models.Parsed;
+using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
