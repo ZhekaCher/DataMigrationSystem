@@ -1,4 +1,4 @@
-# Adata Database Migration System
+﻿# Adata Database Migration System
 
 ## Details
 
@@ -20,3 +20,4 @@
 
 * **Кенжетаев Галымжан** - *Initial work* - [capomafiosoken](https://github.com/capomafiosoken)
 * **Евгений Черданцев** - *Initial work* - [ZhekaCher](https://github.com/ZhekaCher)
+* **Айбекич** - *Not Initial work* - [aibekzh](https://github.com/aibekzh)
