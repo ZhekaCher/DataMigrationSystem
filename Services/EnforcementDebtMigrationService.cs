@@ -60,7 +60,6 @@ namespace DataMigrationSystem.Services
                     oldAmount = await
                         _webEnforcementDebtContext.CompanyEnforcementDebts.Where(x => x.IinBin == companyDto.IinBin).SumAsync(x=>x.Amount);
                     bin = companyDto.IinBin;
-                    await _webEnforcementDebtContext.SaveChangesAsync();
                 }
                 var enforcementDebt = await DtoToCompanyEntity(companyDto);
                 await _webEnforcementDebtContext.CompanyEnforcementDebts.Upsert(enforcementDebt).On(x => x.Uid).RunAsync();
