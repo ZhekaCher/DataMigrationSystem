@@ -138,6 +138,11 @@ namespace DataMigrationSystem
                     }
                 }
 
+                if (!argMigrations.Any())
+                {
+                    logger.Warn("No migrations has been specified");
+                    Environment.Exit(0);
+                }
                 //Check if all given migrations exists
                 if (argMigrations != null)
                     foreach (var argMigration in argMigrations)
