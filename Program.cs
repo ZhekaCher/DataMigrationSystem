@@ -150,26 +150,37 @@ namespace DataMigrationSystem
                 startLog = argMigrations.Aggregate(startLog,
                     (current, migrationName) => current + migrationName + "; ");
                 logger.Trace(startLog);
-                await Migrate();
+                await Migrate(argMigrations);
                 logger.Info(endLog, _numOfErrors);
             }
         }
 
         private static async Task Migrate(List<string> migrationList = null)
         {
-            foreach (var keyValuePair in _migrations)
-            {
-                if (migrationList != null && !migrationList.Contains(keyValuePair.Key.Trim())) continue;
-                try
+            if (migrationList == null)
+                foreach (var keyValuePair in _migrations)
                 {
-                    await keyValuePair.Value.StartMigratingAsync();
+                    try
+                    {
+                        await keyValuePair.Value.StartMigratingAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        ++_numOfErrors;
+                        logger.Error($"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|;");
+                    }
                 }
-                catch (Exception e)
-                {
-                    ++_numOfErrors;
-                    logger.Error($"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|;");
-                }
-            }
+            else
+                foreach (var migration in migrationList)
+                    try
+                    {
+                        await _migrations[migration].StartMigratingAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        ++_numOfErrors;
+                        logger.Error($"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|;");
+                    }
         }
     }
 }
