@@ -138,6 +138,11 @@ namespace DataMigrationSystem
                     }
                 }
 
+                if (!argMigrations.Any())
+                {
+                    logger.Warn("No migrations has been specified");
+                    Environment.Exit(0);
+                }
                 //Check if all given migrations exists
                 if (argMigrations != null)
                     foreach (var argMigration in argMigrations)
@@ -157,19 +162,30 @@ namespace DataMigrationSystem
 
         private static async Task Migrate(List<string> migrationList = null)
         {
-            foreach (var keyValuePair in _migrations)
-            {
-                if (migrationList != null && !migrationList.Contains(keyValuePair.Key.Trim())) continue;
-                try
+            if (migrationList == null)
+                foreach (var keyValuePair in _migrations)
                 {
-                    await keyValuePair.Value.StartMigratingAsync();
+                    try
+                    {
+                        await keyValuePair.Value.StartMigratingAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        ++_numOfErrors;
+                        logger.Error($"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|;");
+                    }
                 }
-                catch (Exception e)
-                {
-                    ++_numOfErrors;
-                    logger.Error($"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|;");
-                }
-            }
+            else
+                foreach (var migration in migrationList)
+                    try
+                    {
+                        await _migrations[migration].StartMigratingAsync();
+                    }
+                    catch (Exception e)
+                    {
+                        ++_numOfErrors;
+                        logger.Error($"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|;");
+                    }
         }
     }
 }
