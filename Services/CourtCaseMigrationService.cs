@@ -14,7 +14,7 @@ namespace DataMigrationSystem.Services
         private readonly WebCourtCaseContext _webCourtCaseContext;
         private readonly ParsedCourtCaseContext _parsedCourtCaseContext;
 
-        public CourtCaseMigrationService()
+        public CourtCaseMigrationService(int numOfThreads = 1)
         {
             _webCourtCaseContext = new WebCourtCaseContext();
             _parsedCourtCaseContext = new ParsedCourtCaseContext();

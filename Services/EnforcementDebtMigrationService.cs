@@ -18,7 +18,7 @@ namespace DataMigrationSystem.Services
         private readonly WebEnforcementDebtContext _webEnforcementDebtContext;
         private readonly ParsedEnforcementDebtContext _parsedEnforcementDebtContext;
 
-        public EnforcementDebtMigrationService()
+        public EnforcementDebtMigrationService(int numOfThreads = 1)
         {
             _webEnforcementDebtContext = new WebEnforcementDebtContext();
             _parsedEnforcementDebtContext = new ParsedEnforcementDebtContext();

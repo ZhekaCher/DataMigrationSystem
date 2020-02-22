@@ -17,7 +17,7 @@ namespace DataMigrationSystem.Services
         private readonly WebWantedIndividualContext _webWantedIndividualContext;
         private readonly ParsedWantedIndividualContext _parsedWantedIndividualContext;
 
-        public WantedIndividualMigrationService()
+        public WantedIndividualMigrationService(int numOfThreads = 1)
         {
             _webWantedIndividualContext = new WebWantedIndividualContext();
             _parsedWantedIndividualContext = new ParsedWantedIndividualContext();

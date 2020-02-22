@@ -19,7 +19,7 @@ namespace DataMigrationSystem.Services
         private readonly ParsedTaxDebtContext _parsedTaxDebtContext;
         private readonly WebTaxDebtContext _webTaxDebtContext;
 
-        public TaxDebtMigrationService()
+        public TaxDebtMigrationService(int numOfThreads = 1)
         {
             _parsedTaxDebtContext = new ParsedTaxDebtContext();
             _webTaxDebtContext = new WebTaxDebtContext();

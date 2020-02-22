@@ -16,7 +16,7 @@ namespace DataMigrationSystem.Services
         private readonly WebLeavingRestrictionContext _leavingRestrictionContext;
         private readonly ParsedLeavingRestrictionContext _parsedLeavingRestrictionContext;
 
-        public LeavingRestrictionMigrationService()
+        public LeavingRestrictionMigrationService(int numOfThreads = 1)
         {
             _leavingRestrictionContext = new WebLeavingRestrictionContext();
             _parsedLeavingRestrictionContext = new ParsedLeavingRestrictionContext();
