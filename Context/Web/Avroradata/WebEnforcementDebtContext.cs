@@ -17,7 +17,6 @@ namespace DataMigrationSystem.Context.Web.Avroradata
         }
 
         public DbSet<CompanyEnforcementDebt> CompanyEnforcementDebts { get; set; }    
-        public DbSet<IndividualEnforcementDebt> IndividualEnforcementDebts { get; set; }    
         public DbSet<EnforcementDebtType> EnforcementDebtTypes { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

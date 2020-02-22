@@ -1,8 +1,7 @@
-using DataMigrationSystem.Models;
 using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataMigrationSystem.Context
+namespace DataMigrationSystem.Context.Web.Avroradata
 {
     public class IndividualContext: DbContext
     {
@@ -23,24 +22,5 @@ namespace DataMigrationSystem.Context
         }
         
         public DbSet<Individual> Individuals { get; set; }
-    }
-    public class CompanyContext: DbContext
-    {
-        public CompanyContext(DbContextOptions<CompanyContext> options)
-            : base(options)
-        {
-            
-        }
-
-        public CompanyContext()
-        {
-        }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql("Server = 192.168.1.158; Database = avroradata; Port=5432; User ID = administrator; Password = Z4P6PjEHnJ5nPT; Search Path = avroradata; Integrated Security=true; Pooling=true;");
-        }
-
-        public DbSet<Company> Companies { get; set; }
-       
     }
 }
