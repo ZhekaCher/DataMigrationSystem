@@ -38,11 +38,11 @@ namespace DataMigrationSystem
                     $"Unacceptable value for thread numbers '{arg}'; Value should correlate between 1 and 50 and match to the following form: '-t5'");
                 Environment.Exit(1);
             }
-
-            _migrations.Add("announcement_goszakup",
-                numOfThreads == 1
-                    ? new AnnouncementGoszakupMigrationService()
-                    : new AnnouncementGoszakupMigrationService(numOfThreads));
+            
+            // _migrations.Add("announcement_goszakup",
+            //     numOfThreads == 1
+            //         ? new AnnouncementGoszakupMigrationService()
+            //         : new AnnouncementGoszakupMigrationService(numOfThreads));
             _migrations.Add("court_case",
                 numOfThreads == 1
                     ? new CourtCaseMigrationService()
@@ -55,18 +55,18 @@ namespace DataMigrationSystem
                 numOfThreads == 1
                     ? new LeavingRestrictionMigrationService()
                     : new LeavingRestrictionMigrationService(numOfThreads));
-            _migrations.Add("lot_goszakup",
-                numOfThreads == 1
-                    ? new LotGoszakupMigrationService()
-                    : new LotGoszakupMigrationService(numOfThreads));
+            // _migrations.Add("lot_goszakup",
+            //     numOfThreads == 1
+            //         ? new LotGoszakupMigrationService()
+            //         : new LotGoszakupMigrationService(numOfThreads));
             _migrations.Add("tax_debt",
                 numOfThreads == 1
                     ? new TaxDebtMigrationService()
                     : new TaxDebtMigrationService(numOfThreads));
-            _migrations.Add("wanted_individual",
-                numOfThreads == 1
-                    ? new WantedIndividualMigrationService()
-                    : new WantedIndividualMigrationService(numOfThreads));
+            // _migrations.Add("wanted_individual",
+                // numOfThreads == 1
+                    // ? new WantedIndividualMigrationService()
+                    // : new WantedIndividualMigrationService(numOfThreads));
 
 
             await ProceedArguments(args);
@@ -150,7 +150,7 @@ namespace DataMigrationSystem
                 startLog = argMigrations.Aggregate(startLog,
                     (current, migrationName) => current + migrationName + "; ");
                 logger.Trace(startLog);
-                await Migrate();
+                await Migrate(argMigrations);
                 logger.Info(endLog, _numOfErrors);
             }
         }
