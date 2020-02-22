@@ -28,7 +28,7 @@ namespace DataMigrationSystem.Services
         private object _lock = new object();
 
 
-        public LotGoszakupMigrationService(int numOfThreads = 30)
+        public LotGoszakupMigrationService(int numOfThreads = 1)
         {
             NumOfThreads = numOfThreads;
             using var parsedLotGoszakupContext = new ParsedLotGoszakupContext();
@@ -44,7 +44,6 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
-            Logger.Warn(NumOfThreads);
             Logger.Info("Start");
             var tasks = new List<Task>();
             for (var i = 0; i < NumOfThreads; i++)

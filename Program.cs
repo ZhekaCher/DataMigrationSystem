@@ -13,7 +13,7 @@ namespace DataMigrationSystem
     {
         private static Logger logger;
         private static Dictionary<string, MigrationService> _migrations = new Dictionary<string, MigrationService>();
-        private static int _numOfErrors = 0;
+        public static int NumOfErrors = 0;
 
         private static async Task Main(string[] args)
         {
@@ -25,7 +25,7 @@ namespace DataMigrationSystem
 
 
             //Creating of the services with the given numbers of threads 
-            var numOfThreads = 1;
+            var numOfThreads = -1;
 
             foreach (var arg in args)
             {
@@ -67,6 +67,14 @@ namespace DataMigrationSystem
                 numOfThreads == 1
                     ? new WantedIndividualMigrationService()
                     : new WantedIndividualMigrationService(numOfThreads));
+            _migrations.Add("all_participants_goszakup",
+                numOfThreads == -1
+                    ? new AllParticipantsGoszakupMigrationService()
+                    : new AllParticipantsGoszakupMigrationService(numOfThreads));
+            _migrations.Add("unscrupulous_goszakup",
+                numOfThreads == -1
+                    ? new UnscrupulousGoszakupMigrationService()
+                    : new UnscrupulousGoszakupMigrationService(numOfThreads));
 
 
             await ProceedArguments(args);
@@ -95,7 +103,7 @@ namespace DataMigrationSystem
                     (current, keyValuePair) => current + keyValuePair.Key + "; ");
                 logger.Info(startLog);
                 await Migrate();
-                logger.Info(endLog, _numOfErrors);
+                logger.Info(endLog, NumOfErrors);
             }
             else
             {
@@ -143,20 +151,20 @@ namespace DataMigrationSystem
                     logger.Warn("No migrations has been specified");
                     Environment.Exit(0);
                 }
+
                 //Check if all given migrations exists
-                if (argMigrations != null)
-                    foreach (var argMigration in argMigrations)
-                    {
-                        if (_migrations.ContainsKey(argMigration)) continue;
-                        logger.Warn($"Migration '{argMigration}' doesn't exists");
-                        Environment.Exit(1);
-                    }
+                foreach (var argMigration in argMigrations)
+                {
+                    if (_migrations.ContainsKey(argMigration)) continue;
+                    logger.Warn($"Migration '{argMigration}' doesn't exists");
+                    Environment.Exit(1);
+                }
 
                 startLog = argMigrations.Aggregate(startLog,
                     (current, migrationName) => current + migrationName + "; ");
-                logger.Trace(startLog);
+                logger.Info(startLog);
                 await Migrate(argMigrations);
-                logger.Info(endLog, _numOfErrors);
+                logger.Info(endLog, NumOfErrors);
             }
         }
 
@@ -171,7 +179,7 @@ namespace DataMigrationSystem
                     }
                     catch (Exception e)
                     {
-                        ++_numOfErrors;
+                        ++NumOfErrors;
                         logger.Error($"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|;");
                     }
                 }
@@ -183,7 +191,7 @@ namespace DataMigrationSystem
                     }
                     catch (Exception e)
                     {
-                        ++_numOfErrors;
+                        ++NumOfErrors;
                         logger.Error($"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|;");
                     }
         }

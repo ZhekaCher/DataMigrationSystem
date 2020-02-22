@@ -62,7 +62,7 @@ namespace DataMigrationSystem.Services
             foreach (var dto in parsedAnnouncementGoszakupContext.AnnouncementGoszakupDtos.Where(x =>
                 x.Id % NumOfThreads == threadNum))
             {
-                var dtoIns = AnnouncementGoszakupDtoToAnnouncement(dto);
+                var dtoIns = DtoToWeb(dto);
                 dtoIns.IdTf = _sTradingFloorId;
                 await webAnnouncementContext.Announcements.Upsert(dtoIns).On(x => new {x.IdAnno, x.IdTf}).RunAsync();
                 lock (_lock)
@@ -72,7 +72,7 @@ namespace DataMigrationSystem.Services
             Logger.Info("Completed thread");
         }
 
-        private Announcement AnnouncementGoszakupDtoToAnnouncement(AnnouncementGoszakupDto announcementGoszakupDto)
+        private Announcement DtoToWeb(AnnouncementGoszakupDto announcementGoszakupDto)
         {
             var announcement = new Announcement();
             announcement.IdAnno = announcementGoszakupDto.Id;
