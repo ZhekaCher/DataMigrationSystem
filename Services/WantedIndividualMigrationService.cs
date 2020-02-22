@@ -17,11 +17,10 @@ namespace DataMigrationSystem.Services
         private readonly WebWantedIndividualContext _webWantedIndividualContext;
         private readonly ParsedWantedIndividualContext _parsedWantedIndividualContext;
 
-        public WantedIndividualMigrationService(WebWantedIndividualContext webWantedIndividualContext,
-            ParsedWantedIndividualContext parsedWantedIndividualContext)
+        public WantedIndividualMigrationService()
         {
-            _webWantedIndividualContext = webWantedIndividualContext;
-            _parsedWantedIndividualContext = parsedWantedIndividualContext;
+            _webWantedIndividualContext = new WebWantedIndividualContext();
+            _parsedWantedIndividualContext = new ParsedWantedIndividualContext();
         }
 
         protected override Logger InitializeLogger()
