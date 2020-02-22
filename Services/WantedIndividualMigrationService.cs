@@ -35,18 +35,7 @@ namespace DataMigrationSystem.Services
             foreach (var wantedIndividualDto in wantedIndividualsDtos)
             {
                 var wantedIn = await DtoToEntity(wantedIndividualDto);
-                var found = await _webWantedIndividualContext.WantedIndividuals.FirstOrDefaultAsync(x =>
-                    x.Iin == wantedIn.Iin);
-                if (found==null)
-                {
-                    await _webWantedIndividualContext.AddAsync(wantedIn);
-                }
-                else
-                {
-                    _webWantedIndividualContext.Entry(found).CurrentValues.SetValues(wantedIn);
-                }
-
-                await _webWantedIndividualContext.SaveChangesAsync();
+                await _webWantedIndividualContext.WantedIndividuals.Upsert(wantedIn).On(x => x.Iin).RunAsync();
             }
         }
 
@@ -56,73 +45,51 @@ namespace DataMigrationSystem.Services
                 .Distinct();
             foreach (var distinct in nationalities)
             {
-                var found = await _webWantedIndividualContext.Nationalities.FirstOrDefaultAsync(x =>
-                    x.Name == distinct);
-                if (found == null)
+                
+                await _webWantedIndividualContext.Nationalities.Upsert(new Nationality
                 {
-                    await _webWantedIndividualContext.AddAsync(new Nationality()
-                    {
-                        Name = distinct
-                    });
-                }
+                    Name = distinct
+                }).On(x=>x.Name).RunAsync();
+                
             }
-            await _webWantedIndividualContext.SaveChangesAsync();
             
             var raceTypes = _parsedWantedIndividualContext.WantedIndividualDtos.Select(x => x.Race).Distinct();
             foreach (var distinct in raceTypes)
             {
-                var found = await _webWantedIndividualContext.RaceTypes.FirstOrDefaultAsync(x => x.Name == distinct);
-                if (found == null)
+                await _webWantedIndividualContext.RaceTypes.Upsert(new RaceType
                 {
-                    await _webWantedIndividualContext.RaceTypes.AddAsync(new RaceType()
-                    {
-                        Name = distinct
-                    });
-                }
+                    Name = distinct
+                }).On(x=>x.Name).RunAsync();
             }
-            await _webWantedIndividualContext.SaveChangesAsync();
 
             var issueds = _parsedWantedIndividualContext.WantedIndividualDtos.Select(x => x.IssuedBy).Distinct();
             foreach (var distinct in issueds)
             {
-                var found = await _webWantedIndividualContext.Issueds.FirstOrDefaultAsync(x => x.Name == distinct);
-                if (found == null)
+                await _webWantedIndividualContext.Issueds.Upsert(new Issued()
                 {
-                    await _webWantedIndividualContext.Issueds.AddAsync(new Issued()
-                    {
-                        Name = distinct
-                    });
-                }
+                    Name = distinct
+                }).On(x=>x.Name).RunAsync();
             }
-            await _webWantedIndividualContext.SaveChangesAsync();
 
             var documents = _parsedWantedIndividualContext.WantedIndividualDtos.Select(x => x.DocumentType).Distinct();
             foreach (var distinct in documents)
             {
-                var found = _webWantedIndividualContext.Documents.FirstOrDefaultAsync(x => x.Name == distinct);
-                if (found == null)
+                await _webWantedIndividualContext.Documents.Upsert(new Document()
                 {
-                    await _webWantedIndividualContext.Documents.AddAsync(new Document()
-                    {
-                        Name = distinct
-                    });
-                }
+                    Name = distinct
+                }).On(x=>x.Name).RunAsync();
             }
-            await _webWantedIndividualContext.SaveChangesAsync();
 
             var listTypes = _parsedWantedIndividualContext.WantedIndividualDtos.Select(x => x.List).Distinct();
             foreach (var distinct in listTypes)
             {
-                var found = _webWantedIndividualContext.ListTypes.FirstOrDefaultAsync(x => x.Name == distinct);
-                if (found == null)
+                
+                await _webWantedIndividualContext.ListTypes.Upsert(new ListType()
                 {
-                    await _webWantedIndividualContext.ListTypes.AddAsync(new ListType()
-                    {
-                        Name = distinct
-                    });
-                }
+                    Name = distinct
+                }).On(x=>x.Name).RunAsync();
+                
             }
-            await _webWantedIndividualContext.SaveChangesAsync();
         }
 
         private async Task<WantedIndividual> DtoToEntity(WantedIndividualDto wantedIndividualDto)
