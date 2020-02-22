@@ -39,42 +39,42 @@ namespace DataMigrationSystem
                 Environment.Exit(1);
             }
 
-            _migrations.Add("announcement_goszakup",
-                numOfThreads == 1
-                    ? new AnnouncementGoszakupMigrationService()
-                    : new AnnouncementGoszakupMigrationService(numOfThreads));
-            _migrations.Add("court_case",
-                numOfThreads == 1
-                    ? new CourtCaseMigrationService()
-                    : new CourtCaseMigrationService(numOfThreads));
-            _migrations.Add("enforcement_debt",
-                numOfThreads == 1
-                    ? new EnforcementDebtMigrationService()
-                    : new EnforcementDebtMigrationService(numOfThreads));
-            _migrations.Add("leaving_restriction",
-                numOfThreads == 1
-                    ? new LeavingRestrictionMigrationService()
-                    : new LeavingRestrictionMigrationService(numOfThreads));
+            // _migrations.Add("announcement_goszakup",
+            //     numOfThreads == 1
+            //         ? new AnnouncementGoszakupMigrationService()
+            //         : new AnnouncementGoszakupMigrationService(numOfThreads));
+            // _migrations.Add("court_case",
+            //     numOfThreads == 1
+            //         ? new CourtCaseMigrationService()
+            //         : new CourtCaseMigrationService(numOfThreads));
+            // _migrations.Add("enforcement_debt",
+            //     numOfThreads == 1
+            //         ? new EnforcementDebtMigrationService()
+            //         : new EnforcementDebtMigrationService(numOfThreads));
+            // _migrations.Add("leaving_restriction",
+            //     numOfThreads == 1
+            //         ? new LeavingRestrictionMigrationService()
+            //         : new LeavingRestrictionMigrationService(numOfThreads));
             _migrations.Add("lot_goszakup",
-                numOfThreads == 1
+                numOfThreads == -1
                     ? new LotGoszakupMigrationService()
                     : new LotGoszakupMigrationService(numOfThreads));
-            _migrations.Add("tax_debt",
-                numOfThreads == 1
-                    ? new TaxDebtMigrationService()
-                    : new TaxDebtMigrationService(numOfThreads));
-            _migrations.Add("wanted_individual",
-                numOfThreads == 1
-                    ? new WantedIndividualMigrationService()
-                    : new WantedIndividualMigrationService(numOfThreads));
-            _migrations.Add("all_participants_goszakup",
-                numOfThreads == -1
-                    ? new AllParticipantsGoszakupMigrationService()
-                    : new AllParticipantsGoszakupMigrationService(numOfThreads));
-            _migrations.Add("unscrupulous_goszakup",
-                numOfThreads == -1
-                    ? new UnscrupulousGoszakupMigrationService()
-                    : new UnscrupulousGoszakupMigrationService(numOfThreads));
+            // _migrations.Add("tax_debt",
+            //     numOfThreads == 1
+            //         ? new TaxDebtMigrationService()
+            //         : new TaxDebtMigrationService(numOfThreads));
+            // _migrations.Add("wanted_individual",
+            //     numOfThreads == 1
+            //         ? new WantedIndividualMigrationService()
+            //         : new WantedIndividualMigrationService(numOfThreads));
+            // _migrations.Add("all_participants_goszakup",
+            //     numOfThreads == -1
+            //         ? new AllParticipantsGoszakupMigrationService()
+            //         : new AllParticipantsGoszakupMigrationService(numOfThreads));
+            // _migrations.Add("unscrupulous_goszakup",
+            //     numOfThreads == -1
+            //         ? new UnscrupulousGoszakupMigrationService()
+            //         : new UnscrupulousGoszakupMigrationService(numOfThreads));
 
 
             await ProceedArguments(args);

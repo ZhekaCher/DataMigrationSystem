@@ -37,6 +37,7 @@ namespace DataMigrationSystem.Services
             _sTradingFloorId = webLotContext.STradingFloors
                 .FirstOrDefault(x => x.Code.Equals(_currentTradingFloor)).Id;
         }
+
         protected override Logger InitializeLogger()
         {
             return LogManager.GetCurrentClassLogger();
@@ -44,31 +45,42 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
-            Logger.Info("Start");
+            Logger.Info($"Starting migration with '{NumOfThreads}' threads");
             var tasks = new List<Task>();
             for (var i = 0; i < NumOfThreads; i++)
                 tasks.Add(Migrate(i));
 
             await Task.WhenAll(tasks);
-            Logger.Info("Ended");
+            Logger.Info("End of migration");
         }
-        
+
         private async Task Migrate(int threadNum)
         {
             Logger.Info("Started thread");
 
             await using var webLotContext = new WebLotContext();
             await using var parsedLotGoszakupContext = new ParsedLotGoszakupContext();
+            await using var parsedAnnouncementGoszakupContext = new ParsedAnnouncementGoszakupContext();
             foreach (var dto in parsedLotGoszakupContext.LotGoszakupDtos.Where(x =>
                 x.Id % NumOfThreads == threadNum))
             {
                 var dtoIns = LotGoszakupDtoToLot(dto);
                 dtoIns.IdTf = _sTradingFloorId;
-                await webLotContext.Lots.Upsert(dtoIns).On(x => new {x.IdLot, x.IdTf}).RunAsync();
+                // dtoIns.IdAnno =
+                    // parsedAnnouncementGoszakupContext.AnnouncementGoszakupDtos.FirstOrDefault(x =>
+                        // x.NumberAnno.Equals(dto.TrdBuyNumberAnno)).Id;
+                try
+                {
+                    await webLotContext.Lots.Upsert(dtoIns).On(x => new {x.IdLot, x.IdTf}).RunAsync();
+                }
+                catch (Exception e)
+                {
+                    Logger.Warn(e);
+                }
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
             }
-            
+
             Logger.Info("Completed thread");
         }
 
@@ -80,6 +92,7 @@ namespace DataMigrationSystem.Services
             lot.CustomerBin = lotsGoszakupDto.CustomerBin;
             lot.DescriptionKz = lotsGoszakupDto.DescriptionKz;
             lot.DescriptionRu = lotsGoszakupDto.DescriptionRu;
+            lot.IdAnno = 3308910;
             // lot.IdAnno = lotsGoszakupDto.TrdBuyNumberAnno ;
             lot.IdLot = lotsGoszakupDto.Id;
             lot.NameKz = lotsGoszakupDto.NameKz;
@@ -93,7 +106,7 @@ namespace DataMigrationSystem.Services
         {
             if (db.Entry(entity).State == EntityState.Detached)
                 db.Set<T>().Add(entity);
-            db.SaveChanges(); 
+            db.SaveChanges();
         }
     }
 }
