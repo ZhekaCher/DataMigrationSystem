@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Web.Avroradata;
@@ -37,6 +38,7 @@ namespace DataMigrationSystem.Services
                     RelevanceDate = x.RelevanceDate
                 } 
                 );
+            Console.WriteLine("Hello World");
             foreach (var disabilitiesOrgSkDto in disabilitiesOrgSkDtos)
             {
                 await _webDisabilitiesOrgSkContext.DisabilitiesOrgSk.Upsert(disabilitiesOrgSkDto).On(x => x.Bin).RunAsync();
