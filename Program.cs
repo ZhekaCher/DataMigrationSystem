@@ -17,6 +17,12 @@ namespace DataMigrationSystem
         private static Dictionary<string, MigrationService> _migrations = new Dictionary<string, MigrationService>();
         public static int NumOfErrors = 0;
 
+        public static List<Type> migrationServices = new List<Type>()
+        {
+            typeof(LotGoszakupMigrationService),
+            typeof(AnnouncementGoszakupMigrationService)
+        };
+
         private static async Task Main(string[] args)
         {
             Console.InputEncoding = Encoding.UTF8;
@@ -25,7 +31,7 @@ namespace DataMigrationSystem
             LogManager.Configuration = new XmlLoggingConfiguration("NLog.config");
             logger = LogManager.GetCurrentClassLogger();
 
-
+            //Type.GetType("DataMigrationSystem.Services.TaxDebtMigrationService");
             //Creating of the services with the given numbers of threads 
             var numOfThreads = -1;
 
@@ -41,28 +47,11 @@ namespace DataMigrationSystem
                 Environment.Exit(1);
             }
 
-            FillMigrations(numOfThreads);
-
+            foreach (var migrationService in migrationServices)
+                AddMigration(migrationService, numOfThreads);
 
             await ProceedArguments(args);
         }
-
-
-
-        /// @author Yevgeniy Cherdantsev
-        /// @date 24.02.2020 13:16:15
-        /// @version 1.0
-        /// <summary>
-        /// INPUT
-        /// </summary>
-        /// <param name="numOfThreads"></param>
-        private static void FillMigrations(int numOfThreads)
-        {
-            AddMigration(typeof(LotGoszakupMigrationService), numOfThreads);
-            AddMigration(typeof(AnnouncementGoszakupMigrationService), numOfThreads);
-        }
-
-
 
         /// @author Yevgeniy Cherdantsev
         /// @date 24.02.2020 13:16:33
@@ -184,7 +173,6 @@ namespace DataMigrationSystem
                 logger.Info(endLog, NumOfErrors);
             }
         }
-
 
 
         /// @author Yevgeniy Cherdantsev
