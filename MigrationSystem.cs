@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using System.Threading.Tasks;
 using DataMigrationSystem.Services;
 using NLog;
 using Npgsql;
@@ -16,17 +17,16 @@ namespace DataMigrationSystem
     /// <summary>
     /// INPUT
     /// </summary>
-    public class Launch
+    public class MigrationSystem
     {
         private static Logger logger;
         private Dictionary<string, object> _configurations = PreloadConfigurations();
         private Dictionary<string, object> _args;
         private Dictionary<string, string> _commandsDictionary = new Dictionary<string, string>();
 
-        internal Launch(string[] args)
+        internal MigrationSystem(string[] args)
         {
             logger = LogManager.GetCurrentClassLogger();
-
             _commandsDictionary.Add("--help (-h)", "prints commands list");
             _commandsDictionary.Add("--list (-l)", "prints the list of avaliable migrations");
             _commandsDictionary.Add("--threads (-t)",
@@ -36,10 +36,9 @@ namespace DataMigrationSystem
 
             _args = ParseArguments(args);
             ProceedArguments();
-            StartMigrations();
         }
 
-        private void StartMigrations()
+        public async Task StartMigrations()
         {
             var listOfMigrations = ((List<string>) _configurations["migrations"]).ToList();
             var threads = (int?) _configurations["threads"];
@@ -74,7 +73,8 @@ namespace DataMigrationSystem
                 }
                 catch (IndexOutOfRangeException e)
                 {
-                    logger.Error($"Try to implement Constructor: |MigrationService(int numOfThreads = 1)| in {migration} class");
+                    logger.Error(
+                        $"Try to implement Constructor: |MigrationService(int numOfThreads = 1)| in {migration} class");
                 }
                 catch (Exception e)
                 {
