@@ -29,8 +29,10 @@ namespace DataMigrationSystem
             Console.Title = "Data Migration System";
             LogManager.Configuration = new XmlLoggingConfiguration("NLog.config");
             logger = LogManager.GetCurrentClassLogger();
+            logger.Info("Configuring and starting migrations...");
             var migrationSystem = new MigrationSystem(args);
             await migrationSystem.StartMigrations();
+            logger.Info($"Migration ended with '{NumOfErrors}' errors");
         }
     }
 }

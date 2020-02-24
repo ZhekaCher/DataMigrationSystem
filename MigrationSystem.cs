@@ -22,17 +22,12 @@ namespace DataMigrationSystem
         private static Logger logger;
         private Dictionary<string, object> _configurations = PreloadConfigurations();
         private Dictionary<string, object> _args;
-        private Dictionary<string, string> _commandsDictionary = new Dictionary<string, string>();
+        private static Dictionary<string, string> _commandsDictionary = new Dictionary<string, string>();
+        private static string _helpString;
 
         internal MigrationSystem(string[] args)
         {
             logger = LogManager.GetCurrentClassLogger();
-            _commandsDictionary.Add("--help (-h)", "prints commands list");
-            _commandsDictionary.Add("--list (-l)", "prints the list of avaliable migrations");
-            _commandsDictionary.Add("--threads (-t)",
-                $"choose number of threads\n{"Example: -t5 -> starting with 5 threads for all migrations",81}");
-            _commandsDictionary.Add("--migrations (-m)",
-                $"allows to choose migrations\n{"Example: -m tax_debt wanted_individual -> starting the given migrations",94}");
 
             _args = ParseArguments(args);
             ProceedArguments();
@@ -46,6 +41,7 @@ namespace DataMigrationSystem
             {
                 MigrationService migrationService;
                 var migrationClass = GetMigrationServiceFromName(migration);
+                logger.Info($"Trying to launch {migration}");
                 try
                 {
                     if (threads == null)
@@ -61,24 +57,32 @@ namespace DataMigrationSystem
                                 threads);
                     }
 
-                    migrationService.StartMigratingAsync();
+                    await migrationService.StartMigratingAsync();
                 }
                 catch (TargetInvocationException e)
                 {
                     if (e.InnerException.GetType() == typeof(PostgresException))
-                        logger.Error($"Message:|{e.InnerException.Message}| at |{migration}|");
+                        logger.Error($"Message:|{e.InnerException.Message}| at '{migration}'");
                     else
                         logger.Error(
                             $"Message:|{e.InnerException.Message}; StackTrace:|{e.InnerException.StackTrace}|");
+                    Program.NumOfErrors++;
                 }
-                catch (IndexOutOfRangeException e)
+                catch (IndexOutOfRangeException)
                 {
                     logger.Error(
                         $"Try to implement Constructor: |MigrationService(int numOfThreads = 1)| in {migration} class");
+                    Program.NumOfErrors++;
+                }
+                catch (NullReferenceException)
+                {
+                    logger.Error($"It seems that '{migration}' doesn't exist");
+                    Program.NumOfErrors++;
                 }
                 catch (Exception e)
                 {
                     logger.Error($"Message:|{e.InnerException.Message}; StackTrace:|{e.InnerException.StackTrace}|");
+                    Program.NumOfErrors++;
                 }
             }
         }
@@ -86,6 +90,16 @@ namespace DataMigrationSystem
 
         private static Dictionary<string, object> PreloadConfigurations()
         {
+            _commandsDictionary.Add("--help (-h)", "prints commands list");
+            _commandsDictionary.Add("--list (-l)", "prints the list of avaliable migrations");
+            _commandsDictionary.Add("--threads (-t)",
+                $"choose number of threads\n{"Example: -t 5 -> starting with 5 threads for all migrations",82}");
+            _commandsDictionary.Add("--migrations (-m)",
+                $"allows to choose migrations\n{"Example: -m tax_debt wanted_individual -> starting the given migrations",94}");
+            
+            _helpString = _commandsDictionary.Aggregate("",
+                (current, command) => current + $"{command.Key,-20} : {command.Value}\n");
+            
             var conf = new Dictionary<string, object>();
             conf.Add("threads", null);
             conf.Add("migrations", new List<string>()
@@ -114,7 +128,7 @@ namespace DataMigrationSystem
                         if (numOfThreads <= 1 && numOfThreads >= 50)
                         {
                             logger.Warn(
-                                $"Unacceptable value for thread numbers '{arg}'; Value should correlate between 1 and 50 and match to the following form: '-t5'");
+                                $"Unacceptable value for thread numbers '{arg}'; Value should correlate between 1 and 50 and match to the following form: '-t 5'");
                             Environment.Exit(1);
                         }
 
@@ -148,7 +162,11 @@ namespace DataMigrationSystem
                                 arguments.Add("list", null);
                                 break;
                             default:
+                                logger.Warn($"Found unknown argument '{arg}'; Check if your arguments are correct");
+                                Console.WriteLine(_helpString);
+                                Environment.Exit(1);
                                 break;
+                                
                         }
 
                         break;
@@ -175,9 +193,7 @@ namespace DataMigrationSystem
 
                 if (_args.ContainsKey("help"))
                 {
-                    var helpString = _commandsDictionary.Aggregate("",
-                        (current, command) => current + $"{command.Key,-20} : {command.Value}\n");
-                    Console.Write(helpString);
+                    Console.Write(_helpString);
                     Environment.Exit(0);
                 }
 
@@ -196,7 +212,7 @@ namespace DataMigrationSystem
 
         private Type GetMigrationServiceFromName(string name)
         {
-            return Type.GetType($"DataMigrationSystem.Services.{name}");
+            return Type.GetType($"{typeof(MigrationService).Namespace}.{name}");
         }
     }
 }
