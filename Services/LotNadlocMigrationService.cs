@@ -59,6 +59,7 @@ namespace DataMigrationSystem.Services
             }
         }
 
+<<<<<<< HEAD
         private Lot LotNadlocDtoToLot(LotNadlocDto nadlocLotsDto)
         {
             var lot = new Lot();
@@ -73,6 +74,12 @@ namespace DataMigrationSystem.Services
             lot.DeliveryAddress = nadlocLotsDto.DeliveryPlace;
 
             return lot;
+=======
+        private Lot LotNadlocDtoToLot(NadlocLotsDto nadlocLotsDto)
+        {
+            var lot = new Lot();
+            lot.Total = nadlocLotsDto.
+>>>>>>> Tralala
         }
     }
 }
