@@ -24,6 +24,7 @@ namespace DataMigrationSystem.Context.Parsed
         public DbSet<TaxDebtBccDto> TaxDebtBccs { get; set; }
         public DbSet<TaxDebtPayerDto> TaxDebtPayers { get; set; }
         public DbSet<TaxDebtOrgDto> TaxDebtOrgs { get; set; }
+        public DbSet<CompanyDto> CompanyDtos { get; set; }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
