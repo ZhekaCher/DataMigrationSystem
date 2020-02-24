@@ -20,6 +20,8 @@ namespace DataMigrationSystem.Context.Web.Avroradata
         }
 
         public DbSet<Company> Companies { get; set; }
+        public DbSet<Kato> Katos { get; set; }
+        public DbSet<Krp> Krps { get; set; }
         public DbSet<Oked> Okeds { get; set; }
         public DbSet<CompanyOked> CompaniesOkeds { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)

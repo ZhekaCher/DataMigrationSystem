@@ -8,6 +8,8 @@ namespace DataMigrationSystem.Models.Parsed
     public class CourtCaseDto
     {
         [Key]
+        [Column("id")]
+        public long Id { get; set; }
         [Column("number")]
         public string Number { get; set; }
         [Column("sides")]
@@ -33,6 +35,8 @@ namespace DataMigrationSystem.Models.Parsed
     public class CourtCaseEntityDto
     {
         [Key]
+        [Column("id")]
+        public long Id { get; set; }
         [Column("number")]
         public string Number{ get; set; }
         [Column("iin_bin")]

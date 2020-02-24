@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,13 +12,14 @@ namespace DataMigrationSystem.Services
 {
     public class CompanyMigrationService : MigrationService
     {
-        private readonly WebCompanyContext _webCompanyContext;
-        private readonly ParsedCompanyContext _parsedCompanyContext;
-
-        public CompanyMigrationService()
+        private readonly object _forLock;
+        private int _total;
+        public CompanyMigrationService(int numOfThreads = 1)
         {
-            _webCompanyContext = new WebCompanyContext();
-            _parsedCompanyContext = new ParsedCompanyContext();
+            NumOfThreads = numOfThreads;
+            using var parsedCompanyContext = new ParsedCompanyContext(); 
+            _total = parsedCompanyContext.CompanyDtos.Count();
+            _forLock = new object();
         }
 
         protected override Logger InitializeLogger()
@@ -29,49 +29,102 @@ namespace DataMigrationSystem.Services
         
         public override async Task StartMigratingAsync()
         {
-            var companyDtos = from companyDto in _parsedCompanyContext.CompanyDtos
-                select DtoToEntity(companyDto);
-            foreach (var company in companyDtos)
+            await MigrateReferences();
+            Logger.Warn(NumOfThreads);
+            Logger.Info("Start");
+            var tasks = new List<Task>();
+            for (var i = 0; i < NumOfThreads; i++)
+                tasks.Add(Migrate(i));
+
+            await Task.WhenAll(tasks);
+            Logger.Info("Ended");
+        }
+
+        private async Task Migrate(int threadNum)
+        {
+            await using var webCompanyContext = new WebCompanyContext();
+            await using var parsedCompanyContext = new ParsedCompanyContext();
+            var companyDtos = from companyDto in parsedCompanyContext.CompanyDtos where companyDto.Id % NumOfThreads == threadNum
+                select companyDto;
+            foreach (var companyDto in companyDtos)
             {
-                await _webCompanyContext.Upsert(company).On(x => x.Bin).RunAsync();
+                var company = DtoToEntity(companyDto);
+                await webCompanyContext.Companies.Upsert(company).On(x => x.Bin).RunAsync();
+                // await _webCompanyContext.CompaniesOkeds.UpsertRange(company.CompanyOkeds)
+                // .On(x => new {x.CompanyId, x.OkedId}).RunAsync();
+                lock (_forLock)
+                {
+                    Logger.Trace(_total--);
+                }
+            }
+        }
+
+        private async Task MigrateReferences()
+        {
+            await using var webCompanyContext = new WebCompanyContext();
+            await using var parsedCompanyContext = new ParsedCompanyContext();
+
+            var katos = parsedCompanyContext.CompanyDtos
+                .Select(x => new {x.KatoCode, x.SettlementNameKz, x.SettlementNameRu}).Distinct();
+            foreach (var distinct in katos)
+            {
+                await webCompanyContext.Katos.Upsert(new Kato
+                {
+                    Id = distinct.KatoCode,
+                    NameKz = distinct.SettlementNameKz,
+                    NameRu = distinct.SettlementNameRu,
+                                    
+                }).On(x=>x.Id).RunAsync();
+            }
+            var krps = parsedCompanyContext.CompanyDtos
+                .Select(x => new {x.KrpCode, x.KrpNameKz, x.KrpNameRu}).Distinct();
+            foreach (var distinct in krps)
+            {
+                await webCompanyContext.Krps.Upsert(new Krp
+                {
+                    Id = distinct.KrpCode,
+                    NameKz = distinct.KrpNameKz,
+                    NameRu = distinct.KrpNameRu,
+                                    
+                }).On(x=>x.Id).RunAsync();
             }
         }
         private Company DtoToEntity(CompanyDto dto)
         {
-             var company = new Company
+            var company = new Company
+            {
+                Bin = dto.Bin,
+                IdRegion = dto.Region,
+                NameRu = dto.NameRu,
+                NameKz = dto.NameKz,
+                DateRegistration = dto.RegistrationDate,
+                IdKrp = dto.KrpCode,
+                IdKato = dto.KatoCode,
+                LegalAddress = dto.LegalAddress,
+                FullnameDirector = dto.NameHead,
+                RelevanceDate = dto.RelevanceDate
+            };
+            if (dto.OkedCode != null)
+            {
+                company.CompanyOkeds = new List<CompanyOked>
                 {
-                    Bin = dto.Bin,
-                    IdRegion = dto.Region,
-                    NameRu = dto.NameRu,
-                    NameKz = dto.NameKz,
-                    DateRegistration = dto.RegistrationDate,
-                    IdKrp = dto.KrpCode,
-                    IdKato = dto.KatoCode,
-                    LegalAddress = dto.LegalAddress,
-                    FullnameDirector = dto.NameHead,
-                    RelevanceDate = dto.RelevanceDate
+                    new CompanyOked {CompanyId = dto.Bin, OkedId = dto.OkedCode, Type = 1}
                 };
-                if (dto.OkedCode != null)
+                if (dto.SecondOkedCode != null)
                 {
-                    company.CompanyOkeds = new List<CompanyOked>
+                    var okeds = dto.SecondOkedCode.Split(',');
+                    foreach (var oked in okeds)
                     {
-                        new CompanyOked {CompanyId = dto.Bin, OkedId = dto.OkedCode, Type = 1}
-                    };
-                    if (dto.SecondOkedCode != null)
-                    {
-                        var okeds = dto.SecondOkedCode.Split(',');
-                        foreach (var oked in okeds)
+                        company.CompanyOkeds.Add(new CompanyOked
                         {
-                            company.CompanyOkeds.Add(new CompanyOked
-                            {
-                                CompanyId = dto.Bin,
-                                OkedId = oked,
-                                Type = 2,
-                            });
-                        }
+                            CompanyId = dto.Bin,
+                            OkedId = oked,
+                            Type = 2
+                        });
                     }
                 }
-                return company;
+            }
+            return company;
         }
     }
 }

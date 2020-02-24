@@ -46,6 +46,40 @@ namespace DataMigrationSystem
                     $"Unacceptable value for thread numbers '{arg}'; Value should correlate between 1 and 50 and match to the following form: '-t5'");
                 Environment.Exit(1);
             }
+            
+            // _migrations.Add("announcement_goszakup",
+            //     numOfThreads == 1
+            //         ? new AnnouncementGoszakupMigrationService()
+            //         : new AnnouncementGoszakupMigrationService(numOfThreads));
+            _migrations.Add("court_case",
+                numOfThreads == 1
+                    ? new CourtCaseMigrationService()
+                    : new CourtCaseMigrationService(numOfThreads));
+            _migrations.Add("enforcement_debt",
+                numOfThreads == 1
+                    ? new EnforcementDebtMigrationService()
+                    : new EnforcementDebtMigrationService(numOfThreads));
+            _migrations.Add("leaving_restriction",
+                numOfThreads == 1
+                    ? new LeavingRestrictionMigrationService()
+                    : new LeavingRestrictionMigrationService(numOfThreads));
+            // _migrations.Add("lot_goszakup",
+            // numOfThreads == 1
+            // ? new LotGoszakupMigrationService()
+            // : new LotGoszakupMigrationService(numOfThreads));
+            _migrations.Add("tax_debt",
+                numOfThreads == 1
+                    ? new TaxDebtMigrationService()
+                    : new TaxDebtMigrationService(numOfThreads));
+            // _migrations.Add("wanted_individual",
+            // numOfThreads == 1
+            // ? new WantedIndividualMigrationService()
+            // : new WantedIndividualMigrationService(numOfThreads));
+            _migrations.Add("company",
+                numOfThreads == 1
+                    ? new CompanyMigrationService()
+                    : new CompanyMigrationService(numOfThreads));
+
 
             foreach (var migrationService in migrationServices)
                 AddMigration(migrationService, numOfThreads);
