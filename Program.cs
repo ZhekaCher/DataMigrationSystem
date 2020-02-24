@@ -13,26 +13,21 @@ namespace DataMigrationSystem
 {
     internal static class Program
     {
-        private static Logger logger;
+        private static Logger _logger;
         private static Dictionary<string, MigrationService> _migrations = new Dictionary<string, MigrationService>();
         public static int NumOfErrors = 0;
-
-        public static List<Type> migrationServices = new List<Type>
-        {
-            typeof(LotGoszakupMigrationService)
-        };
-
+        
         private static async Task Main(string[] args)
         {
             Console.InputEncoding = Encoding.UTF8;
             Console.OutputEncoding = Encoding.UTF8;
             Console.Title = "Data Migration System";
             LogManager.Configuration = new XmlLoggingConfiguration("NLog.config");
-            logger = LogManager.GetCurrentClassLogger();
-            logger.Info("Configuring and starting migrations...");
+            _logger = LogManager.GetCurrentClassLogger();
+            _logger.Info("Configuring and starting migrations...");
             var migrationSystem = new MigrationSystem(args);
             await migrationSystem.StartMigrations();
-            logger.Info($"Migration ended with '{NumOfErrors}' errors");
+            _logger.Info($"Migration ended with '{NumOfErrors}' errors");
         }
     }
 }
