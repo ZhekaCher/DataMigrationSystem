@@ -62,9 +62,9 @@ namespace DataMigrationSystem
                 }
                 catch (TargetInvocationException e)
                 {
-                    if (e.InnerException.GetType() == typeof(PostgresException))
+                    if (e.InnerException is PostgresException)
                         _logger.Error($"Message:|{e.InnerException.Message}| at '{migration}'");
-                    else
+                    else if (e.InnerException != null)
                         _logger.Error(
                             $"Message:|{e.InnerException.Message}; StackTrace:|{e.InnerException.StackTrace}|");
                     Program.NumOfErrors++;
