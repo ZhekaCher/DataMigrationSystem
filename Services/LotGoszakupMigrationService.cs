@@ -73,6 +73,7 @@ namespace DataMigrationSystem.Services
                 catch (Exception e)
                 {
                     Logger.Warn(e);
+                    Program.NumOfErrors++;
                 }
 
                 lock (_lock)
@@ -90,7 +91,6 @@ namespace DataMigrationSystem.Services
             lot.CustomerBin = lotsGoszakupDto.CustomerBin;
             lot.DescriptionKz = lotsGoszakupDto.DescriptionKz;
             lot.DescriptionRu = lotsGoszakupDto.DescriptionRu;
-            lot.IdAnno = 3308910;
             if (lotsGoszakupDto.TrdBuyId != null) lot.IdAnno = (long) lotsGoszakupDto.TrdBuyId;
             lot.IdLot = lotsGoszakupDto.Id;
             lot.NameKz = lotsGoszakupDto.NameKz;
