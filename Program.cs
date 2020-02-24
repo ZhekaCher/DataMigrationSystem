@@ -39,7 +39,7 @@ namespace DataMigrationSystem
                 Environment.Exit(1);
             }
 
-            _migrations.Add("announcement_goszakup",
+            /*_migrations.Add("announcement_goszakup",
                 numOfThreads == 1
                     ? new AnnouncementGoszakupMigrationService()
                     : new AnnouncementGoszakupMigrationService(numOfThreads));
@@ -64,6 +64,11 @@ namespace DataMigrationSystem
                     ? new TaxDebtMigrationService()
                     : new TaxDebtMigrationService(numOfThreads));
             _migrations.Add("wanted_individual",
+                numOfThreads == 1
+                    ? new WantedIndividualMigrationService()
+                    : new WantedIndividualMigrationService(numOfThreads));*/
+            
+            _migrations.Add("aibekmigration",
                 numOfThreads == 1
                     ? new WantedIndividualMigrationService()
                     : new WantedIndividualMigrationService(numOfThreads));
