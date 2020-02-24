@@ -28,7 +28,7 @@ namespace DataMigrationSystem.Services
         private readonly object _lock = new object();
 
 
-        public LotGoszakupMigrationService(int numOfThreads = 1)
+        public LotGoszakupMigrationService(int numOfThreads = 30)
         {
             NumOfThreads = numOfThreads;
             using var parsedLotGoszakupContext = new ParsedLotGoszakupContext();

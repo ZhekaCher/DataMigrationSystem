@@ -3,8 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using DataMigrationSystem.Services;
 using NLog;
+using Npgsql;
 
 namespace DataMigrationSystem
 {
@@ -19,22 +21,77 @@ namespace DataMigrationSystem
         private static Logger logger;
         private Dictionary<string, object> _configurations = PreloadConfigurations();
         private Dictionary<string, object> _args;
-        private List<MigrationService> _migrations = new List<MigrationService>();
+        private Dictionary<string, string> _commandsDictionary = new Dictionary<string, string>();
 
         internal Launch(string[] args)
         {
             logger = LogManager.GetCurrentClassLogger();
+
+            _commandsDictionary.Add("--help (-h)", "prints commands list");
+            _commandsDictionary.Add("--list (-l)", "prints the list of avaliable migrations");
+            _commandsDictionary.Add("--threads (-t)",
+                $"choose number of threads\n{"Example: -t5 -> starting with 5 threads for all migrations",81}");
+            _commandsDictionary.Add("--migrations (-m)",
+                $"allows to choose migrations\n{"Example: -m tax_debt wanted_individual -> starting the given migrations",94}");
+
             _args = ParseArguments(args);
             ProceedArguments();
+            StartMigrations();
+        }
+
+        private void StartMigrations()
+        {
+            var listOfMigrations = ((List<string>) _configurations["migrations"]).ToList();
+            var threads = (int?) _configurations["threads"];
+            foreach (var migration in listOfMigrations)
+            {
+                MigrationService migrationService;
+                var migrationClass = GetMigrationServiceFromName(migration);
+                try
+                {
+                    if (threads == null)
+                    {
+                        migrationService =
+                            (MigrationService) Activator.CreateInstance(migrationClass,
+                                (int) migrationClass.GetConstructors()[0].GetParameters()[0].DefaultValue);
+                    }
+                    else
+                    {
+                        migrationService =
+                            (MigrationService) Activator.CreateInstance(migrationClass,
+                                threads);
+                    }
+
+                    migrationService.StartMigratingAsync();
+                }
+                catch (TargetInvocationException e)
+                {
+                    if (e.InnerException.GetType() == typeof(PostgresException))
+                        logger.Error($"Message:|{e.InnerException.Message}| at |{migration}|");
+                    else
+                        logger.Error(
+                            $"Message:|{e.InnerException.Message}; StackTrace:|{e.InnerException.StackTrace}|");
+                }
+                catch (IndexOutOfRangeException e)
+                {
+                    logger.Error($"Try to implement Constructor: |MigrationService(int numOfThreads = 1)| in {migration} class");
+                }
+                catch (Exception e)
+                {
+                    logger.Error($"Message:|{e.InnerException.Message}; StackTrace:|{e.InnerException.StackTrace}|");
+                }
+            }
         }
 
 
         private static Dictionary<string, object> PreloadConfigurations()
         {
             var conf = new Dictionary<string, object>();
-
             conf.Add("threads", null);
-            conf.Add("migrations", null);
+            conf.Add("migrations", new List<string>()
+            {
+                "LotGoszakupMigrationService"
+            });
             return conf;
         }
 
@@ -42,8 +99,6 @@ namespace DataMigrationSystem
         {
             //TODO(Rewrite Id Using enumerators)
             var arguments = new Dictionary<string, object>();
-            arguments.Add("list", null);
-            arguments.Add("help", null);
 
             string flag = null;
             foreach (var arg in args)
@@ -84,6 +139,14 @@ namespace DataMigrationSystem
                                 arguments.Add("migrations", new List<string>());
                                 flag = "migrations";
                                 break;
+                            case "-h":
+                            case "--help":
+                                arguments.Add("help", null);
+                                break;
+                            case "-l":
+                            case "--list":
+                                arguments.Add("list", null);
+                                break;
                             default:
                                 break;
                         }
@@ -101,6 +164,23 @@ namespace DataMigrationSystem
         {
             foreach (var keyValuePair in _args)
             {
+                if (_args.ContainsKey("list"))
+                {
+                    var migrations = ((List<string>) _configurations["migrations"]).ToList();
+                    Console.WriteLine("The list of avaliable migrations:");
+                    foreach (var migration in migrations)
+                        Console.WriteLine(migration);
+                    Environment.Exit(0);
+                }
+
+                if (_args.ContainsKey("help"))
+                {
+                    var helpString = _commandsDictionary.Aggregate("",
+                        (current, command) => current + $"{command.Key,-20} : {command.Value}\n");
+                    Console.Write(helpString);
+                    Environment.Exit(0);
+                }
+
                 switch (keyValuePair.Key)
                 {
                     case "threads":
@@ -112,43 +192,7 @@ namespace DataMigrationSystem
                         break;
                 }
             }
-        // }
-        //
-        //
-        // /// @author Yevgeniy Cherdantsev
-        // /// @date 24.02.2020 13:16:53
-        // /// @version 1.0
-        // /// <summary>
-        // /// INPUT
-        // /// </summary>
-        // /// <param name="migrationList"></param>
-        // private static async Task Migrate()
-        // {
-        //     if (migrationList == null)
-        //         foreach (var keyValuePair in _migrations)
-        //         {
-        //             try
-        //             {
-        //                 await keyValuePair.Value.StartMigratingAsync();
-        //             }
-        //             catch (Exception e)
-        //             {
-        //                 Program.NumOfErrors++;
-        //                 logger.Error($"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|;");
-        //             }
-        //         }
-        //     else
-        //         foreach (var migration in migrationList)
-        //             try
-        //             {
-        //                 await _migrations[migration].StartMigratingAsync();
-        //             }
-        //             catch (Exception e)
-        //             {
-        //                 Program.NumOfErrors++;
-        //                 logger.Error($"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|;");
-        //             }
-         }
+        }
 
         private Type GetMigrationServiceFromName(string name)
         {

@@ -32,56 +32,7 @@ namespace DataMigrationSystem
 
             new Launch(args);
 
-            //Type.GetType("DataMigrationSystem.Services.TaxDebtMigrationService");
-            //Creating of the services with the given numbers of threads 
-            var numOfThreads = -1;
-
-            foreach (var arg in args)
-            {
-                if (!arg.ToLower().StartsWith("-t") && !arg.ToLower().StartsWith("--threads")) continue;
-                var temp = arg.ToLower().Replace("--threads", "");
-                temp = temp.Replace("-t", "");
-                int.TryParse(temp, out numOfThreads);
-                if (numOfThreads >= 1 && numOfThreads <= 50) break;
-                logger.Warn(
-                    $"Unacceptable value for thread numbers '{arg}'; Value should correlate between 1 and 50 and match to the following form: '-t5'");
-                Environment.Exit(1);
-            }
-
-            foreach (var migrationService in migrationServices)
-                AddMigration(migrationService, numOfThreads);
-
-            await ProceedArguments(args);
-        }
-
-        /// @author Yevgeniy Cherdantsev
-        /// @date 24.02.2020 13:16:33
-        /// @version 1.0
-        /// <summary>
-        /// INPUT
-        /// </summary>
-        /// <param name="migrationService"></param>
-        /// <param name="numOfThreads"></param>
-        private static void AddMigration(Type migrationService, int numOfThreads)
-        {
-            try
-            {
-                _migrations.Add(migrationService.Name,
-                    numOfThreads == -1
-                        ? (MigrationService) Activator.CreateInstance(migrationService)
-                        : (MigrationService) Activator.CreateInstance(migrationService, numOfThreads));
-            }
-            catch (TargetInvocationException e)
-            {
-                if (e.InnerException.GetType() == typeof(PostgresException))
-                    logger.Error($"Message:|{e.InnerException.Message}| at |{migrationService.Name}|");
-                else
-                    logger.Error($"Message:|{e.InnerException.Message}; StackTrace:|{e.InnerException.StackTrace}|");
-            }
-            catch (Exception e)
-            {
-                logger.Error($"Message:|{e.InnerException.Message}; StackTrace:|{e.InnerException.StackTrace}|");
-            }
+            // await ProceedArguments(args);
         }
 
         private static async Task ProceedArguments(string[] args)
