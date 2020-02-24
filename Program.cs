@@ -17,10 +17,9 @@ namespace DataMigrationSystem
         private static Dictionary<string, MigrationService> _migrations = new Dictionary<string, MigrationService>();
         public static int NumOfErrors = 0;
 
-        public static List<Type> migrationServices = new List<Type>()
+        public static List<Type> migrationServices = new List<Type>
         {
-            typeof(LotGoszakupMigrationService),
-            typeof(AnnouncementGoszakupMigrationService)
+            typeof(LotGoszakupMigrationService)
         };
 
         private static async Task Main(string[] args)
@@ -30,6 +29,8 @@ namespace DataMigrationSystem
             Console.Title = "Data Migration System";
             LogManager.Configuration = new XmlLoggingConfiguration("NLog.config");
             logger = LogManager.GetCurrentClassLogger();
+
+            new Launch(args);
 
             //Type.GetType("DataMigrationSystem.Services.TaxDebtMigrationService");
             //Creating of the services with the given numbers of threads 
