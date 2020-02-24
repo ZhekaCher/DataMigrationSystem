@@ -39,7 +39,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("race")]
         public int?  Race{ get; set; }
         [Column("list")]
-        public int?  List{ get; set; }
+        public int?  ListId{ get; set; }
         [Column("searching_reason")]
         public string  SearchingReason{ get; set; }
         [Column("nationality")]

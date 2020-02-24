@@ -152,13 +152,13 @@ namespace DataMigrationSystem.Services
             }
             if (wantedIndividualDto.List != null)
             {
-                wantedIndividual.List =
+                wantedIndividual.ListId =
                     (await _webWantedIndividualContext.ListTypes.FirstOrDefaultAsync(x =>
                         x.Name == wantedIndividualDto.List))?.Id;
             }
             else
             {
-                wantedIndividual.List = null;
+                wantedIndividual.ListId = null;
             }
             return wantedIndividual;
         }
