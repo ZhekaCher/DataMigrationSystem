@@ -43,7 +43,7 @@ namespace DataMigrationSystem.Services
                 await _webDisabilitiesOrgSkContext.DisabilitiesOrgSk.Upsert(disabilitiesOrgSkDto).On(x => x.Bin).RunAsync();
             }
         }
-
-      
+        
+        
     }
 }
