@@ -38,7 +38,6 @@ namespace DataMigrationSystem.Services
                     RelevanceDate = x.RelevanceDate
                 } 
                 );
-            Console.WriteLine("Hello World");
             foreach (var disabilitiesOrgSkDto in disabilitiesOrgSkDtos)
             {
                 await _webDisabilitiesOrgSkContext.DisabilitiesOrgSk.Upsert(disabilitiesOrgSkDto).On(x => x.Bin).RunAsync();
