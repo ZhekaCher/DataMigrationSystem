@@ -56,18 +56,21 @@ namespace DataMigrationSystem
                     ? new LeavingRestrictionMigrationService()
                     : new LeavingRestrictionMigrationService(numOfThreads));
             // _migrations.Add("lot_goszakup",
-            //     numOfThreads == 1
-            //         ? new LotGoszakupMigrationService()
-            //         : new LotGoszakupMigrationService(numOfThreads));
+            // numOfThreads == 1
+            // ? new LotGoszakupMigrationService()
+            // : new LotGoszakupMigrationService(numOfThreads));
             _migrations.Add("tax_debt",
                 numOfThreads == 1
                     ? new TaxDebtMigrationService()
                     : new TaxDebtMigrationService(numOfThreads));
             // _migrations.Add("wanted_individual",
-                // numOfThreads == 1
-                    // ? new WantedIndividualMigrationService()
-                    // : new WantedIndividualMigrationService(numOfThreads));
-
+            // numOfThreads == 1
+            // ? new WantedIndividualMigrationService()
+            // : new WantedIndividualMigrationService(numOfThreads));
+            _migrations.Add("company",
+                numOfThreads == 1
+                    ? new CompanyMigrationService()
+                    : new CompanyMigrationService(numOfThreads));
 
             await ProceedArguments(args);
         }
