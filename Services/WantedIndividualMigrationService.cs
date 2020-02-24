@@ -19,6 +19,7 @@ namespace DataMigrationSystem.Services
 
         public WantedIndividualMigrationService(int numOfThreads = 1)
         {
+            NumOfThreads = numOfThreads;
             _webWantedIndividualContext = new WebWantedIndividualContext();
             _parsedWantedIndividualContext = new ParsedWantedIndividualContext();
         }
