@@ -105,7 +105,7 @@ namespace DataMigrationSystem
             conf.Add("threads", null);
             conf.Add("migrations", new List<string>()
             {
-                "LotGoszakupMigrationService"
+                "LotGoszakup"
             });
             return conf;
         }
