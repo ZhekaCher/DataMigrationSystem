@@ -36,8 +36,8 @@ namespace DataMigrationSystem
 
         public async Task StartMigrations()
         {
-            var listOfMigrations = ((List<string>) _configurations[ConfigurationElements.MIGRATIONS]).ToList();
-            var threads = (int?) _configurations[ConfigurationElements.THREADS];
+            var listOfMigrations = ((List<string>) _configurations[ConfigurationElements.Migrations]).ToList();
+            var threads = (int?) _configurations[ConfigurationElements.Threads];
             foreach (var migration in listOfMigrations)
             {
                 MigrationService migrationService;
@@ -102,8 +102,8 @@ namespace DataMigrationSystem
                 (current, command) => current + $"{command.Key,-20} : {command.Value}\n");
             
             var conf = new Dictionary<ConfigurationElements, object>();
-            conf.Add(ConfigurationElements.THREADS, null);
-            conf.Add(ConfigurationElements.MIGRATIONS, new List<string>()
+            conf.Add(ConfigurationElements.Threads, null);
+            conf.Add(ConfigurationElements.Migrations, new List<string>()
             {
                 "LotGoszakup"
             });
@@ -122,7 +122,7 @@ namespace DataMigrationSystem
 
                 switch (flag)
                 {
-                    case ConfigurationElements.THREADS:
+                    case ConfigurationElements.Threads:
                         int numOfThreads;
                         int.TryParse(arg, out numOfThreads);
                         if (numOfThreads <= 1 && numOfThreads >= 50)
@@ -132,34 +132,34 @@ namespace DataMigrationSystem
                             Environment.Exit(1);
                         }
 
-                        arguments[ConfigurationElements.THREADS] = numOfThreads;
+                        arguments[ConfigurationElements.Threads] = numOfThreads;
                         flag = null;
                         break;
-                    case ConfigurationElements.MIGRATIONS:
-                        var list = ((List<string>) arguments[ConfigurationElements.MIGRATIONS]).ToList();
+                    case ConfigurationElements.Migrations:
+                        var list = ((List<string>) arguments[ConfigurationElements.Migrations]).ToList();
                         list.Add(arg);
-                        arguments[ConfigurationElements.MIGRATIONS] = list;
+                        arguments[ConfigurationElements.Migrations] = list;
                         break;
                     case null:
                         switch (arg.ToLower())
                         {
                             case "-t":
                             case "--threads":
-                                arguments.Add(ConfigurationElements.THREADS, null);
-                                flag = ConfigurationElements.THREADS;
+                                arguments.Add(ConfigurationElements.Threads, null);
+                                flag = ConfigurationElements.Threads;
                                 break;
                             case "-m":
                             case "--migrations":
-                                arguments.Add(ConfigurationElements.MIGRATIONS, new List<string>());
-                                flag = ConfigurationElements.MIGRATIONS;
+                                arguments.Add(ConfigurationElements.Migrations, new List<string>());
+                                flag = ConfigurationElements.Migrations;
                                 break;
                             case "-h":
                             case "--help":
-                                arguments.Add(ConfigurationElements.HELP, null);
+                                arguments.Add(ConfigurationElements.Help, null);
                                 break;
                             case "-l":
                             case "--list":
-                                arguments.Add(ConfigurationElements.LIST, null);
+                                arguments.Add(ConfigurationElements.List, null);
                                 break;
                             default:
                                 _logger.Warn($"Found unknown argument '{arg}'; Check if your arguments are correct");
@@ -182,16 +182,16 @@ namespace DataMigrationSystem
         {
             foreach (var keyValuePair in _args)
             {
-                if (_args.ContainsKey(ConfigurationElements.LIST))
+                if (_args.ContainsKey(ConfigurationElements.List))
                 {
-                    var migrations = ((List<string>) _configurations[ConfigurationElements.MIGRATIONS]).ToList();
+                    var migrations = ((List<string>) _configurations[ConfigurationElements.Migrations]).ToList();
                     Console.WriteLine("The list of avaliable migrations:");
                     foreach (var migration in migrations)
                         Console.WriteLine(migration);
                     Environment.Exit(0);
                 }
 
-                if (_args.ContainsKey(ConfigurationElements.HELP))
+                if (_args.ContainsKey(ConfigurationElements.Help))
                 {
                     Console.Write(_helpString);
                     Environment.Exit(0);
@@ -199,12 +199,12 @@ namespace DataMigrationSystem
 
                 switch (keyValuePair.Key)
                 {
-                    case ConfigurationElements.THREADS:
-                        _configurations[ConfigurationElements.THREADS] = keyValuePair.Value ?? _configurations[ConfigurationElements.THREADS];
+                    case ConfigurationElements.Threads:
+                        _configurations[ConfigurationElements.Threads] = keyValuePair.Value ?? _configurations[ConfigurationElements.Threads];
                         break;
-                    case ConfigurationElements.MIGRATIONS:
+                    case ConfigurationElements.Migrations:
                         if (keyValuePair.Value != null)
-                            _configurations[ConfigurationElements.MIGRATIONS] = ((List<string>) keyValuePair.Value).ToList();
+                            _configurations[ConfigurationElements.Migrations] = ((List<string>) keyValuePair.Value).ToList();
                         break;
                 }
             }
@@ -217,10 +217,10 @@ namespace DataMigrationSystem
         
         private enum ConfigurationElements : byte
         {
-            THREADS,
-            MIGRATIONS,
-            HELP,
-            LIST
+            Threads,
+            Migrations,
+            Help,
+            List
         }
     }
 }
