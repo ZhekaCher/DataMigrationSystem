@@ -22,10 +22,10 @@ namespace DataMigrationSystem.Services
     /// </summary>
     public class LotGoszakupMigrationService : MigrationService
     {
-        private readonly string _currentTradingFloor = "goszakup";
-        private int _sTradingFloorId;
+        private const string CurrentTradingFloor = "goszakup";
+        private readonly int _sTradingFloorId;
         private int _total;
-        private object _lock = new object();
+        private readonly object _lock = new object();
 
 
         public LotGoszakupMigrationService(int numOfThreads = 1)
@@ -35,7 +35,7 @@ namespace DataMigrationSystem.Services
             using var webLotContext = new WebLotContext();
             _total = parsedLotGoszakupContext.LotGoszakupDtos.Count();
             _sTradingFloorId = webLotContext.STradingFloors
-                .FirstOrDefault(x => x.Code.Equals(_currentTradingFloor)).Id;
+                .FirstOrDefault(x => x.Code.Equals(CurrentTradingFloor)).Id;
         }
 
         protected override Logger InitializeLogger()
@@ -66,9 +66,6 @@ namespace DataMigrationSystem.Services
             {
                 var dtoIns = LotGoszakupDtoToLot(dto);
                 dtoIns.IdTf = _sTradingFloorId;
-                // dtoIns.IdAnno =
-                    // parsedAnnouncementGoszakupContext.AnnouncementGoszakupDtos.FirstOrDefault(x =>
-                        // x.NumberAnno.Equals(dto.TrdBuyNumberAnno)).Id;
                 try
                 {
                     await webLotContext.Lots.Upsert(dtoIns).On(x => new {x.IdLot, x.IdTf}).RunAsync();
@@ -77,6 +74,7 @@ namespace DataMigrationSystem.Services
                 {
                     Logger.Warn(e);
                 }
+
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
             }
@@ -84,7 +82,7 @@ namespace DataMigrationSystem.Services
             Logger.Info("Completed thread");
         }
 
-        private Lot LotGoszakupDtoToLot(LotGoszakupDto lotsGoszakupDto)
+        private static Lot LotGoszakupDtoToLot(LotGoszakupDto lotsGoszakupDto)
         {
             var lot = new Lot();
             lot.Total = lotsGoszakupDto.Amount;
@@ -93,20 +91,13 @@ namespace DataMigrationSystem.Services
             lot.DescriptionKz = lotsGoszakupDto.DescriptionKz;
             lot.DescriptionRu = lotsGoszakupDto.DescriptionRu;
             lot.IdAnno = 3308910;
-            // lot.IdAnno = lotsGoszakupDto.TrdBuyNumberAnno ;
+            if (lotsGoszakupDto.TrdBuyId != null) lot.IdAnno = (long) lotsGoszakupDto.TrdBuyId;
             lot.IdLot = lotsGoszakupDto.Id;
             lot.NameKz = lotsGoszakupDto.NameKz;
             lot.NameRu = lotsGoszakupDto.NameRu;
             lot.NumberLot = lotsGoszakupDto.LotNumber;
             lot.RelevanceDate = lotsGoszakupDto.Relevance;
             return lot;
-        }
-
-        private void InsertOrUpdate<T>(T entity, DbContext db) where T : class
-        {
-            if (db.Entry(entity).State == EntityState.Detached)
-                db.Set<T>().Add(entity);
-            db.SaveChanges();
         }
     }
 }
