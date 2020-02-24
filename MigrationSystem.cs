@@ -213,7 +213,7 @@ namespace DataMigrationSystem
 
         private static Type GetMigrationServiceFromName(string name)
         {
-            return Type.GetType($"{typeof(MigrationService).Namespace}.{name}");
+            return Type.GetType($"{typeof(MigrationService).Namespace}.{name}MigrationService");
         }
     }
 }
