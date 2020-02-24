@@ -21,7 +21,6 @@ namespace DataMigrationSystem.Context.Web.Avroradata
         public DbSet<CourtCaseType> CaseTypes { get; set; }
         public DbSet<Court> Courts { get; set; }    
         public DbSet<CompanyCourtCaseEntity> CompanyCourtCaseEntities { get; set; }
-        public DbSet<IndividualCourtCaseEntity> IndividualCourtCaseEntities { get; set; }
         public DbSet<CourtCaseCategory> CourtCaseCategories { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

@@ -6,7 +6,7 @@ namespace DataMigrationSystem.Context.Parsed
     public class ParsedLotNadlocContext : DbContext
     {
         
-        public DbSet<NadlocLotsDto> NadlocLotsDtos { get; set; }
+        public DbSet<LotNadlocDto> NadlocLotsDtos { get; set; }
 
         public ParsedLotNadlocContext(DbContextOptions<ParsedLotNadlocContext> options) : base(options)
         {

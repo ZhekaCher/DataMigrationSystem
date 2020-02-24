@@ -18,7 +18,6 @@ namespace DataMigrationSystem.Context.Web.Avroradata
            
         }
 
-        public DbSet<IndividualLeavingRestriction> IndividualLeavingRestrictions { get; set; }    
         public DbSet<CompanyLeavingRestriction> CompanyLeavingRestrictions { get; set; }    
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

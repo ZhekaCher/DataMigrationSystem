@@ -59,10 +59,19 @@ namespace DataMigrationSystem.Services
             }
         }
 
-        private Lot LotNadlocDtoToLot(NadlocLotsDto nadlocLotsDto)
+        private Lot LotNadlocDtoToLot(LotNadlocDto nadlocLotsDto)
         {
             var lot = new Lot();
-            // lot.Total = nadlocLotsDto.
+            lot.IdLot = nadlocLotsDto.Id;
+            lot.IdAnno = nadlocLotsDto.TenderId;
+            lot.NumberLot = nadlocLotsDto.LotNumber.ToString();
+            lot.NameRu = nadlocLotsDto.ScpDescription;
+            lot.Quantity = nadlocLotsDto.Quantity;
+            lot.Price = nadlocLotsDto.FullPrice/nadlocLotsDto.Quantity;
+            lot.Total = nadlocLotsDto.FullPrice;
+            lot.RelevanceDate = nadlocLotsDto.RelevanceDate;
+            lot.DeliveryAddress = nadlocLotsDto.DeliveryPlace;
+
             return lot;
         }
     }

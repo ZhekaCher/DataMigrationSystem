@@ -10,6 +10,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
     {
 
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Column("bin")]
         public long IinBin { get; set; }
         [Column("relevance_date")]
@@ -86,6 +87,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
     public class TaxDebtOrgName
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Column("char_code")]
         public long CharCode { get; set; }
         [Column("name_ru")]
@@ -98,6 +100,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
     public class TaxDebtBccName
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Column("bcc")]
         public long Bcc { get; set; }
         [Column("name_ru")]

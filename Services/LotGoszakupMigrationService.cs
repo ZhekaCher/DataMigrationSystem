@@ -22,10 +22,10 @@ namespace DataMigrationSystem.Services
     /// </summary>
     public class LotGoszakupMigrationService : MigrationService
     {
-        private readonly string _currentTradingFloor = "goszakup";
-        private int _sTradingFloorId;
+        private const string CurrentTradingFloor = "goszakup";
+        private readonly int _sTradingFloorId;
         private int _total;
-        private object _lock = new object();
+        private readonly object _lock = new object();
 
 
         public LotGoszakupMigrationService(int numOfThreads = 30)
@@ -35,8 +35,9 @@ namespace DataMigrationSystem.Services
             using var webLotContext = new WebLotContext();
             _total = parsedLotGoszakupContext.LotGoszakupDtos.Count();
             _sTradingFloorId = webLotContext.STradingFloors
-                .FirstOrDefault(x => x.Code.Equals(_currentTradingFloor)).Id;
+                .FirstOrDefault(x => x.Code.Equals(CurrentTradingFloor)).Id;
         }
+
         protected override Logger InitializeLogger()
         {
             return LogManager.GetCurrentClassLogger();
@@ -44,36 +45,45 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
-            Logger.Warn(NumOfThreads);
-            Logger.Info("Start");
+            Logger.Info($"Starting migration with '{NumOfThreads}' threads");
             var tasks = new List<Task>();
             for (var i = 0; i < NumOfThreads; i++)
                 tasks.Add(Migrate(i));
 
             await Task.WhenAll(tasks);
-            Logger.Info("Ended");
+            Logger.Info("End of migration");
         }
-        
+
         private async Task Migrate(int threadNum)
         {
             Logger.Info("Started thread");
 
             await using var webLotContext = new WebLotContext();
             await using var parsedLotGoszakupContext = new ParsedLotGoszakupContext();
+            await using var parsedAnnouncementGoszakupContext = new ParsedAnnouncementGoszakupContext();
             foreach (var dto in parsedLotGoszakupContext.LotGoszakupDtos.Where(x =>
                 x.Id % NumOfThreads == threadNum))
             {
                 var dtoIns = LotGoszakupDtoToLot(dto);
                 dtoIns.IdTf = _sTradingFloorId;
-                await webLotContext.Lots.Upsert(dtoIns).On(x => new {x.IdLot, x.IdTf}).RunAsync();
+                try
+                {
+                    await webLotContext.Lots.Upsert(dtoIns).On(x => new {x.IdLot, x.IdTf}).RunAsync();
+                }
+                catch (Exception e)
+                {
+                    Logger.Warn(e);
+                    Program.NumOfErrors++;
+                }
+
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
             }
-            
+
             Logger.Info("Completed thread");
         }
 
-        private Lot LotGoszakupDtoToLot(LotGoszakupDto lotsGoszakupDto)
+        private static Lot LotGoszakupDtoToLot(LotGoszakupDto lotsGoszakupDto)
         {
             var lot = new Lot();
             lot.Total = lotsGoszakupDto.Amount;
@@ -81,20 +91,13 @@ namespace DataMigrationSystem.Services
             lot.CustomerBin = lotsGoszakupDto.CustomerBin;
             lot.DescriptionKz = lotsGoszakupDto.DescriptionKz;
             lot.DescriptionRu = lotsGoszakupDto.DescriptionRu;
-            // lot.IdAnno = lotsGoszakupDto.TrdBuyNumberAnno ;
+            if (lotsGoszakupDto.TrdBuyId != null) lot.IdAnno = (long) lotsGoszakupDto.TrdBuyId;
             lot.IdLot = lotsGoszakupDto.Id;
             lot.NameKz = lotsGoszakupDto.NameKz;
             lot.NameRu = lotsGoszakupDto.NameRu;
             lot.NumberLot = lotsGoszakupDto.LotNumber;
             lot.RelevanceDate = lotsGoszakupDto.Relevance;
             return lot;
-        }
-
-        private void InsertOrUpdate<T>(T entity, DbContext db) where T : class
-        {
-            if (db.Entry(entity).State == EntityState.Detached)
-                db.Set<T>().Add(entity);
-            db.SaveChanges(); 
         }
     }
 }

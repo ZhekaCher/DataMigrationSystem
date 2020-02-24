@@ -4,6 +4,19 @@
 
 Система переноса данных из **базы данных парсинга** в **базу данных веба**
 
+### List of Avaliable Migrations:
+* AllParticipantsGoszakup
+* AnnouncementGoszakup
+* Company
+* CourtCase
+* EnforcementDebt
+* LeavingRestriction
+* LotGoszakup
+* TaxDebt
+* UnscrupulousGoszakup
+* WantedIndividual
+
+
 ## Libraries
 
 * NLog 4.6.8

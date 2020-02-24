@@ -19,6 +19,7 @@ namespace DataMigrationSystem.Services
 
         public WantedIndividualMigrationService(int numOfThreads = 1)
         {
+            NumOfThreads = numOfThreads;
             _webWantedIndividualContext = new WebWantedIndividualContext();
             _parsedWantedIndividualContext = new ParsedWantedIndividualContext();
         }
@@ -152,13 +153,13 @@ namespace DataMigrationSystem.Services
             }
             if (wantedIndividualDto.List != null)
             {
-                wantedIndividual.List =
+                wantedIndividual.ListId =
                     (await _webWantedIndividualContext.ListTypes.FirstOrDefaultAsync(x =>
                         x.Name == wantedIndividualDto.List))?.Id;
             }
             else
             {
-                wantedIndividual.List = null;
+                wantedIndividual.ListId = null;
             }
             return wantedIndividual;
         }

@@ -16,13 +16,15 @@ namespace DataMigrationSystem.Services
 {
     public class TaxDebtMigrationService : MigrationService
     {
-        private readonly ParsedTaxDebtContext _parsedTaxDebtContext;
-        private readonly WebTaxDebtContext _webTaxDebtContext;
 
+
+        private readonly object _forLock;
+        private int _counter = 0;
         public TaxDebtMigrationService(int numOfThreads = 1)
         {
-            _parsedTaxDebtContext = new ParsedTaxDebtContext();
-            _webTaxDebtContext = new WebTaxDebtContext();
+
+            _forLock = new object();
+            
         }
 
         protected override Logger InitializeLogger()
@@ -32,19 +34,45 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
+            
             await MigrateReferences();
-            var taxDebtDtos = _parsedTaxDebtContext.TaxDebts;
+            var tasks = new List<Task>();
+            for (int i = 0; i < NumOfThreads; i++)
+            {
+                tasks.Add(Migrate(i));
+            }
+
+            await Task.WhenAll(tasks);
+        }
+
+        private async Task Migrate(int numThread)
+        {
+            await using var parsedTaxDebtContext = new ParsedTaxDebtContext();
+            await using var webTaxDebtContext = new WebTaxDebtContext();
+            
+            var taxDebtDtos = from courtCaseEntityDto in parsedTaxDebtContext.TaxDebts
+                join companies in parsedTaxDebtContext.CompanyDtos
+                    on courtCaseEntityDto.IinBin equals companies.Bin
+                orderby courtCaseEntityDto.IinBin where courtCaseEntityDto.IinBin %NumOfThreads == numThread
+                select courtCaseEntityDto;
 
             foreach (var taxDebtDto in taxDebtDtos)
             {
                 var taxDebt = await DtoToEntity(taxDebtDto);
-                await _webTaxDebtContext.TaxDebts.Upsert(taxDebt).On(x => x.IinBin).RunAsync();
+                await webTaxDebtContext.TaxDebts.Upsert(taxDebt).On(x => x.IinBin).RunAsync();
+                lock (_forLock)
+                {
+                    Logger.Trace(_counter++);
+                }
             }
         }
         
         private async Task MigrateReferences()
         {
-            var taxDebtOrgs = _parsedTaxDebtContext.TaxDebtOrgs.Select(x=>new {x.CharCode, x.NameKk, x.NameRu}).Distinct();
+            await using var parsedTaxDebtContext = new ParsedTaxDebtContext();
+            await using var webTaxDebtContext = new WebTaxDebtContext();
+            var taxDebtOrgs = parsedTaxDebtContext.TaxDebtOrgs.Select(x=>new 
+                {x.CharCode, x.NameKk, x.NameRu}).Distinct();
             foreach (var distinct in taxDebtOrgs)
             {
                 var taxDebtOrg = new TaxDebtOrgName
@@ -53,10 +81,10 @@ namespace DataMigrationSystem.Services
                     NameKk = distinct.NameKk,
                     NameRu = distinct.NameRu
                 };
-                await _webTaxDebtContext.TaxDebtOrgNames.Upsert(taxDebtOrg).On(x => x.CharCode).RunAsync();
+                await webTaxDebtContext.TaxDebtOrgNames.Upsert(taxDebtOrg).On(x => x.CharCode).RunAsync();
             }
         
-            var taxDebtBccs = _parsedTaxDebtContext.TaxDebtBccs.Select(x=> new
+            var taxDebtBccs = parsedTaxDebtContext.TaxDebtBccs.Select(x=> new
             {
                 x.Bcc, x.NameKk, x.NameRu
             }).Distinct();
@@ -68,7 +96,7 @@ namespace DataMigrationSystem.Services
                     NameKk = distinct.NameKk,
                     NameRu = distinct.NameRu
                 };
-                await _webTaxDebtContext.TaxDebtBccNames.Upsert(taxDebtBcc).On(x => x.Bcc).RunAsync();
+                await webTaxDebtContext.TaxDebtBccNames.Upsert(taxDebtBcc).On(x => x.Bcc).RunAsync();
 
             }
         }

@@ -1,18 +1,17 @@
 using DataMigrationSystem.Models.Parsed;
-using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Parsed
 {
-    public class ParsedCourtCaseContext: DbContext
+    public class ParsedUnreliableTaxpayerContext: DbContext
     {
-        public ParsedCourtCaseContext(DbContextOptions<ParsedCourtCaseContext> options)
+        public ParsedUnreliableTaxpayerContext(DbContextOptions<ParsedUnreliableTaxpayerContext> options)
             : base(options)
         {
             
         }
 
-        public ParsedCourtCaseContext()
+        public ParsedUnreliableTaxpayerContext()
         {
             
         }
@@ -20,9 +19,6 @@ namespace DataMigrationSystem.Context.Parsed
         {
             optionsBuilder.UseNpgsql("Server = localhost; Database = test_parsing; Port=5432; User ID = galymzhan; Password = Qwerty123; Search Path = parsing; Integrated Security=true; Pooling=true;");
         }
-        public DbSet<CourtCaseDto> CourtCaseDtos { get; set; }    
-        public DbSet<CourtCaseEntityDto> CourtCaseEntityDtos { get; set; }    
-        public DbSet<ParsedCompany> ParsedCompanies { get; set; }
-        public DbSet<CompanyDto> CompanyDtos { get; set; }
+        public DbSet<UnreliableTaxpayerDto> UnreliableTaxpayerDtos { get; set; }    
     }
 }

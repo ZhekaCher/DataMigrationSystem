@@ -1,9 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataMigrationSystem.Models.Parsed
 {
-    public class CompanyStatGovDto
+    [Table("companies")]
+    public class CompanyDto
     {
         [Key]
         [Column("id")]
@@ -17,9 +19,9 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("name_ru")]
         public string NameRu { get; set; }
         [Column("registration_date")]
-        public string RegistrationDate { get; set; }
+        public DateTime? RegistrationDate { get; set; }
         [Column("oked_code")]
-        public long OkedCode { get; set; }
+        public string OkedCode { get; set; }
         [Column("activity_name_ru")]
         public string ActivityNameRu { get; set; }
         [Column("activity_name_kz")]
@@ -27,22 +29,22 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("second_oked_code")]
         public string SecondOkedCode { get; set; }
         [Column("krp_code")]
-        public long KrpCode { get; set; }
+        public int KrpCode { get; set; }
         [Column("krp_name_ru")]
         public string KrpNameRu { get; set; }
         [Column("krp_name_kz")]
         public string KrpNameKz { get; set; }
         [Column("kato_code")]
-        public long KatoCode { get; set; }
+        public int KatoCode { get; set; }
         [Column("settlement_name_ru")]
         public string SettlementNameRu { get; set; }
         [Column("settlement_name_kz")]
-        public string SettelementNameKz { get; set; }
+        public string SettlementNameKz { get; set; }
         [Column("legal_address")]
         public string LegalAddress { get; set; }
         [Column("name_head")]
         public string NameHead { get; set; }
         [Column("relevance_date")]
-        public string RelevanceDate { get; set; }
+        public DateTime? RelevanceDate { get; set; }
     }
 }
