@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using DataMigrationSystem.Services;
 using NLog;
 using Npgsql;
+// ReSharper disable CognitiveComplexity
 
 namespace DataMigrationSystem
 {
@@ -19,7 +20,7 @@ namespace DataMigrationSystem
     /// </summary>
     public class MigrationSystem
     {
-        private static Logger logger;
+        private static Logger _logger;
         private Dictionary<string, object> _configurations = PreloadConfigurations();
         private Dictionary<string, object> _args;
         private static Dictionary<string, string> _commandsDictionary = new Dictionary<string, string>();
@@ -27,7 +28,7 @@ namespace DataMigrationSystem
 
         internal MigrationSystem(string[] args)
         {
-            logger = LogManager.GetCurrentClassLogger();
+            _logger = LogManager.GetCurrentClassLogger();
 
             _args = ParseArguments(args);
             ProceedArguments();
@@ -41,7 +42,7 @@ namespace DataMigrationSystem
             {
                 MigrationService migrationService;
                 var migrationClass = GetMigrationServiceFromName(migration);
-                logger.Info($"Trying to launch {migration}");
+                _logger.Info($"Trying to launch {migration}");
                 try
                 {
                     if (threads == null)
@@ -62,26 +63,26 @@ namespace DataMigrationSystem
                 catch (TargetInvocationException e)
                 {
                     if (e.InnerException.GetType() == typeof(PostgresException))
-                        logger.Error($"Message:|{e.InnerException.Message}| at '{migration}'");
+                        _logger.Error($"Message:|{e.InnerException.Message}| at '{migration}'");
                     else
-                        logger.Error(
+                        _logger.Error(
                             $"Message:|{e.InnerException.Message}; StackTrace:|{e.InnerException.StackTrace}|");
                     Program.NumOfErrors++;
                 }
                 catch (IndexOutOfRangeException)
                 {
-                    logger.Error(
+                    _logger.Error(
                         $"Try to implement Constructor: |MigrationService(int numOfThreads = 1)| in {migration} class");
                     Program.NumOfErrors++;
                 }
                 catch (NullReferenceException)
                 {
-                    logger.Error($"It seems that '{migration}' doesn't exist");
+                    _logger.Error($"It seems that '{migration}' doesn't exist");
                     Program.NumOfErrors++;
                 }
                 catch (Exception e)
                 {
-                    logger.Error($"Message:|{e.InnerException.Message}; StackTrace:|{e.InnerException.StackTrace}|");
+                    _logger.Error($"Message:|{e.InnerException.Message}; StackTrace:|{e.InnerException.StackTrace}|");
                     Program.NumOfErrors++;
                 }
             }
@@ -127,7 +128,7 @@ namespace DataMigrationSystem
                         int.TryParse(arg, out numOfThreads);
                         if (numOfThreads <= 1 && numOfThreads >= 50)
                         {
-                            logger.Warn(
+                            _logger.Warn(
                                 $"Unacceptable value for thread numbers '{arg}'; Value should correlate between 1 and 50 and match to the following form: '-t 5'");
                             Environment.Exit(1);
                         }
@@ -162,7 +163,7 @@ namespace DataMigrationSystem
                                 arguments.Add("list", null);
                                 break;
                             default:
-                                logger.Warn($"Found unknown argument '{arg}'; Check if your arguments are correct");
+                                _logger.Warn($"Found unknown argument '{arg}'; Check if your arguments are correct");
                                 Console.WriteLine(_helpString);
                                 Environment.Exit(1);
                                 break;
@@ -210,7 +211,7 @@ namespace DataMigrationSystem
             }
         }
 
-        private Type GetMigrationServiceFromName(string name)
+        private static Type GetMigrationServiceFromName(string name)
         {
             return Type.GetType($"{typeof(MigrationService).Namespace}.{name}");
         }
