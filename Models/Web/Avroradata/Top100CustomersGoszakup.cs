@@ -7,15 +7,15 @@ namespace DataMigrationSystem.Models.Web.Avroradata
     public class Top100CustomersGoszakup
     {
         [Column("number_of_contracts")]
-        private string Contracts { get; set; }
+        public long Contracts { get; set; }
         [Column("amount")]
-        private long Amount { get; set; }
+        public double? Amount { get; set; }
         [Column("place")]
-        private int Place { get; set; }
+        public int Place { get; set; }
         [Column("date_of_adding")] 
-        private DateTime AddingDate { get; set; }
+        public DateTime? AddingDate { get; set; }
         [Column("biin_companies")]
-        private long Biin { get; set; }
+        public long Bin { get; set; }
 
     }
 }

@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace DataMigrationSystem.Models.Parsed
 {
     [Table("top100suppliers")]
-    public class Top100SuppliersgoszakupDto
+    public class Top100SuppliersGoszakupDto
     {
         [Key]
         [Column("id")]
@@ -13,14 +13,14 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("name")]
         public string Name { get; set; }
         [Column("bin")]
-        public long bin { get; set; }
+        public long Bin { get; set; }
         [Column("contracts")]
-        public long contracts { get; set; }
+        public long Contracts { get; set; }
         [Column("amount")]
-        public string Amount { get; set; }
+        public double? Amount { get; set; }
         [Column("place")]
         public int Place { get; set; }
         [Column("adding_date")]
-        public DateTime AddingDate { get; set; }
+        public DateTime? AddingDate { get; set; }
     }
 }
