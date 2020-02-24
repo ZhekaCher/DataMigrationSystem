@@ -24,7 +24,7 @@ namespace DataMigrationSystem.Services
         private int _sTradingFloorId;
         private int _total;
         private object _lock = new object();
-        
+
 
         public AnnouncementGoszakupMigrationService(int numOfThreads = 30)
         {
@@ -43,36 +43,36 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
-            Logger.Warn(NumOfThreads);
-            Logger.Info("Start");
+            Logger.Info($"Starting migration with '{NumOfThreads}' threads");
+
             var tasks = new List<Task>();
             for (var i = 0; i < NumOfThreads; i++)
                 tasks.Add(Migrate(i));
 
             await Task.WhenAll(tasks);
-            Logger.Info("Ended");
+            Logger.Info("End of migration");
         }
 
         private async Task Migrate(int threadNum)
         {
             Logger.Info("Started thread");
-            
+
             await using var webAnnouncementContext = new WebAnnouncementContext();
             await using var parsedAnnouncementGoszakupContext = new ParsedAnnouncementGoszakupContext();
             foreach (var dto in parsedAnnouncementGoszakupContext.AnnouncementGoszakupDtos.Where(x =>
                 x.Id % NumOfThreads == threadNum))
             {
-                var dtoIns = AnnouncementGoszakupDtoToAnnouncement(dto);
+                var dtoIns = DtoToWeb(dto);
                 dtoIns.IdTf = _sTradingFloorId;
                 await webAnnouncementContext.Announcements.Upsert(dtoIns).On(x => new {x.IdAnno, x.IdTf}).RunAsync();
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
             }
-            
+
             Logger.Info("Completed thread");
         }
 
-        private Announcement AnnouncementGoszakupDtoToAnnouncement(AnnouncementGoszakupDto announcementGoszakupDto)
+        private Announcement DtoToWeb(AnnouncementGoszakupDto announcementGoszakupDto)
         {
             var announcement = new Announcement();
             announcement.IdAnno = announcementGoszakupDto.Id;

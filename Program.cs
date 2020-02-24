@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using DataMigrationSystem.Services;
 using NLog;
 using NLog.Config;
+using Npgsql;
 
 namespace DataMigrationSystem
 {
@@ -13,7 +15,13 @@ namespace DataMigrationSystem
     {
         private static Logger logger;
         private static Dictionary<string, MigrationService> _migrations = new Dictionary<string, MigrationService>();
-        private static int _numOfErrors = 0;
+        public static int NumOfErrors = 0;
+
+        public static List<Type> migrationServices = new List<Type>()
+        {
+            typeof(LotGoszakupMigrationService),
+            typeof(AnnouncementGoszakupMigrationService)
+        };
 
         private static async Task Main(string[] args)
         {
@@ -23,9 +31,9 @@ namespace DataMigrationSystem
             LogManager.Configuration = new XmlLoggingConfiguration("NLog.config");
             logger = LogManager.GetCurrentClassLogger();
 
-
+            //Type.GetType("DataMigrationSystem.Services.TaxDebtMigrationService");
             //Creating of the services with the given numbers of threads 
-            var numOfThreads = 1;
+            var numOfThreads = -1;
 
             foreach (var arg in args)
             {
@@ -72,7 +80,41 @@ namespace DataMigrationSystem
                     ? new CompanyMigrationService()
                     : new CompanyMigrationService(numOfThreads));
 
+
+            foreach (var migrationService in migrationServices)
+                AddMigration(migrationService, numOfThreads);
+
             await ProceedArguments(args);
+        }
+
+        /// @author Yevgeniy Cherdantsev
+        /// @date 24.02.2020 13:16:33
+        /// @version 1.0
+        /// <summary>
+        /// INPUT
+        /// </summary>
+        /// <param name="migrationService"></param>
+        /// <param name="numOfThreads"></param>
+        private static void AddMigration(Type migrationService, int numOfThreads)
+        {
+            try
+            {
+                _migrations.Add(migrationService.Name,
+                    numOfThreads == -1
+                        ? (MigrationService) Activator.CreateInstance(migrationService)
+                        : (MigrationService) Activator.CreateInstance(migrationService, numOfThreads));
+            }
+            catch (TargetInvocationException e)
+            {
+                if (e.InnerException.GetType() == typeof(PostgresException))
+                    logger.Error($"Message:|{e.InnerException.Message}| at |{migrationService.Name}|");
+                else
+                    logger.Error($"Message:|{e.InnerException.Message}; StackTrace:|{e.InnerException.StackTrace}|");
+            }
+            catch (Exception e)
+            {
+                logger.Error($"Message:|{e.InnerException.Message}; StackTrace:|{e.InnerException.StackTrace}|");
+            }
         }
 
         private static async Task ProceedArguments(string[] args)
@@ -84,22 +126,25 @@ namespace DataMigrationSystem
             commandsDictionary.Add("--list (-l)", "prints the list of avaliable migrations");
             commandsDictionary.Add("--threads (-t)",
                 $"choose number of threads\n{"Example: -t5 -> starting with 5 threads for all migrations",81}");
+
             commandsDictionary.Add("--migrations (-m)",
                 $"allows to choose migrations\n{"Example: -m tax_debt wanted_individual -> starting the given migrations",94}");
+
             var helpString = commandsDictionary.Aggregate("",
                 (current, keyValuePair) => current + $"{keyValuePair.Key,-20} : {keyValuePair.Value}\n");
 
             var startLog = "Data migration started; Next migrations will be proceed: ";
-            var endLog = "Data migration fully completed with '{0}' errors";
 
+            var endLog = "Data migration fully completed with '{0}' errors";
             if (args.Length == 0)
             {
                 startLog = _migrations.Aggregate(startLog,
                     (current, keyValuePair) => current + keyValuePair.Key + "; ");
                 logger.Info(startLog);
                 await Migrate();
-                logger.Info(endLog, _numOfErrors);
+                logger.Info(endLog, NumOfErrors);
             }
+
             else
             {
                 var listFlag = false;
@@ -110,7 +155,7 @@ namespace DataMigrationSystem
                         continue;
                     if (listFlag)
                     {
-                        argMigrations.Add(arg.ToLower());
+                        argMigrations.Add(arg);
                         continue;
                     }
 
@@ -146,23 +191,31 @@ namespace DataMigrationSystem
                     logger.Warn("No migrations has been specified");
                     Environment.Exit(0);
                 }
+
                 //Check if all given migrations exists
-                if (argMigrations != null)
-                    foreach (var argMigration in argMigrations)
-                    {
-                        if (_migrations.ContainsKey(argMigration)) continue;
-                        logger.Warn($"Migration '{argMigration}' doesn't exists");
-                        Environment.Exit(1);
-                    }
+                foreach (var argMigration in argMigrations)
+                {
+                    if (_migrations.ContainsKey(argMigration)) continue;
+                    logger.Warn($"Migration '{argMigration}' doesn't exists");
+                    Environment.Exit(1);
+                }
 
                 startLog = argMigrations.Aggregate(startLog,
                     (current, migrationName) => current + migrationName + "; ");
-                logger.Trace(startLog);
+                logger.Info(startLog);
                 await Migrate(argMigrations);
-                logger.Info(endLog, _numOfErrors);
+                logger.Info(endLog, NumOfErrors);
             }
         }
 
+
+        /// @author Yevgeniy Cherdantsev
+        /// @date 24.02.2020 13:16:53
+        /// @version 1.0
+        /// <summary>
+        /// INPUT
+        /// </summary>
+        /// <param name="migrationList"></param>
         private static async Task Migrate(List<string> migrationList = null)
         {
             if (migrationList == null)
@@ -174,7 +227,7 @@ namespace DataMigrationSystem
                     }
                     catch (Exception e)
                     {
-                        ++_numOfErrors;
+                        ++NumOfErrors;
                         logger.Error($"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|;");
                     }
                 }
@@ -186,7 +239,7 @@ namespace DataMigrationSystem
                     }
                     catch (Exception e)
                     {
-                        ++_numOfErrors;
+                        ++NumOfErrors;
                         logger.Error($"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|;");
                     }
         }

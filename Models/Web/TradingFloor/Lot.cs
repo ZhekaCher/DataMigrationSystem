@@ -15,7 +15,7 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
     {
         [Key] [Column("id")] public long? Id { get; set; }
         [Column("id_lot")] public long? IdLot { get; set; }
-        [Column("id_anno")] public long? IdAnno { get; set; }
+        [Column("id_anno")] public long IdAnno { get; set; }
         [Column("id_tf")] public long? IdTf { get; set; }
         [Column("number_lot")] public string NumberLot { get; set; }
         [Column("name_ru")] public string NameRu { get; set; }
