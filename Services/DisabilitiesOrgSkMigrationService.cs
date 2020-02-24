@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Web.Avroradata;
 using DataMigrationSystem.Models.Parsed;
@@ -15,6 +16,7 @@ namespace DataMigrationSystem.Services
 
         public DisabilitiesOrgSkMigrationService(int numOfThreads = 1)
         {
+            NumOfThreads = numOfThreads;
             _webDisabilitiesOrgSkContext= new WebDisabilitiesOrgSkContext();
             _parsedDisabilitiesOrgSkContext = new ParsedDisabilitiesOrgSkContext();
         }
@@ -26,24 +28,21 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
-            var disabilitiesOrgSkDtos = _parsedDisabilitiesOrgSkContext.DisabilitiesOrgSkDtos;
+            var disabilitiesOrgSkDtos = _parsedDisabilitiesOrgSkContext.DisabilitiesOrgSkDtos
+                .Select(x=>new DisabilitiesOrgSk
+                {
+                    Id=x.Id,
+                    Bin = x.Bin,
+                    ProducerType = x.ProducerType,
+                    RelevanceDate = x.RelevanceDate
+                } 
+                );
             foreach (var disabilitiesOrgSkDto in disabilitiesOrgSkDtos)
             {
-                var disOrg = await DtoToEntity(disabilitiesOrgSkDto);
-                await _webDisabilitiesOrgSkContext.DisabilitiesOrgSk.Upsert(disOrg).On(x => x.Bin).RunAsync();
+                await _webDisabilitiesOrgSkContext.DisabilitiesOrgSk.Upsert(disabilitiesOrgSkDto).On(x => x.Bin).RunAsync();
             }
         }
 
-        private async Task<DisabilitiesOrgSk> DtoToEntity(DisabilitiesOrgSkDto disabilitiesOrgSkDto)
-        {
-            var disabilitiesOrgSk = new DisabilitiesOrgSk
-            {
-                Id=disabilitiesOrgSkDto.Id,
-                Bin = disabilitiesOrgSkDto.Bin,
-                ProducerType = disabilitiesOrgSkDto.ProducerType,
-                RelevanceDate = disabilitiesOrgSkDto.RelevanceDate
-            };
-            return disabilitiesOrgSk;
-        }
+      
     }
 }
