@@ -62,7 +62,8 @@ namespace DataMigrationSystem.Services
         private Lot LotNadlocDtoToLot(NadlocLotsDto nadlocLotsDto)
         {
             var lot = new Lot();
-            lot.Total = nadlocLotsDto.
+            // lot.Total = nadlocLotsDto.
+            return lot;
         }
     }
 }
