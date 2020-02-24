@@ -78,8 +78,13 @@ namespace DataMigrationSystem.Services
         private Lot LotNadlocDtoToLot(NadlocLotsDto nadlocLotsDto)
         {
             var lot = new Lot();
+<<<<<<< HEAD
             lot.Total = nadlocLotsDto.
 >>>>>>> Tralala
+=======
+            // lot.Total = nadlocLotsDto.
+            return lot;
+>>>>>>> Lalala2
         }
     }
 }
