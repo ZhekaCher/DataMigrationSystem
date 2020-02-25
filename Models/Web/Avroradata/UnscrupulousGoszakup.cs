@@ -4,6 +4,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataMigrationSystem.Models.Web.Avroradata
 {
+
+
+	/// @author Yevgeniy Cherdantsev
+	/// @date 25.02.2020 09:33:46
+	/// @version 1.0
+	/// <summary>
+	/// 'unscrupulous_goszakup' web table
+	/// </summary>
 	[Table("unscrupulous_goszakup")]
 	public class UnscrupulousGoszakup
 	{

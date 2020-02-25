@@ -4,21 +4,21 @@ using Microsoft.EntityFrameworkCore;
 namespace DataMigrationSystem.Context.Parsed
 {
     /// @author Yevgeniy Cherdantsev
-    /// @date 21.02.2020 13:23:50
+    /// @date 22.02.2020 16:02:33
     /// @version 1.0
     /// <summary>
-    /// Контекст для работы с таблицей 'announcement_goszakup'
+    /// Контекст для работы с таблицей 'unscrupulouses_goszakup_context'
     /// </summary>
-    public class ParsedAnnouncementGoszakupContext : DbContext
+    public class ParsedUnscrupulousGoszakupContext : DbContext
     {
-        public DbSet<AnnouncementGoszakupDto> AnnouncementGoszakupDtos { get; set; }
+        public DbSet<UnscrupulousGoszakupDto> UnscrupulousGoszakupDtos { get; set; }
 
-        public ParsedAnnouncementGoszakupContext(DbContextOptions<ParsedAnnouncementGoszakupContext> options)
+        public ParsedUnscrupulousGoszakupContext(DbContextOptions<ParsedUnscrupulousGoszakupContext> options)
             : base(options)
         {
         }
 
-        public ParsedAnnouncementGoszakupContext()
+        public ParsedUnscrupulousGoszakupContext()
         {
         }
 

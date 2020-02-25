@@ -39,7 +39,7 @@ namespace DataMigrationSystem.Services
                     Birthday = x.Birthday,
                     Iin = x.Iin,
                     Court = x.Court,
-                    CourtDate = DateTime.ParseExact(x.CourtDate,"",CultureInfo.InvariantCulture),
+                    CourtDate = DateTime.ParseExact(x.CourtDate,"yyyy-MM-dd",CultureInfo.InvariantCulture),
                     CrimeArticle = x.CrimeArticle,
                     Judgement = x.Judgement,
                     JailReleaseDate = x.JailReleaseDate

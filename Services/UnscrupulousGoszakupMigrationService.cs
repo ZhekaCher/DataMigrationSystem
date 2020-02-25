@@ -16,7 +16,7 @@ namespace DataMigrationSystem.Services
     /// @date 22.02.2020 16:09:59
     /// @version 1.0
     /// <summary>
-    /// INPUT
+    /// migration of goszakup unscrupulous
     /// </summary>
     public class UnscrupulousGoszakupMigrationService : MigrationService
     {
@@ -31,8 +31,8 @@ namespace DataMigrationSystem.Services
         public UnscrupulousGoszakupMigrationService(int numOfThreads = 30)
         {
             NumOfThreads = numOfThreads;
-            using var parsedUnscrupulousesGoszakupContext = new ParsedUnscrupulousesGoszakupContext();
-            _total = parsedUnscrupulousesGoszakupContext.UnscrupulousesGoszakupDtos.Count();
+            using var parsedUnscrupulousGoszakupContext = new ParsedUnscrupulousGoszakupContext();
+            _total = parsedUnscrupulousGoszakupContext.UnscrupulousGoszakupDtos.Count();
         }
 
         public override async Task StartMigratingAsync()
@@ -52,9 +52,9 @@ namespace DataMigrationSystem.Services
 
 
             await using var webUnscrupulousGoszakupContext = new WebUnscrupulousGoszakupContext();
-            await using var parsedUnscrupulousesGoszakupContext = new ParsedUnscrupulousesGoszakupContext();
+            await using var parsedUnscrupulousGoszakupContext = new ParsedUnscrupulousGoszakupContext();
 
-            foreach (var dto in parsedUnscrupulousesGoszakupContext.UnscrupulousesGoszakupDtos.Where(x =>
+            foreach (var dto in parsedUnscrupulousGoszakupContext.UnscrupulousGoszakupDtos.Where(x =>
                 x.Pid % NumOfThreads == threadNum).Where(x => x.SupplierInnunp == null))
             {
                 var temp = DtoToWeb(dto);
@@ -85,11 +85,11 @@ namespace DataMigrationSystem.Services
             Logger.Info("Completed thread");
         }
 
-        private UnscrupulousGoszakup DtoToWeb(UnscrupulousesGoszakupDto unscrupulousesGoszakupDto)
+        private UnscrupulousGoszakup DtoToWeb(UnscrupulousGoszakupDto unscrupulousGoszakupDto)
         {
             var unscrupulousGoszakup = new UnscrupulousGoszakup();
-            unscrupulousGoszakup.BiinCompanies = unscrupulousesGoszakupDto.SupplierBiin;
-            unscrupulousGoszakup.RelevanceDate = unscrupulousesGoszakupDto.Relevance;
+            unscrupulousGoszakup.BiinCompanies = unscrupulousGoszakupDto.SupplierBiin;
+            unscrupulousGoszakup.RelevanceDate = unscrupulousGoszakupDto.Relevance;
             unscrupulousGoszakup.Status = true;
             return unscrupulousGoszakup;
         }

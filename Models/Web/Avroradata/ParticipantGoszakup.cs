@@ -4,8 +4,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataMigrationSystem.Models.Web.Avroradata
 {
+
+
+	/// @author Yevgeniy Cherdantsev
+	/// @date 25.02.2020 09:33:10
+	/// @version 1.0
+	/// <summary>
+	/// 'all_participants_goszakup' web table
+	/// </summary>
 	[Table("all_participants_goszakup")]
-	public class AllParticipantsGoszakup
+	public class ParticipantGoszakup
 	{
 		
 		[Key, DatabaseGenerated(DatabaseGeneratedOption.None)] [Column("biin_companies")] public long? BiinCompanies{get; set;}

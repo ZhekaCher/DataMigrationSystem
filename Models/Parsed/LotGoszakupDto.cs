@@ -8,9 +8,9 @@ namespace DataMigrationSystem.Models.Parsed
     /// @date 19.02.2020 17:44:50
     /// @version 1.0
     /// <summary>
-    /// 'lots_goszakup' parse table
+    /// 'lot_goszakup' parse table
     /// </summary>
-    [Table("lots_goszakup")]
+    [Table("lot_goszakup")]
     public class LotGoszakupDto
     {
         [Key] [Column("id")] public int Id { get; set; }

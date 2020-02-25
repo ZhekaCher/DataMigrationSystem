@@ -9,19 +9,19 @@ namespace DataMigrationSystem.Context.Web.Avroradata
     /// @date 22.02.2020 13:43:36
     /// @version 1.0
     /// <summary>
-    /// Контекст для работы с таблицей 'all_participants_goszakup'
+    /// Контекст для работы с таблицей 'participant_goszakup'
     /// </summary>
 
-    public class WebAllParticipantsGoszakupContext : DbContext
+    public class WebParticipantGoszakupContext : DbContext
     {
-        public DbSet<AllParticipantsGoszakup> AllParticipantsGoszakup { get; set; }
-        public WebAllParticipantsGoszakupContext(DbContextOptions<WebAllParticipantsGoszakupContext> options)
+        public DbSet<ParticipantGoszakup> ParticipantsGoszakup { get; set; }
+        public WebParticipantGoszakupContext(DbContextOptions<WebParticipantGoszakupContext> options)
             : base(options)
         {
 
         }
 
-        public WebAllParticipantsGoszakupContext()
+        public WebParticipantGoszakupContext()
         {
 
         }

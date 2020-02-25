@@ -5,16 +5,27 @@
 Система переноса данных из **базы данных парсинга** в **базу данных веба**
 
 ### List of Avaliable Migrations:
-* AllParticipantsGoszakup
-* AnnouncementGoszakup
+
 * Company
 * CourtCase
+* Disabilities
 * EnforcementDebt
 * LeavingRestriction
-* LotGoszakup
+* Pedophiles
+* ProducersSk
+* ReliableSk
 * TaxDebt
-* UnscrupulousGoszakup
+* Terrorist
+* Top100Goszakup
+* UnreliableTaxpayer
 * WantedIndividual
+
+Goszakup:
+* ParticipantGoszakup
+* UnscrupulousGoszakup
+* AnnouncementGoszakup
+* LotGoszakup
+* ContractGoszakup
 
 
 ## Libraries
