@@ -16,17 +16,18 @@ namespace DataMigrationSystem.Services
         private readonly string _currentTradingFloor = "nadloc";
         private int _sTradingFloorId;
         private int _total;
-        private object _lock = new object();
+        private readonly object _lock = new object();
 
         public LotNadlocMigrationService(int numOfThreads = 30)
         {
             NumOfThreads = numOfThreads;
-            using var ParsedLotNadlocContext = new ParsedLotNadlocContext();
-            using var WebLotContext = new WebLotContext();
-            _total = ParsedLotNadlocContext.NadlocLotsDtos.Count();
-            _sTradingFloorId = WebLotContext.STradingFloors.FirstOrDefault(x => x.Code.Equals(_currentTradingFloor)).Id;
-            
+            using var parsedLotNadlocContext = new ParsedLotNadlocContext();
+            using var webLotContext = new WebLotContext();
+            _total = parsedLotNadlocContext.NadlocLotsDtos.Count();
+            _sTradingFloorId = webLotContext.STradingFloors.FirstOrDefault(x => x.Code.Equals(_currentTradingFloor)).Id;
+
         }
+
         protected override Logger InitializeLogger()
         {
             return LogManager.GetCurrentClassLogger();
@@ -49,30 +50,24 @@ namespace DataMigrationSystem.Services
             Logger.Info("Started Thread");
             await using var webLotContext = new WebLotContext();
             await using var parsedLotNadlocContext = new ParsedLotNadlocContext();
-            foreach (var dto in parsedLotNadlocContext.NadlocLotsDtos.Where(x=>x.Id % NumOfThreads == threadNum))
+            foreach (var dto in parsedLotNadlocContext.NadlocLotsDtos.Where(x => x.Id % NumOfThreads == threadNum)
+                .Select(x => new Lot
+                {
+                    IdLot = x.Id,
+                    IdAnno = x.TenderId,
+                    NumberLot = x.LotNumber.ToString(),
+                    NameRu = x.ScpDescription,
+                    Quantity = x.Quantity,
+                    Price = x.FullPrice/x.Quantity,
+                    Total = x.FullPrice,
+                    RelevanceDate = x.RelevanceDate,
+                    DeliveryAddress = x.DeliveryPlace
+                }))
             {
-                var dtoIns = LotNadlocDtoToLot(dto);
-                dtoIns.IdTf = _sTradingFloorId;
-                await webLotContext.Lots.Upsert(dtoIns).On(x => new {x.IdLot, x.IdTf}).RunAsync();
+                await webLotContext.Lots.Upsert(dto).On(x => new {x.IdLot, x.IdTf}).RunAsync();
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
             }
         }
-        
-        private Lot LotNadlocDtoToLot(LotNadlocDto nadlocLotsDto)
-        {
-            var lot = new Lot();
-            lot.IdLot = nadlocLotsDto.Id;
-            lot.IdAnno = nadlocLotsDto.TenderId;
-            lot.NumberLot = nadlocLotsDto.LotNumber.ToString();
-            lot.NameRu = nadlocLotsDto.ScpDescription;
-            lot.Quantity = nadlocLotsDto.Quantity;
-            lot.Price = nadlocLotsDto.FullPrice/nadlocLotsDto.Quantity;
-            lot.Total = nadlocLotsDto.FullPrice;
-            lot.RelevanceDate = nadlocLotsDto.RelevanceDate;
-            lot.DeliveryAddress = nadlocLotsDto.DeliveryPlace;
-
-            return lot;
-            
-        }
+    }
 }
