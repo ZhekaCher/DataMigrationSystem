@@ -4,8 +4,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataMigrationSystem.Models.Parsed
 {
-	[Table("unscrupulouses_goszakup")]
-	public class UnscrupulousesGoszakupDto
+
+	/// @author Yevgeniy Cherdantsev
+	/// @date 25.02.2020 09:32:30
+	/// @version 1.0
+	/// <summary>
+	/// 'unscrupulous_goszakup' parse table
+	/// </summary>
+	[Table("unscrupulous_goszakup")]
+	public class UnscrupulousGoszakupDto
 	{
 		[Key] [Column("pid")] public int? Pid{get; set;}
 		[Column("supplier_biin")] public long? SupplierBiin{get; set;}

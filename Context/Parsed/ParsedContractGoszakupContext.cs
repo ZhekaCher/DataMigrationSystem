@@ -3,23 +3,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Parsed
 {
+
     /// @author Yevgeniy Cherdantsev
-    /// @date 21.02.2020 13:23:50
+    /// @date 24.02.2020 17:52:27
     /// @version 1.0
     /// <summary>
-    /// Контекст для работы с таблицей 'announcement_goszakup'
+    /// Контекст для работы с таблицей 'contract_goszakup'
     /// </summary>
-    public class ParsedAnnouncementGoszakupContext : DbContext
-    {
-        public DbSet<AnnouncementGoszakupDto> AnnouncementGoszakupDtos { get; set; }
 
-        public ParsedAnnouncementGoszakupContext(DbContextOptions<ParsedAnnouncementGoszakupContext> options)
+    public class ParsedContractGoszakupContext : DbContext
+    {
+        public DbSet<ContractGoszakupDto> ContractGoszakupDtos { get; set; }
+        public ParsedContractGoszakupContext(DbContextOptions<ParsedContractGoszakupContext> options)
             : base(options)
         {
+
         }
 
-        public ParsedAnnouncementGoszakupContext()
+        public ParsedContractGoszakupContext()
         {
+
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

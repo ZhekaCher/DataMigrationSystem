@@ -4,27 +4,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Parsed
 {
-
     /// @author Yevgeniy Cherdantsev
     /// @date 19.02.2020 19:49:36
     /// @version 1.0
     /// <summary>
-    /// Контекст для работы с таблицей 'lots_goszakup'
+    /// Контекст для работы с таблицей 'lot_goszakup'
     /// </summary>
-
     public class ParsedLotGoszakupContext : DbContext
     {
-        
-        public DbSet<LotGoszakupDto> LotGoszakupDtos { get; set; }    
+        public DbSet<LotGoszakupDto> LotGoszakupDtos { get; set; }
+
         public ParsedLotGoszakupContext(DbContextOptions<ParsedLotGoszakupContext> options)
             : base(options)
         {
-
         }
 
         public ParsedLotGoszakupContext()
         {
-
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

@@ -64,7 +64,7 @@ namespace DataMigrationSystem.Services
             foreach (var dto in parsedLotGoszakupContext.LotGoszakupDtos.Where(x =>
                 x.Id % NumOfThreads == threadNum))
             {
-                var dtoIns = LotGoszakupDtoToLot(dto);
+                var dtoIns = DtoToWeb(dto);
                 dtoIns.IdTf = _sTradingFloorId;
                 try
                 {
@@ -83,20 +83,20 @@ namespace DataMigrationSystem.Services
             Logger.Info("Completed thread");
         }
 
-        private static Lot LotGoszakupDtoToLot(LotGoszakupDto lotsGoszakupDto)
+        private static Lot DtoToWeb(LotGoszakupDto lotGoszakupDto)
         {
             var lot = new Lot();
-            lot.Total = lotsGoszakupDto.Amount;
-            lot.Quantity = lotsGoszakupDto.Count;
-            lot.CustomerBin = lotsGoszakupDto.CustomerBin;
-            lot.DescriptionKz = lotsGoszakupDto.DescriptionKz;
-            lot.DescriptionRu = lotsGoszakupDto.DescriptionRu;
-            if (lotsGoszakupDto.TrdBuyId != null) lot.IdAnno = (long) lotsGoszakupDto.TrdBuyId;
-            lot.IdLot = lotsGoszakupDto.Id;
-            lot.NameKz = lotsGoszakupDto.NameKz;
-            lot.NameRu = lotsGoszakupDto.NameRu;
-            lot.NumberLot = lotsGoszakupDto.LotNumber;
-            lot.RelevanceDate = lotsGoszakupDto.Relevance;
+            lot.Total = lotGoszakupDto.Amount;
+            lot.Quantity = lotGoszakupDto.Count;
+            lot.CustomerBin = lotGoszakupDto.CustomerBin;
+            lot.DescriptionKz = lotGoszakupDto.DescriptionKz;
+            lot.DescriptionRu = lotGoszakupDto.DescriptionRu;
+            if (lotGoszakupDto.TrdBuyId != null) lot.IdAnno = (long) lotGoszakupDto.TrdBuyId;
+            lot.IdLot = lotGoszakupDto.Id;
+            lot.NameKz = lotGoszakupDto.NameKz;
+            lot.NameRu = lotGoszakupDto.NameRu;
+            lot.NumberLot = lotGoszakupDto.LotNumber;
+            lot.RelevanceDate = lotGoszakupDto.Relevance;
             return lot;
         }
     }
