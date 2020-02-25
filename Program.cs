@@ -14,7 +14,6 @@ namespace DataMigrationSystem
     internal static class Program
     {
         private static Logger _logger;
-        private static Dictionary<string, MigrationService> _migrations = new Dictionary<string, MigrationService>();
         public static int NumOfErrors = 0;
         
         private static async Task Main(string[] args)
