@@ -58,8 +58,7 @@ namespace DataMigrationSystem.Services
                     Logger.Trace($"Left {--_total}");
             }
         }
-
-<<<<<<< HEAD
+        
         private Lot LotNadlocDtoToLot(LotNadlocDto nadlocLotsDto)
         {
             var lot = new Lot();
@@ -74,17 +73,6 @@ namespace DataMigrationSystem.Services
             lot.DeliveryAddress = nadlocLotsDto.DeliveryPlace;
 
             return lot;
-=======
-        private Lot LotNadlocDtoToLot(NadlocLotsDto nadlocLotsDto)
-        {
-            var lot = new Lot();
-<<<<<<< HEAD
-            lot.Total = nadlocLotsDto.
->>>>>>> Tralala
-=======
-            // lot.Total = nadlocLotsDto.
-            return lot;
->>>>>>> Lalala2
+            
         }
-    }
 }
