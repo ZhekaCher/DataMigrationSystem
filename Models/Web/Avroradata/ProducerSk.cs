@@ -9,7 +9,6 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Key]
         [Column("id")]
         public long Id { get; set; }
-        public string Name { get; set; }
         [Column("bin")]
         public  long Bin { get; set; }
         [Column("producer_type")]
