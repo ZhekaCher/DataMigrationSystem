@@ -16,7 +16,7 @@ namespace DataMigrationSystem
         private static Logger _logger;
         public static int NumOfErrors = 0;
         
-        private static async Task Main(string[] args)
+        private staticgit async Task Main(string[] args)
         {
             Console.InputEncoding = Encoding.UTF8;
             Console.OutputEncoding = Encoding.UTF8;
