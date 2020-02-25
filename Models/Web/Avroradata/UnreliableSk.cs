@@ -7,14 +7,14 @@ namespace DataMigrationSystem.Models.Web.Avroradata
     public class UnreliableSk
     {
         [Column("reason")]
-        private string Reason { get; set; }
+        public string Reason { get; set; }
         [Column("date_of_adding")]
-        private DateTime AddingDate { get; set; }
+        public DateTime AddingDate { get; set; }
         [Column("date_of_unreliable")]
-        private DateTime UnreliableDate { get; set; }
+        public DateTime UnreliableDate { get; set; }
         [Column("date_of_relevance")]
-        private DateTime RelevanceDate { get; set; }
+        public DateTime RelevanceDate { get; set; }
         [Column("biin_companies")]
-        private long Biin { get; set; }
+        public long Biin { get; set; }
     }
 }
