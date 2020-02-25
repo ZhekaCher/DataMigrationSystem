@@ -25,7 +25,7 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("court")]
         public string Court { get;set; }
         [Column("court_date")]
-        public string CourtDate{ get;set; }
+        public DateTime CourtDate{ get;set; }
         [Column("crime_article")]
         public string CrimeArticle { get;set; }
         [Column("judgement")]
