@@ -20,9 +20,9 @@ namespace DataMigrationSystem.Services
 
         private readonly object _forLock;
         private int _counter = 0;
-        public TaxDebtMigrationService(int numOfThreads = 1)
+        public TaxDebtMigrationService(int numOfThreads = 20)
         {
-
+            NumOfThreads = numOfThreads;
             _forLock = new object();
             
         }
@@ -50,13 +50,20 @@ namespace DataMigrationSystem.Services
             await using var parsedTaxDebtContext = new ParsedTaxDebtContext();
             await using var webTaxDebtContext = new WebTaxDebtContext();
             
-            var taxDebtDtos = from taxDebt in parsedTaxDebtContext.TaxDebts
+            var taxDebts = from taxDebt in parsedTaxDebtContext.TaxDebts
                 orderby taxDebt.IinBin where taxDebt.IinBin %NumOfThreads == numThread
-                select taxDebt;
+                select new TaxDebt
+                {
+                    Total = taxDebt.Total,
+                    PensionContribution = taxDebt.PensionContribution,
+                    SocialContribution = taxDebt.SocialContribution,
+                    SocialHealthInsurance = taxDebt.SocialHealthInsurance,
+                    IinBin = taxDebt.IinBin
+                    
+                };
 
-            foreach (var taxDebtDto in taxDebtDtos)
+            foreach (var taxDebt in taxDebts)
             {
-                var taxDebt = await DtoToEntity(taxDebtDto);
                 await webTaxDebtContext.TaxDebts.Upsert(taxDebt).On(x => x.IinBin).RunAsync();
                 lock (_forLock)
                 {
@@ -103,49 +110,49 @@ namespace DataMigrationSystem.Services
         {
             return await Task.Run(() =>
             {
-                // var taxOrgs = new List<TaxDebtOrg>();
-                // foreach (var taxOrgInfo in debtDto.TaxDebtOrgs)
-                // {
-                //
-                //     var taxPayers = new List<TaxDebtPayer>();
-                //     foreach (var taxPayerInfo in taxOrgInfo.TaxDebtPayers)
-                //     {
-                //         var taxBccs = new List<TaxDebtBcc>();
-                //         foreach (var bccArrearsInfo in taxPayerInfo.TaxDebtBccs)
-                //         {
-                //         
-                //             taxBccs.Add(new TaxDebtBcc
-                //             {
-                //                 Bcc = bccArrearsInfo.Bcc,
-                //                 Tax = bccArrearsInfo.Tax,
-                //                 Total = bccArrearsInfo.Total,
-                //                 Poena = bccArrearsInfo.Poena,
-                //                 Fine = bccArrearsInfo.Fine,
-                //                 CharCode = bccArrearsInfo.CharCode,
-                //                 IinBin = bccArrearsInfo.IinBin,
-                //             });
-                //         }
-                //         taxPayers.Add(new TaxDebtPayer
-                //         {
-                //             IinBin = taxPayerInfo.IinBin,
-                //             CharCode = taxPayerInfo.CharCode,
-                //             HeadIinBin = taxPayerInfo.HeadIinBin,
-                //             Total = taxPayerInfo.Total,
-                //             TaxDebtBccs = taxBccs
-                //         });
-                //     }
-                //     taxOrgs.Add(new TaxDebtOrg
-                //     {
-                //         CharCode = taxOrgInfo.CharCode,
-                //         Total = taxOrgInfo.Total,
-                //         TotalTax = taxOrgInfo.TotalTax,
-                //         PensionContribution = taxOrgInfo.PensionContribution,
-                //         SocialContribution = taxOrgInfo.SocialContribution,
-                //         SocialHealthInsurance = taxOrgInfo.SocialHealthInsurance,
-                //         IinBin = taxOrgInfo.IinBin,
-                //         TaxDebtPayers = taxPayers
-                //     });
-                // }
+                var taxOrgs = new List<TaxDebtOrg>();
+                foreach (var taxOrgInfo in debtDto.TaxDebtOrgs)
+                {
+                
+                    var taxPayers = new List<TaxDebtPayer>();
+                    foreach (var taxPayerInfo in taxOrgInfo.TaxDebtPayers)
+                    {
+                        var taxBccs = new List<TaxDebtBcc>();
+                        foreach (var bccArrearsInfo in taxPayerInfo.TaxDebtBccs)
+                        {
+                        
+                            taxBccs.Add(new TaxDebtBcc
+                            {
+                                Bcc = bccArrearsInfo.Bcc,
+                                Tax = bccArrearsInfo.Tax,
+                                Total = bccArrearsInfo.Total,
+                                Poena = bccArrearsInfo.Poena,
+                                Fine = bccArrearsInfo.Fine,
+                                CharCode = bccArrearsInfo.CharCode,
+                                IinBin = bccArrearsInfo.IinBin,
+                            });
+                        }
+                        taxPayers.Add(new TaxDebtPayer
+                        {
+                            IinBin = taxPayerInfo.IinBin,
+                            CharCode = taxPayerInfo.CharCode,
+                            HeadIinBin = taxPayerInfo.HeadIinBin,
+                            Total = taxPayerInfo.Total,
+                            TaxDebtBccs = taxBccs
+                        });
+                    }
+                    taxOrgs.Add(new TaxDebtOrg
+                    {
+                        CharCode = taxOrgInfo.CharCode,
+                        Total = taxOrgInfo.Total,
+                        TotalTax = taxOrgInfo.TotalTax,
+                        PensionContribution = taxOrgInfo.PensionContribution,
+                        SocialContribution = taxOrgInfo.SocialContribution,
+                        SocialHealthInsurance = taxOrgInfo.SocialHealthInsurance,
+                        IinBin = taxOrgInfo.IinBin,
+                        TaxDebtPayers = taxPayers
+                    });
+                }
                 var taxDebt = new TaxDebt
                 {
                     Total = debtDto.Total,
@@ -153,7 +160,7 @@ namespace DataMigrationSystem.Services
                     SocialContribution = debtDto.SocialContribution,
                     SocialHealthInsurance = debtDto.SocialHealthInsurance,
                     IinBin = debtDto.IinBin,
-                    // TaxDebtOrgs = taxOrgs
+                    TaxDebtOrgs = taxOrgs
                 };
                 return taxDebt;
             });
