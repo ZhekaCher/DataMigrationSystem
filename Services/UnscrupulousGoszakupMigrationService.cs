@@ -39,11 +39,39 @@ namespace DataMigrationSystem.Services
         {
             Logger.Info($"Starting migration with '{NumOfThreads}' threads");
             var tasks = new List<Task>();
-            for (var i = 0; i < NumOfThreads; i++)
-                tasks.Add(Migrate(i));
+            // for (var i = 0; i < NumOfThreads; i++)
+                // tasks.Add(Migrate(i));
 
-            await Task.WhenAll(tasks);
+            // await Task.WhenAll(tasks);
             Logger.Info("End of migration");
+            
+            
+            Logger.Info("Starting removing participants who out of unscrupulous");
+
+            await using var webUnscrupulousGoszakupContext = new WebUnscrupulousGoszakupContext();
+            await using var webUnscrupulousGoszakupContext2 = new WebUnscrupulousGoszakupContext();
+            await using var parsedUnscrupulousGoszakupContext = new ParsedUnscrupulousGoszakupContext();
+            var firstParsedTime = parsedUnscrupulousGoszakupContext.UnscrupulousGoszakupDtos.OrderBy(x => x.Relevance).FirstOrDefault().Relevance; 
+            var old = webUnscrupulousGoszakupContext.UnscrupulousGoszakup.Where(x =>
+                x.RelevanceDate < firstParsedTime).Where(x => x.Status==true);
+            var left = old.Count();
+            foreach (var unscrupulousGoszakup in old)
+                try
+                {
+                    unscrupulousGoszakup.Status = false;
+                    unscrupulousGoszakup.RelevanceDate = firstParsedTime;
+                    webUnscrupulousGoszakupContext2.UnscrupulousGoszakup.Update(unscrupulousGoszakup);
+                    await webUnscrupulousGoszakupContext2.SaveChangesAsync();
+                    Logger.Trace($"{unscrupulousGoszakup.BiinCompanies} Left: {--left}");
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(
+                        $"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|;");
+                    Program.NumOfErrors++;
+                }
+            Logger.Info("Removing done");
+            
         }
 
         private async Task Migrate(int threadNum)
@@ -80,7 +108,6 @@ namespace DataMigrationSystem.Services
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
             }
-
 
             Logger.Info("Completed thread");
         }
