@@ -105,10 +105,10 @@ namespace DataMigrationSystem
 
             var conf = new Dictionary<ConfigurationElements, object>();
             conf.Add(ConfigurationElements.Threads, null);
+            
             using var parserMonitoringContext = new ParserMonitoringContext();
-
             var parserMonitorings =
-                parserMonitoringContext.ParserMonitorings.Where(x => x.MigrateReady == false && x.Active == true);
+                parserMonitoringContext.ParserMonitorings.Where(x => x.Parsed == true && x.Active == true);
             var migrations = new List<string>();
             foreach (var parserMonitoring in parserMonitorings)
                 migrations.Add(parserMonitoring.Name);
