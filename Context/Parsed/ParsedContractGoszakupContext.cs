@@ -11,19 +11,9 @@ namespace DataMigrationSystem.Context.Parsed
     /// Контекст для работы с таблицей 'contract_goszakup'
     /// </summary>
 
-    public class ParsedContractGoszakupContext : DbContext
+    public class ParsedContractGoszakupContext : ParsedContext
     {
         public DbSet<ContractGoszakupDto> ContractGoszakupDtos { get; set; }
-        public ParsedContractGoszakupContext(DbContextOptions<ParsedContractGoszakupContext> options)
-            : base(options)
-        {
-
-        }
-
-        public ParsedContractGoszakupContext()
-        {
-
-        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

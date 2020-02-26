@@ -65,6 +65,7 @@ namespace DataMigrationSystem
                     var parserMonitoring =
                         parserMonitoringContext.ParserMonitorings.FirstOrDefault(x => x.Name.Equals(migration));
                     parserMonitoring.Parsed = false;
+                    parserMonitoring.LastMigrated = DateTime.Now;
                     parserMonitoringContext.Update(parserMonitoring);
                     await parserMonitoringContext.SaveChangesAsync();
                 }
