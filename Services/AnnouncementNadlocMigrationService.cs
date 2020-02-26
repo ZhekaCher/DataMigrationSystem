@@ -11,14 +11,14 @@ using SomeNamespace;
 
 namespace DataMigrationSystem.Services
 {
-    public class AnnouncemenetNadlocMigrationService : MigrationService
+    public class AnnouncementNadlocMigrationService : MigrationService
     {
         private readonly string _currentTradingFloor="nedro";
         private int _sTradingFloorId;
         private int _total;
         private object _lock = new object();
 
-        public AnnouncemenetNadlocMigrationService(int numOfThreads = 30)
+        public AnnouncementNadlocMigrationService(int numOfThreads = 30)
         {
             NumOfThreads = numOfThreads;
             using var parsedAnnouncementNadlocContext = new ParsedAnnouncementNadlocContext();
