@@ -54,7 +54,7 @@ namespace DataMigrationSystem.Services
             {
                 if (bin != companyDto.IinBin)
                 {
-                    await webEnforcementDebtContext.Database.ExecuteSqlRawAsync($"select avroradata.enforcement_debt_history({bin}, {oldCounter}, {oldAmount})");
+                    await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"select avroradata.enforcement_debt_history({bin}, {oldCounter}, {oldAmount})");
                     oldCounter = await
                         webEnforcementDebtContext.CompanyEnforcementDebts.CountAsync(x => x.IinBin == companyDto.IinBin);
                     oldAmount = await

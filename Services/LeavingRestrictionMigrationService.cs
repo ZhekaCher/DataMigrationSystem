@@ -47,7 +47,7 @@ namespace DataMigrationSystem.Services
             {
                 if (bin != companyDto.IinBin)
                 { 
-                    await leavingRestrictionContext.Database.ExecuteSqlRawAsync($"select avroradata.leaving_restriction_history({bin}, {oldCounter})");
+                    await leavingRestrictionContext.Database.ExecuteSqlInterpolatedAsync($"select avroradata.leaving_restriction_history({bin}, {oldCounter})");
                     oldCounter =
                         leavingRestrictionContext.CompanyLeavingRestrictions.Count(x => x.IinBin == companyDto.IinBin);
                     bin = companyDto.IinBin;
