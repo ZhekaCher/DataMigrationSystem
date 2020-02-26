@@ -15,7 +15,6 @@ namespace DataMigrationSystem.Services
         private int _counter;
         public UnreliableTaxpayerMigrationService(int numOfThreads = 1)
         {
-
             NumOfThreads = numOfThreads;
             _forLock = new object();
             
@@ -54,7 +53,7 @@ namespace DataMigrationSystem.Services
                 });
             foreach (var taxpayer in taxpayers)
             {
-                await webUnreliableTaxpayerContext.Upsert(taxpayer).On(x => x.BinCompany).RunAsync();
+                await webUnreliableTaxpayerContext.UnreliableTaxpayers.Upsert(taxpayer).On(x => x.BinCompany).RunAsync();
                 lock (_forLock)
                 {
                     Logger.Trace(_counter++);

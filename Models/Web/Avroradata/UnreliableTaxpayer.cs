@@ -14,6 +14,5 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("id_type_document")] public long? IdTypeDocument{get; set;}
         [Column("id_list_type")] public long? IdListType{get; set;}
         [Column("note")] public string Note{get; set;}
-
     }
 }
