@@ -91,7 +91,7 @@ namespace DataMigrationSystem.Services
             }
 
 
-            Logger.Info("Completed thread");
+            Logger.Info($"Completed thread at {_total}");
         }
 
         private (Contract, ContractGoszakup) DtoToWeb(ContractGoszakupDto contractGoszakupDto)

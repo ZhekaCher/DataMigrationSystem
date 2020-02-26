@@ -81,7 +81,7 @@ namespace DataMigrationSystem.Services
             }
 
 
-            Logger.Info("Completed thread");
+            Logger.Info($"Completed thread at {_total}");
         }
 
         private ParticipantGoszakup DtoToWeb(ParticipantGoszakupDto participantGoszakupDto)
