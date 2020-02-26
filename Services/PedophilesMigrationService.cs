@@ -30,7 +30,7 @@ namespace DataMigrationSystem.Services
         public override async Task StartMigratingAsync()
         {
             var pedophilesDDto = _parsedPedophilesContext.PedophileDtos
-                .Select(x => new Pedofil
+                .Select(x => new Pedophile
                 {
                     Id = x.Id,
                     LastName = x.LastName,
@@ -46,7 +46,7 @@ namespace DataMigrationSystem.Services
                 });
             foreach (var pedofilDto in pedophilesDDto)
             {
-                await _webPedophilesContext.Pedofils.Upsert(pedofilDto).On(x => x.Iin).RunAsync();
+                await _webPedophilesContext.Pedophiles.Upsert(pedofilDto).On(x => x.Iin).RunAsync();
             }
         }
     }

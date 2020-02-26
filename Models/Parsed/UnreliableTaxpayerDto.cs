@@ -5,13 +5,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace DataMigrationSystem.Models.Parsed
 {
     
-    [Table("unreliable_taxpayer")]
+    [Table("unreliable_taxpayers")]
     public class UnreliableTaxpayerDto
     {
         [Key] 
-        [Column("i")] public long? Id{get; set;}
-        [Column("bin_company")] public long? BinCompany{get; set;}
-        [Column("rnn_company")] public long? RnnCompany{get; set;}
+        [Column("id")] public long? Id{get; set;}
+        [Column("iin_bin")] public long? BinCompany{get; set;}
+        [Column("rnn")] public long? RnnCompany{get; set;}
         [Column("name_company")] public string NameCompany{get; set;}
         [Column("name_head")] public string NameHead{get; set;}
         [Column("iin_head")] public long? IinHead{get; set;}

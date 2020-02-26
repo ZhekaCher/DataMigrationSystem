@@ -3,16 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Web.Avroradata
 {
-    public class WebTerroristContext:DbContext
+    public class WebTerroristContext: WebContext
     {
-        public WebTerroristContext(DbContextOptions<WebTerroristContext> options):base(options){}
-        public WebTerroristContext(){}
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-
-            optionsBuilder.UseNpgsql("");
-        }
         public DbSet<Terrorist> Terrorists { get; set; }
     }
 }

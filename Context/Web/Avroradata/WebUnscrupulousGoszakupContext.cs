@@ -11,25 +11,8 @@ namespace DataMigrationSystem.Context.Web.Avroradata
     /// Контекст для работы с таблицей 'unscrupulous_goszakup'
     /// </summary>
 
-    public class WebUnscrupulousGoszakupContext : DbContext
+    public class WebUnscrupulousGoszakupContext : WebContext
     {
-        
-        
         public DbSet<UnscrupulousGoszakup> UnscrupulousGoszakup { get; set; }
-        public WebUnscrupulousGoszakupContext(DbContextOptions<WebUnscrupulousGoszakupContext> options)
-            : base(options)
-        {
-
-        }
-
-        public WebUnscrupulousGoszakupContext()
-        {
-
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql("Server = 192.168.1.158; Database = avroradata; Port=5432; User ID = administrator; Password = Z4P6PjEHnJ5nPT; Search Path = avroradata; Integrated Security=true; Pooling=true;");
-        }
     }
 }

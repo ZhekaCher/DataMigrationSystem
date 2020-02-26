@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace DataMigrationSystem.Models.Web.Avroradata
 {
     [Table("pedophiles")]
-    public class Pedofil
+    public class Pedophile
     {
         [Key] 
         [Column("id")]
