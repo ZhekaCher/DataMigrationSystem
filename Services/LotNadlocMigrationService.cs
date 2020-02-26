@@ -13,7 +13,7 @@ namespace DataMigrationSystem.Services
 {
     public class LotNadlocMigrationService : MigrationService
     {
-        private readonly string _currentTradingFloor = "nadloc";
+        private readonly string _currentTradingFloor = "nedro";
         private int _sTradingFloorId;
         private int _total;
         private readonly object _lock = new object();
@@ -53,6 +53,7 @@ namespace DataMigrationSystem.Services
             foreach (var dto in parsedLotNadlocContext.NadlocLotsDtos.Where(x => x.Id % NumOfThreads == threadNum)
                 .Select(x => new Lot
                 {
+                    IdTf = _sTradingFloorId,
                     IdLot = x.Id,
                     IdAnno = x.TenderId,
                     NumberLot = x.LotNumber.ToString(),
