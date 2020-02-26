@@ -50,11 +50,9 @@ namespace DataMigrationSystem.Services
             await using var parsedTaxDebtContext = new ParsedTaxDebtContext();
             await using var webTaxDebtContext = new WebTaxDebtContext();
             
-            var taxDebtDtos = from courtCaseEntityDto in parsedTaxDebtContext.TaxDebts
-                join companies in parsedTaxDebtContext.CompanyDtos
-                    on courtCaseEntityDto.IinBin equals companies.Bin
-                orderby courtCaseEntityDto.IinBin where courtCaseEntityDto.IinBin %NumOfThreads == numThread
-                select courtCaseEntityDto;
+            var taxDebtDtos = from taxDebt in parsedTaxDebtContext.TaxDebts
+                orderby taxDebt.IinBin where taxDebt.IinBin %NumOfThreads == numThread
+                select taxDebt;
 
             foreach (var taxDebtDto in taxDebtDtos)
             {

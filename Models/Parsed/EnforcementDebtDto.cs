@@ -8,6 +8,8 @@ namespace DataMigrationSystem.Models.Parsed
     public class EnforcementDebtDto
     {
         [Key]
+        [Column("id")]
+        public long Id { get; set; }
         [Column("uid")]
         public string Uid { get; set; }
         [Column("essence_requirements")]

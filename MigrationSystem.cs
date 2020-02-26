@@ -82,7 +82,7 @@ namespace DataMigrationSystem
                 }
                 catch (Exception e)
                 {
-                    _logger.Error($"Message:|{e.InnerException.Message}; StackTrace:|{e.InnerException.StackTrace}|");
+                    _logger.Error($"Message:|{e.Message}; StackTrace:|{e.StackTrace}|");
                     Program.NumOfErrors++;
                 }
             }
@@ -105,7 +105,7 @@ namespace DataMigrationSystem
             conf.Add(ConfigurationElements.Threads, null);
             conf.Add(ConfigurationElements.Migrations, new List<string>()
             {
-                "LotGoszakup"
+                "EnforcementDebt"
             });
             return conf;
         }
