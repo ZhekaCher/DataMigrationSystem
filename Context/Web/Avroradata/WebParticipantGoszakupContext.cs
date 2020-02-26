@@ -12,23 +12,8 @@ namespace DataMigrationSystem.Context.Web.Avroradata
     /// Контекст для работы с таблицей 'participant_goszakup'
     /// </summary>
 
-    public class WebParticipantGoszakupContext : DbContext
+    public class WebParticipantGoszakupContext : WebContext
     {
         public DbSet<ParticipantGoszakup> ParticipantsGoszakup { get; set; }
-        public WebParticipantGoszakupContext(DbContextOptions<WebParticipantGoszakupContext> options)
-            : base(options)
-        {
-
-        }
-
-        public WebParticipantGoszakupContext()
-        {
-
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql("Server = 192.168.1.158; Database = avroradata; Port=5432; User ID = administrator; Password = Z4P6PjEHnJ5nPT; Search Path = avroradata; Integrated Security=true; Pooling=true;");
-        }
     }
 }
