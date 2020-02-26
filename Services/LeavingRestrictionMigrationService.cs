@@ -1,10 +1,8 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DataMigrationSystem.Context;
 using DataMigrationSystem.Context.Parsed;
-using DataMigrationSystem.Context.Web;
 using DataMigrationSystem.Context.Web.Avroradata;
-using DataMigrationSystem.Models;
 using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
 using NLog;
@@ -13,13 +11,12 @@ namespace DataMigrationSystem.Services
 {
     public sealed class LeavingRestrictionMigrationService : MigrationService
     {
-        private readonly WebLeavingRestrictionContext _leavingRestrictionContext;
-        private readonly ParsedLeavingRestrictionContext _parsedLeavingRestrictionContext;
 
+        private long _counter;
+        private readonly object _forLock = new object();
         public LeavingRestrictionMigrationService(int numOfThreads = 1)
         {
-            _leavingRestrictionContext = new WebLeavingRestrictionContext();
-            _parsedLeavingRestrictionContext = new ParsedLeavingRestrictionContext();
+            NumOfThreads = 20;
         }
 
         protected override Logger InitializeLogger()
@@ -27,9 +24,12 @@ namespace DataMigrationSystem.Services
             return LogManager.GetCurrentClassLogger();
         }
 
-        public override async Task StartMigratingAsync()
+        private async Task MigrateAsync(int numThread)
         {
-            var companyDtos = from leavingRestrictionDto in _parsedLeavingRestrictionContext.LeavingRestrictionDtos
+            await using var leavingRestrictionContext = new WebLeavingRestrictionContext();
+            await using var parsedLeavingRestrictionContext = new  ParsedLeavingRestrictionContext();
+            var companyDtos = from leavingRestrictionDto in parsedLeavingRestrictionContext.LeavingRestrictionDtos
+                where leavingRestrictionDto.IinBin%NumOfThreads==numThread
                 orderby leavingRestrictionDto.IinBin
                 select new CompanyLeavingRestriction
                 {
@@ -41,26 +41,36 @@ namespace DataMigrationSystem.Services
                     Cause = leavingRestrictionDto.Cause
                 };
 
-            long i = 0;
             long bin = 0;
             int oldCounter = 0;
             foreach (var companyDto in companyDtos)
             {
                 if (bin != companyDto.IinBin)
                 { 
-                    await _leavingRestrictionContext.Database.ExecuteSqlRawAsync($"select avroradata.leaving_restriction_history({bin}, {oldCounter})");
+                    await leavingRestrictionContext.Database.ExecuteSqlInterpolatedAsync($"select avroradata.leaving_restriction_history({bin}, {oldCounter})");
                     oldCounter =
-                        _leavingRestrictionContext.CompanyLeavingRestrictions.Count(x => x.IinBin == companyDto.IinBin);
+                        leavingRestrictionContext.CompanyLeavingRestrictions.Count(x => x.IinBin == companyDto.IinBin);
                     bin = companyDto.IinBin;
-                    _leavingRestrictionContext.CompanyLeavingRestrictions.RemoveRange(
-                        _leavingRestrictionContext.CompanyLeavingRestrictions.Where(x =>
+                    leavingRestrictionContext.CompanyLeavingRestrictions.RemoveRange(
+                        leavingRestrictionContext.CompanyLeavingRestrictions.Where(x =>
                             x.IinBin == companyDto.IinBin));
-                    await _leavingRestrictionContext.SaveChangesAsync();
+                    await leavingRestrictionContext.SaveChangesAsync();
                 }
-                await _leavingRestrictionContext.CompanyLeavingRestrictions.AddAsync(companyDto);
-                await _leavingRestrictionContext.SaveChangesAsync();
-                Logger.Info(i++);
+                await leavingRestrictionContext.CompanyLeavingRestrictions.AddAsync(companyDto);
+                await leavingRestrictionContext.SaveChangesAsync();
+                Logger.Info(_counter++);
             }
+        }
+        public override async Task StartMigratingAsync()
+        {
+            var tasks = new List<Task>();
+            
+            for (var i = 0; i < NumOfThreads; i++)
+            {
+                tasks.Add(MigrateAsync(i));
+            }
+
+            await Task.WhenAll(tasks);
         }
     }
 }

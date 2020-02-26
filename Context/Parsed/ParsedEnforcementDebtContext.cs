@@ -7,13 +7,14 @@ namespace DataMigrationSystem.Context.Parsed
 {
     public class ParsedEnforcementDebtContext : ParsedContext
     {
+        
         public DbSet<EnforcementDebtDto> EnforcementDebtDtos { get; set; }    
         public DbSet<EnforcementDebtDetailDto> EnforcementDebtDetailDtos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<EnforcementDebtDto>().HasOne(x => x.DetailDto).WithOne(x => x.EnforcementDebtDto)
-                .HasForeignKey<EnforcementDebtDetailDto>(x => x.Uid);
+                .HasForeignKey<EnforcementDebtDetailDto>(x => x.Uid).HasPrincipalKey<EnforcementDebtDto>(x=>x.Uid);
         }
 
     }

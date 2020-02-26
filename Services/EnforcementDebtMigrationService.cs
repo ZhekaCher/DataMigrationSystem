@@ -1,11 +1,8 @@
-using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DataMigrationSystem.Context;
 using DataMigrationSystem.Context.Parsed;
-using DataMigrationSystem.Context.Web;
 using DataMigrationSystem.Context.Web.Avroradata;
-using DataMigrationSystem.Models;
 using DataMigrationSystem.Models.Parsed;
 using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
@@ -15,13 +12,13 @@ namespace DataMigrationSystem.Services
 {
     public sealed class EnforcementDebtMigrationService : MigrationService
     {
-        private readonly WebEnforcementDebtContext _webEnforcementDebtContext;
-        private readonly ParsedEnforcementDebtContext _parsedEnforcementDebtContext;
+        private int _counter = 0;
+        private readonly object _forLock  = new object();
 
         public EnforcementDebtMigrationService(int numOfThreads = 1)
         {
-            _webEnforcementDebtContext = new WebEnforcementDebtContext();
-            _parsedEnforcementDebtContext = new ParsedEnforcementDebtContext();
+            NumOfThreads = numOfThreads;
+            _counter = 0;
         }
 
         protected override Logger InitializeLogger()
@@ -29,15 +26,20 @@ namespace DataMigrationSystem.Services
             return LogManager.GetCurrentClassLogger();
         }
 
-        public override async Task StartMigratingAsync()
+        private async Task MigrateAsync(int numThread)
         {
-            await MigrateReferences();
-            var companyDtos = from debtDto in _parsedEnforcementDebtContext.EnforcementDebtDtos
-                join debtDetail in _parsedEnforcementDebtContext.EnforcementDebtDetailDtos
-                    on debtDto.Uid equals debtDetail.Uid orderby debtDto.IinBin
+            await using var parsedEnforcementDebtContext = new ParsedEnforcementDebtContext();
+            await using var webEnforcementDebtContext = new WebEnforcementDebtContext();
+
+            var companyDtos = 
+                from debtDto in parsedEnforcementDebtContext.EnforcementDebtDtos
+                join debtDetail in parsedEnforcementDebtContext.EnforcementDebtDetailDtos 
+                    on debtDto.Uid equals debtDetail.Uid into outer
+                from debtDetailOuter in outer.DefaultIfEmpty() where debtDto.IinBin % NumOfThreads == numThread
+                orderby debtDto.IinBin
                 select new EnforcementDebtDto
                 {
-                    DetailDto = debtDetail,
+                    DetailDto = debtDetailOuter,
                     Date = debtDto.Date,
                     Agency = debtDto.Agency,
                     Uid = debtDto.Uid,
@@ -52,18 +54,33 @@ namespace DataMigrationSystem.Services
             {
                 if (bin != companyDto.IinBin)
                 {
-                    await _webEnforcementDebtContext.Database.ExecuteSqlRawAsync($"select avroradata.enforcement_debt_history({bin}, {oldCounter}, {oldAmount})");
+                    await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"select avroradata.enforcement_debt_history({bin}, {oldCounter}, {oldAmount})");
                     oldCounter = await
-                        _webEnforcementDebtContext.CompanyEnforcementDebts.CountAsync(x => x.IinBin == companyDto.IinBin);
+                        webEnforcementDebtContext.CompanyEnforcementDebts.CountAsync(x => x.IinBin == companyDto.IinBin);
                     oldAmount = await
-                        _webEnforcementDebtContext.CompanyEnforcementDebts.Where(x => x.IinBin == companyDto.IinBin).SumAsync(x=>x.Amount);
+                        webEnforcementDebtContext.CompanyEnforcementDebts.Where(x => x.IinBin == companyDto.IinBin).SumAsync(x=>x.Amount);
                     bin = companyDto.IinBin;
                 }
-                var enforcementDebt = await DtoToCompanyEntity(companyDto);
-                await _webEnforcementDebtContext.CompanyEnforcementDebts.Upsert(enforcementDebt).On(x => x.Uid).RunAsync();
+                var enforcementDebt = await DtoToCompanyEntity(companyDto, webEnforcementDebtContext);
+                await webEnforcementDebtContext.CompanyEnforcementDebts.Upsert(enforcementDebt).On(x => x.Uid).RunAsync();
+                lock (_forLock)
+                {
+                    Logger.Trace(_counter++);
+                }
             }
         }
-        private async Task<CompanyEnforcementDebt> DtoToCompanyEntity(EnforcementDebtDto debtDto)
+        public override async Task StartMigratingAsync()
+        {
+            await MigrateReferences();
+            var tasks = new List<Task>();
+            for (int i = 0; i < NumOfThreads; i++)
+            {
+                tasks.Add(MigrateAsync(i));
+            }
+
+            await Task.WhenAll(tasks);
+        }
+        private async Task<CompanyEnforcementDebt> DtoToCompanyEntity(EnforcementDebtDto debtDto, WebEnforcementDebtContext webEnforcementDebtContext)
         {
             var enforcementDebt = new CompanyEnforcementDebt
             {
@@ -84,7 +101,7 @@ namespace DataMigrationSystem.Services
                 enforcementDebt.Number = debtDto.DetailDto.Number;
                 if (debtDto.DetailDto.Type != null)
                 {
-                    enforcementDebt.TypeId = (await _webEnforcementDebtContext.EnforcementDebtTypes.FirstOrDefaultAsync(x => x.Name == debtDto.DetailDto.Type)).Id;
+                    enforcementDebt.TypeId = (await webEnforcementDebtContext.EnforcementDebtTypes.FirstOrDefaultAsync(x => x.Name == debtDto.DetailDto.Type)).Id;
                 }
                 else
                 {
@@ -95,10 +112,12 @@ namespace DataMigrationSystem.Services
         }
         private async Task MigrateReferences()
         {
-            var courts = _parsedEnforcementDebtContext.EnforcementDebtDetailDtos.Select(x => x.Type).Distinct();
-            foreach (var distinct in courts)
+            await using var parsedEnforcementDebtContext = new ParsedEnforcementDebtContext();
+            await using var webEnforcementDebtContext = new WebEnforcementDebtContext();
+            var debtTypes = parsedEnforcementDebtContext.EnforcementDebtDetailDtos.Select(x => x.Type).Distinct();
+            foreach (var distinct in debtTypes)
             {
-                await _webEnforcementDebtContext.EnforcementDebtTypes.Upsert(new EnforcementDebtType()
+                await webEnforcementDebtContext.EnforcementDebtTypes.Upsert(new EnforcementDebtType()
                 {
                     Name = distinct
                 }).On(x => x.Name).RunAsync();
