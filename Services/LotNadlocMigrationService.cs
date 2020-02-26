@@ -59,7 +59,7 @@ namespace DataMigrationSystem.Services
                     NumberLot = x.LotNumber.ToString(),
                     NameRu = x.ScpDescription,
                     Quantity = x.Quantity,
-                    Price = x.FullPrice/x.Quantity,
+                    Price = x.FullPrice,
                     Total = x.FullPrice,
                     RelevanceDate = x.RelevanceDate,
                     DeliveryAddress = x.DeliveryPlace
