@@ -61,7 +61,7 @@ namespace DataMigrationSystem.Services
             }
 
             Logger.Info("Completed thread");
-
+            
         }
 
         private Announcement DtoToWeb(AnnouncementNadlocDto announcementNadlocDto)

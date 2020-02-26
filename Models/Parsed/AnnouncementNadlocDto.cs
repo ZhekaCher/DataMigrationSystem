@@ -9,7 +9,7 @@ namespace SomeNamespace
     {
         [Column("tender_id")] public long? TenderId{get; set;}
         [Column("full_id")] public string FullId{get; set;}
-        [Column("name")] public string Name{get; set;}
+        [Column("name")] public string? Name{get; set;}
         [Column("customer_name")] public string CustomerName{get; set;}
         [Column("customer_link")] public string CustomerLink{get; set;}
         [Column("price_offers")] public string PriceOffers{get; set;}
@@ -25,7 +25,7 @@ namespace SomeNamespace
         [Column("date_finish")] public DateTime? DateFinish{get; set;}
         [Column("date_opening")] public DateTime? DateOpening{get; set;}
         [Column("signature_date")] public DateTime? SignatureDate{get; set;}
-        [Column("lot_amount")] public DateTime? LotAmount{get; set;}
+        [Column("lot_amount")] public long? LotAmount{get; set;}
         [Column("full_price")] public long? FullPrice{get; set;}
         [Column("failed_tender_id")] public long? FailedTenderId{get; set;}
         [Column("customer_bin")] public long? CustomerBin{get; set;}
