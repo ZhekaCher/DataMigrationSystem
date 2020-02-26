@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Parsed
 {
+    /// <summary>
+    /// Parent context 
+    /// </summary>
     public abstract class ParsedContext: DbContext
     {
         public ParsedContext(DbContextOptions<ParsedContext> options)
