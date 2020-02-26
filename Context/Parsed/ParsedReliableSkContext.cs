@@ -4,16 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Parsed
 {
-    public class ParsedReliableSkContext:DbContext
+    public class ParsedReliableSkContext : ParsedContext
     {
-        public ParsedReliableSkContext(DbContextOptions<ParsedReliableSkContext> options)
-            :base(options){}
-        public ParsedReliableSkContext(){}
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql("");
-        }
+        
         
         public DbSet<ReliableSkDto> ReliableSkDtos { get; set; }
     }

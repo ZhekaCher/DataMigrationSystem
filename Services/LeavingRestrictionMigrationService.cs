@@ -30,8 +30,6 @@ namespace DataMigrationSystem.Services
         public override async Task StartMigratingAsync()
         {
             var companyDtos = from leavingRestrictionDto in _parsedLeavingRestrictionContext.LeavingRestrictionDtos
-                join companies in _parsedLeavingRestrictionContext.ParsedCompanies
-                    on leavingRestrictionDto.IinBin equals companies.Bin
                 orderby leavingRestrictionDto.IinBin
                 select new CompanyLeavingRestriction
                 {
