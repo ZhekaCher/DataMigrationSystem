@@ -46,5 +46,6 @@ namespace DataMigrationSystem.Models.Parsed
         public string NameHead { get; set; }
         [Column("relevance_date")]
         public DateTime? RelevanceDate { get; set; }
+        
     }
 }

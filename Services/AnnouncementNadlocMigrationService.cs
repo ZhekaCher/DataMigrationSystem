@@ -50,8 +50,9 @@ namespace DataMigrationSystem.Services
             Logger.Info("Started Thread");
             await using var webAnnouncementContext = new WebAnnouncementContext();
             await using var parsedAnnouncementNadlocContext = new ParsedAnnouncementNadlocContext();
-            foreach (var dto in parsedAnnouncementNadlocContext.AnnouncementNadlocDtos.Where(x =>
-                x.Id % NumOfThreads == threadNum))
+            var dtos = from dto in parsedAnnouncementNadlocContext.AnnouncementNadlocDtos
+                join company in parsedAnnouncementNadlocContext.Companies on dto.CustomerBin equals company.Code where dto.Id % NumOfThreads==threadNum select dto;
+            foreach (var dto in dtos)
             {
                 var dtoIns = DtoToWeb(dto);
                 dtoIns.IdTf = _sTradingFloorId;
