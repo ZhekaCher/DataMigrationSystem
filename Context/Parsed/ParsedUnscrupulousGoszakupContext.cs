@@ -9,23 +9,8 @@ namespace DataMigrationSystem.Context.Parsed
     /// <summary>
     /// Контекст для работы с таблицей 'unscrupulouses_goszakup_context'
     /// </summary>
-    public class ParsedUnscrupulousGoszakupContext : DbContext
+    public class ParsedUnscrupulousGoszakupContext : ParsedContext
     {
         public DbSet<UnscrupulousGoszakupDto> UnscrupulousGoszakupDtos { get; set; }
-
-        public ParsedUnscrupulousGoszakupContext(DbContextOptions<ParsedUnscrupulousGoszakupContext> options)
-            : base(options)
-        {
-        }
-
-        public ParsedUnscrupulousGoszakupContext()
-        {
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql(
-                "Server = '192.168.2.37'; Database = 'development'; Port='5432'; User ID = 'administrator'; Password = 'administrator'; Search Path = 'evgeniy'; Integrated Security=true; Pooling=true;");
-        }
     }
 }

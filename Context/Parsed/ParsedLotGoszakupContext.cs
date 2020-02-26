@@ -10,23 +10,8 @@ namespace DataMigrationSystem.Context.Parsed
     /// <summary>
     /// Контекст для работы с таблицей 'lot_goszakup'
     /// </summary>
-    public class ParsedLotGoszakupContext : DbContext
+    public class ParsedLotGoszakupContext : ParsedContext
     {
         public DbSet<LotGoszakupDto> LotGoszakupDtos { get; set; }
-
-        public ParsedLotGoszakupContext(DbContextOptions<ParsedLotGoszakupContext> options)
-            : base(options)
-        {
-        }
-
-        public ParsedLotGoszakupContext()
-        {
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql(
-                "Server = '192.168.2.37'; Database = 'development'; Port='5432'; User ID = 'administrator'; Password = 'administrator'; Search Path = 'evgeniy'; Integrated Security=true; Pooling=true;");
-        }
     }
 }

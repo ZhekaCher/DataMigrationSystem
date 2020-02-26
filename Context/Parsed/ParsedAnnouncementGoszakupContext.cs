@@ -9,23 +9,8 @@ namespace DataMigrationSystem.Context.Parsed
     /// <summary>
     /// Контекст для работы с таблицей 'announcement_goszakup'
     /// </summary>
-    public class ParsedAnnouncementGoszakupContext : DbContext
+    public class ParsedAnnouncementGoszakupContext : ParsedContext
     {
-        public DbSet<AnnouncementGoszakupDto> AnnouncementGoszakupDtos { get; set; }
-
-        public ParsedAnnouncementGoszakupContext(DbContextOptions<ParsedAnnouncementGoszakupContext> options)
-            : base(options)
-        {
-        }
-
-        public ParsedAnnouncementGoszakupContext()
-        {
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql(
-                "Server = '192.168.2.37'; Database = 'development'; Port='5432'; User ID = 'administrator'; Password = 'administrator'; Search Path = 'evgeniy'; Integrated Security=true; Pooling=true;");
-        }
+        public DbSet<AnnouncementGoszakupDto> AnnouncementGoszakupDtos { get; set; } 
     }
 }
