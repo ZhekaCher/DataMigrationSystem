@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
@@ -18,12 +19,11 @@ namespace DataMigrationSystem.Services
         private int _total;
         private object _lock = new object();
 
-        public AnnouncementNadlocMigrationService(int numOfThreads = 30)
+        public AnnouncementNadlocMigrationService(int numOfThreads = 10)
         {
             NumOfThreads = numOfThreads;
             using var parsedAnnouncementNadlocContext = new ParsedAnnouncementNadlocContext();
             using var webAnnouncememntContext = new WebAnnouncementContext();
-            _total = parsedAnnouncementNadlocContext.AnnouncementNadlocDtos.Count();
             _sTradingFloorId = webAnnouncememntContext.STradingFloors
                 .FirstOrDefault(x => x.Code.Equals(_currentTradingFloor)).Id;
             
@@ -52,12 +52,22 @@ namespace DataMigrationSystem.Services
             await using var parsedAnnouncementNadlocContext = new ParsedAnnouncementNadlocContext();
             var dtos = from dto in parsedAnnouncementNadlocContext.AnnouncementNadlocDtos
                 join company in parsedAnnouncementNadlocContext.Companies on dto.CustomerBin equals company.Code where dto.Id % NumOfThreads==threadNum select dto;
+            _total = dtos.Count();
             foreach (var dto in dtos)
             {
                 var dtoIns = DtoToWeb(dto);
                 dtoIns.IdTf = _sTradingFloorId;
-                await webAnnouncementContext.Announcements.Upsert(dtoIns).On(x => new {x.IdAnno, x.IdTf}).RunAsync();
+                try
+                {
+                    await webAnnouncementContext.Announcements.Upsert(dtoIns).On(x => new {x.IdAnno, x.IdTf})
+                        .RunAsync();
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e.StackTrace);
+                }
                 lock (_lock)
+                    
                     Logger.Trace($"Left {--_total}");
             }
 
