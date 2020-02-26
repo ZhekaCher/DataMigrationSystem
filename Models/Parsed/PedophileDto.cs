@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace DataMigrationSystem.Models.Parsed
 {
     [Table("pedofils")]
-    public class PedofilDto
+    public class PedophileDto
     { 
         [Key] 
         [Column("id")]

@@ -29,7 +29,7 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
-            var pedophilesDDto = _parsedPedophilesContext.PedofilDtos
+            var pedophilesDDto = _parsedPedophilesContext.PedophileDtos
                 .Select(x => new Pedofil
                 {
                     Id = x.Id,

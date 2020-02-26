@@ -34,9 +34,7 @@ namespace DataMigrationSystem.Services
             await MigrateReferences();
             var companyDtos = from debtDto in _parsedEnforcementDebtContext.EnforcementDebtDtos
                 join debtDetail in _parsedEnforcementDebtContext.EnforcementDebtDetailDtos
-                    on debtDto.Uid equals debtDetail.Uid
-                join companies in _parsedEnforcementDebtContext.ParsedCompanies
-                    on debtDto.IinBin equals companies.Bin orderby debtDto.IinBin
+                    on debtDto.Uid equals debtDetail.Uid orderby debtDto.IinBin
                 select new EnforcementDebtDto
                 {
                     DetailDto = debtDetail,
