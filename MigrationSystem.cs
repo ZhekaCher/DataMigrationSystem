@@ -61,6 +61,12 @@ namespace DataMigrationSystem
                     }
 
                     await migrationService.StartMigratingAsync();
+                    await using var parserMonitoringContext = new ParserMonitoringContext();
+                    var parserMonitoring =
+                        parserMonitoringContext.ParserMonitorings.FirstOrDefault(x => x.Name.Equals(migration));
+                    parserMonitoring.Parsed = false;
+                    parserMonitoringContext.Update(parserMonitoring);
+                    await parserMonitoringContext.SaveChangesAsync();
                 }
                 catch (TargetInvocationException e)
                 {
@@ -105,7 +111,7 @@ namespace DataMigrationSystem
 
             var conf = new Dictionary<ConfigurationElements, object>();
             conf.Add(ConfigurationElements.Threads, null);
-            
+
             using var parserMonitoringContext = new ParserMonitoringContext();
             var parserMonitorings =
                 parserMonitoringContext.ParserMonitorings.Where(x => x.Parsed == true && x.Active == true);
