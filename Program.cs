@@ -15,7 +15,7 @@ namespace DataMigrationSystem
     {
         private static Logger _logger;
         public static int NumOfErrors = 0;
-        
+
         private static async Task Main(string[] args)
         {
             Console.InputEncoding = Encoding.UTF8;
@@ -24,9 +24,17 @@ namespace DataMigrationSystem
             LogManager.Configuration = new XmlLoggingConfiguration("NLog.config");
             _logger = LogManager.GetCurrentClassLogger();
             _logger.Info("Configuring and starting migrations...");
-            var migrationSystem = new MigrationSystem(args);
-            await migrationSystem.StartMigrations();
-            _logger.Info($"Migration ended with '{NumOfErrors}' errors");
+            try
+            {
+                var migrationSystem = new MigrationSystem(args);
+                await migrationSystem.StartMigrations();
+                _logger.Info($"Migration ended with '{NumOfErrors}' errors");
+            }
+            catch (Exception e)
+            {
+                _logger.Fatal(e);
+                throw;
+            }
         }
     }
 }

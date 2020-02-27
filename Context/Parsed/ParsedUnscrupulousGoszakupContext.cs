@@ -7,7 +7,7 @@ namespace DataMigrationSystem.Context.Parsed
     /// @date 22.02.2020 16:02:33
     /// @version 1.0
     /// <summary>
-    /// Контекст для работы с таблицей 'unscrupulouses_goszakup_context'
+    /// Контекст для работы с таблицей 'unscrupulouses_goszakup'
     /// </summary>
     public class ParsedUnscrupulousGoszakupContext : ParsedContext
     {

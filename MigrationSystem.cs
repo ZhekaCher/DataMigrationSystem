@@ -5,9 +5,11 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection;
 using System.Threading.Tasks;
+using DataMigrationSystem.Context;
 using DataMigrationSystem.Services;
 using NLog;
 using Npgsql;
+
 // ReSharper disable CognitiveComplexity
 
 namespace DataMigrationSystem
@@ -59,6 +61,13 @@ namespace DataMigrationSystem
                     }
 
                     await migrationService.StartMigratingAsync();
+                    await using var parserMonitoringContext = new ParserMonitoringContext();
+                    var parserMonitoring =
+                        parserMonitoringContext.ParserMonitorings.FirstOrDefault(x => x.Name.Equals(migration));
+                    parserMonitoring.Parsed = false;
+                    parserMonitoring.LastMigrated = DateTime.Now;
+                    parserMonitoringContext.Update(parserMonitoring);
+                    await parserMonitoringContext.SaveChangesAsync();
                 }
                 catch (TargetInvocationException e)
                 {
@@ -97,16 +106,22 @@ namespace DataMigrationSystem
                 $"choose number of threads\n{"Example: -t 5 -> starting with 5 threads for all migrations",82}");
             _commandsDictionary.Add("--migrations (-m)",
                 $"allows to choose migrations\n{"Example: -m tax_debt wanted_individual -> starting the given migrations",94}");
-            
+
             _helpString = _commandsDictionary.Aggregate("",
                 (current, command) => current + $"{command.Key,-20} : {command.Value}\n");
-            
+
             var conf = new Dictionary<ConfigurationElements, object>();
             conf.Add(ConfigurationElements.Threads, null);
-            conf.Add(ConfigurationElements.Migrations, new List<string>()
-            {
-                "ParticipantNadloc"
-            });
+
+
+            using var parserMonitoringContext = new ParserMonitoringContext();
+            var parserMonitorings =
+                parserMonitoringContext.ParserMonitorings.Where(x => x.Parsed == true && x.Active == true);
+            var migrations = new List<string>();
+            foreach (var parserMonitoring in parserMonitorings)
+                migrations.Add(parserMonitoring.Name);
+            conf.Add(ConfigurationElements.Migrations, migrations);
+
             return conf;
         }
 
@@ -166,7 +181,6 @@ namespace DataMigrationSystem
                                 Console.WriteLine(_helpString);
                                 Environment.Exit(1);
                                 break;
-                                
                         }
 
                         break;
@@ -200,11 +214,13 @@ namespace DataMigrationSystem
                 switch (keyValuePair.Key)
                 {
                     case ConfigurationElements.Threads:
-                        _configurations[ConfigurationElements.Threads] = keyValuePair.Value ?? _configurations[ConfigurationElements.Threads];
+                        _configurations[ConfigurationElements.Threads] =
+                            keyValuePair.Value ?? _configurations[ConfigurationElements.Threads];
                         break;
                     case ConfigurationElements.Migrations:
                         if (keyValuePair.Value != null)
-                            _configurations[ConfigurationElements.Migrations] = ((List<string>) keyValuePair.Value).ToList();
+                            _configurations[ConfigurationElements.Migrations] =
+                                ((List<string>) keyValuePair.Value).ToList();
                         break;
                 }
             }
@@ -214,7 +230,7 @@ namespace DataMigrationSystem
         {
             return Type.GetType($"{typeof(MigrationService).Namespace}.{name}MigrationService");
         }
-        
+
         private enum ConfigurationElements : byte
         {
             Threads,

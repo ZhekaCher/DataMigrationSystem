@@ -39,10 +39,10 @@ namespace DataMigrationSystem.Services
         {
             Logger.Info($"Starting migration with '{NumOfThreads}' threads");
             var tasks = new List<Task>();
-            // for (var i = 0; i < NumOfThreads; i++)
-                // tasks.Add(Migrate(i));
+            for (var i = 0; i < NumOfThreads; i++)
+                tasks.Add(Migrate(i));
 
-            // await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks);
             Logger.Info("End of migration");
             
             
@@ -109,7 +109,7 @@ namespace DataMigrationSystem.Services
                     Logger.Trace($"Left {--_total}");
             }
 
-            Logger.Info("Completed thread");
+            Logger.Info($"Completed thread at {_total}");
         }
 
         private UnscrupulousGoszakup DtoToWeb(UnscrupulousGoszakupDto unscrupulousGoszakupDto)
