@@ -18,7 +18,7 @@ namespace DataMigrationSystem.Services
         private int _total;
         private readonly object _lock = new object();
 
-        public LotNadlocMigrationService(int numOfThreads = 30)
+        public LotNadlocMigrationService(int numOfThreads = 10)
         {
             NumOfThreads = numOfThreads;
             using var parsedLotNadlocContext = new ParsedLotNadlocContext();
@@ -58,8 +58,8 @@ namespace DataMigrationSystem.Services
                     IdAnno = x.TenderId,
                     NumberLot = x.LotNumber.ToString(),
                     NameRu = x.ScpDescription,
-                    Quantity = x.Quantity,
-                    Price = x.FullPrice,
+                    Quantity = x.Quantity == null ? 1:x.Quantity ,
+                    Price = x.FullPrice/(x.Quantity == null ? 1:x.Quantity),
                     Total = x.FullPrice,
                     RelevanceDate = x.RelevanceDate,
                     DeliveryAddress = x.DeliveryPlace

@@ -105,7 +105,7 @@ namespace DataMigrationSystem
             conf.Add(ConfigurationElements.Threads, null);
             conf.Add(ConfigurationElements.Migrations, new List<string>()
             {
-                "AnnouncementNadloc"
+                "ParticipantNadloc"
             });
             return conf;
         }

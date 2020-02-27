@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SomeNamespace;
+﻿using DataMigrationSystem.Models.Parsed;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Parsed
 {

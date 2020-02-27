@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SomeNamespace
+namespace DataMigrationSystem.Models.Parsed
 {
     [Table("company_bin")]
     public class CompanyBinDto

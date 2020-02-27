@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SomeNamespace
+namespace DataMigrationSystem.Models.Parsed
 {
     [Table("nadloc_tenders")]
     public class AnnouncementNadlocDto

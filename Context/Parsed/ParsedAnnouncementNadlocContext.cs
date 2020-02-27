@@ -1,7 +1,7 @@
 ﻿using DataMigrationSystem.Models.Parsed;
 using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
-using SomeNamespace;
+
 
 namespace DataMigrationSystem.Context.Parsed
 {
