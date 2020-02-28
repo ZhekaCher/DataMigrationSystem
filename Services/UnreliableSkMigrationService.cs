@@ -27,20 +27,26 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
-            var unreliableSkDtos = _parsedUnreliableSkContext.UnreliableSkDtos
-                .Select(x => new UnreliableSk
+            var unreliableSkDtos = from unreliableSkDto in _parsedUnreliableSkContext.UnreliableSkDtos 
+                join company in _parsedUnreliableSkContext.CompanyBinDtos
+                on unreliableSkDto.Bin equals company.Code
+                select new UnreliableSk
                 {
-                    Reason = x.Reason,
-                    AddingDate = x.AddingDate,
-                    UnreliableDate = x.UnreliableDate,
-                    RelevanceDate = x.RelevanceDate,
-                    Biin = x.Bin
-                });
+                    Reason = unreliableSkDto.Reason,
+                    AddingDate = unreliableSkDto.AddingDate,
+                    UnreliableDate = unreliableSkDto.UnreliableDate,
+                    RelevanceDate = unreliableSkDto.RelevanceDate,
+                    Biin = unreliableSkDto.Bin
+                };
             foreach (var unreliableSkDto in unreliableSkDtos)
             {
                 await _webUnreliableSkContext.UnreliableSks.Upsert(unreliableSkDto)
                     .On(x => x.Biin).RunAsync();
             }
+
+            var lastDate = _webUnreliableSkContext.UnreliableSks.Max(x => x.RelevanceDate).Date;
+            _webUnreliableSkContext.UnreliableSks.RemoveRange(_webUnreliableSkContext.UnreliableSks.Where(x=>x.RelevanceDate<lastDate));
+            await _webUnreliableSkContext.SaveChangesAsync();
         }
     }
 }
