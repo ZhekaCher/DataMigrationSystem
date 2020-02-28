@@ -36,4 +36,25 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("customer_link")] public string CustomerLink{get; set;}
 		
     }
+
+    [Table("nadloc_customers")]
+    public class CustomerNadlocDto
+    {
+        [Key] [Column("id")] public long? Id{get; set;}
+        [Column("bin")] public long? Bin{get; set;}
+        [Column("relevance_date")] public DateTime? RelevanceDate { get; set; }
+        [Column("status")] public Boolean? Status { get; set; }
+
+    }
+    
+    [Table("nadloc_suppliers")]
+    public class SupplierNadlocDto
+    {
+        [Key] [Column("id")] public long? Id{get; set;}
+        [Column("bin")] public long? Bin{get; set;}
+        [Column("relevance_date")] public DateTime? RelevanceDate { get; set; }
+        [Column("status")] public Boolean? Status { get; set; }
+
+    }
+    
 }
