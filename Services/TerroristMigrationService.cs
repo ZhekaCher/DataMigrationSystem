@@ -10,8 +10,8 @@ namespace DataMigrationSystem.Services
 {
     public class TerroristMigrationService:MigrationService
     {
-        private WebTerroristContext _webTerroristContext;
-        private ParsedTerroristContext _parsedTerroristContext;
+        private readonly WebTerroristContext _webTerroristContext;
+        private readonly ParsedTerroristContext _parsedTerroristContext;
 
         public TerroristMigrationService(int numOfThreads = 1)
         {
@@ -46,8 +46,8 @@ namespace DataMigrationSystem.Services
                     .On(x => x.Iin).RunAsync();
             }
 
-            var lastDate = _webTerroristContext.Terrorists.Max(x => x.RelevanceDate).Date;
-            _webTerroristContext.Terrorists.RemoveRange(_webTerroristContext.Terrorists.Where(x=>x.RelevanceDate.Date < lastDate));
+            var minDate = await _parsedTerroristContext.TerroristDtos.MinAsync(x => x.RelevanceDate);
+            _webTerroristContext.Terrorists.RemoveRange(_webTerroristContext.Terrorists.Where(x=>x.RelevanceDate<minDate));
             await _webTerroristContext.SaveChangesAsync();
         }
     }
