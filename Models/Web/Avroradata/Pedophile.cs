@@ -30,5 +30,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         public string Judgement { get;set; }
         [Column("jail_release_date")]
         public DateTime JailReleaseDate { get;set; }
+        [Column("relevance_date")]
+        public DateTime? RelevanceDate { get;set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataMigrationSystem.Models.Web.Avroradata
@@ -8,11 +9,13 @@ namespace DataMigrationSystem.Models.Web.Avroradata
     {
         [Column("reason")]
         public string Reason { get; set; }
-        [Column("date_of_adding")]
+        [Column("adding_date")]
         public DateTime AddingDate { get; set; }
-        [Column("date_of_relevance")]
+        [Column("relevance_date")]
         public DateTime RelevanceDate { get; set; }
-        [Column("biin_companies")]
-        public long Biin { get; set; }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [Column("bin")]
+        public long? Biin { get; set; }
     }
 }

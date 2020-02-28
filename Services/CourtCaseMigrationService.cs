@@ -14,7 +14,7 @@ namespace DataMigrationSystem.Services
     {
         private readonly object _forLock;
         private int _counter;
-        public CourtCaseMigrationService(int numOfThreads = 20)
+        public CourtCaseMigrationService(int numOfThreads = 30)
         {
             NumOfThreads = numOfThreads;
             _forLock = new object();
@@ -32,13 +32,16 @@ namespace DataMigrationSystem.Services
 
             for (int i = 0; i < NumOfThreads; i++)
             {
-                tasks.Add(Migrate(i));
+                tasks.Add(MigrateAsync(i));
             }
 
             await Task.WhenAll(tasks);
+            
+            await using var parsedCourtCaseContext = new ParsedCourtCaseContext();
+            await parsedCourtCaseContext.Database.ExecuteSqlRawAsync("truncate table avroradata.court_case, avroradata.court_case_entity");
         }
 
-        private async Task Migrate(int numThread)
+        private async Task MigrateAsync(int numThread)
         {
             await using var parsedCourtCaseContext = new ParsedCourtCaseContext();
             await using var webCourtCaseContext = new WebCourtCaseContext();
@@ -53,10 +56,8 @@ namespace DataMigrationSystem.Services
                 }
             }
             
-            var companyDtos = from courtCaseEntityDto in parsedCourtCaseContext.CourtCaseEntityDtos
-                join companies in parsedCourtCaseContext.CompanyDtos
-                    on courtCaseEntityDto.IinBin equals companies.Bin
-                orderby courtCaseEntityDto.IinBin where courtCaseEntityDto.Id%NumOfThreads == numThread
+            var companyDtos = from courtCaseEntityDto in parsedCourtCaseContext.CourtCaseEntityDtos 
+                where courtCaseEntityDto.Id%NumOfThreads == numThread
                 select courtCaseEntityDto;
             foreach (var companyDto in companyDtos)
             {

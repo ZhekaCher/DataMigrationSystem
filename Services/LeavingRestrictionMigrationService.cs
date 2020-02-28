@@ -14,7 +14,7 @@ namespace DataMigrationSystem.Services
 
         private long _counter;
         private readonly object _forLock = new object();
-        public LeavingRestrictionMigrationService(int numOfThreads = 10)
+        public LeavingRestrictionMigrationService(int numOfThreads = 20)
         {
             NumOfThreads = numOfThreads;
         }
@@ -58,7 +58,7 @@ namespace DataMigrationSystem.Services
                 }
                 await leavingRestrictionContext.CompanyLeavingRestrictions.AddAsync(companyDto);
                 await leavingRestrictionContext.SaveChangesAsync();
-                Logger.Info(_counter++);
+                Logger.Trace(_counter++);
             }
         }
         public override async Task StartMigratingAsync()
@@ -68,9 +68,12 @@ namespace DataMigrationSystem.Services
             for (var i = 0; i < NumOfThreads; i++)
             {
                 tasks.Add(MigrateAsync(i));
+                
             }
 
             await Task.WhenAll(tasks);
+            await using var parsedLeavingRestrictionContext = new  ParsedLeavingRestrictionContext();
+            await parsedLeavingRestrictionContext.Database.ExecuteSqlRawAsync("truncate table avroradata.leaving_restriction;");
         }
     }
 }

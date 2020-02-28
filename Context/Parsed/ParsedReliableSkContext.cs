@@ -7,7 +7,7 @@ namespace DataMigrationSystem.Context.Parsed
     public class ParsedReliableSkContext : ParsedContext
     {
         
-        
+        public DbSet<CompanyBinDto> CompanyBinDtos { get; set; }
         public DbSet<ReliableSkDto> ReliableSkDtos { get; set; }
     }
 }

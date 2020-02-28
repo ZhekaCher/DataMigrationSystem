@@ -12,10 +12,10 @@ namespace DataMigrationSystem.Services
 {
     public sealed class EnforcementDebtMigrationService : MigrationService
     {
-        private int _counter = 0;
+        private int _counter;
         private readonly object _forLock  = new object();
 
-        public EnforcementDebtMigrationService(int numOfThreads = 1)
+        public EnforcementDebtMigrationService(int numOfThreads = 30)
         {
             NumOfThreads = numOfThreads;
             _counter = 0;
@@ -54,7 +54,7 @@ namespace DataMigrationSystem.Services
             {
                 if (bin != companyDto.IinBin)
                 {
-                    await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"select avroradata.enforcement_debt_history({bin}, {oldCounter}, {oldAmount})");
+                    await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"select avroradata.enforcement_debt_history({bin}, {oldCounter}, {oldAmount}::numeric(18,2))");
                     oldCounter = await
                         webEnforcementDebtContext.CompanyEnforcementDebts.CountAsync(x => x.IinBin == companyDto.IinBin);
                     oldAmount = await
@@ -79,6 +79,8 @@ namespace DataMigrationSystem.Services
             }
 
             await Task.WhenAll(tasks);
+            await using var parsedEnforcementDebtContext = new ParsedEnforcementDebtContext();
+            await parsedEnforcementDebtContext.Database.ExecuteSqlRawAsync("truncate table avroradata.enforcement_debt cascade;");
         }
         private async Task<CompanyEnforcementDebt> DtoToCompanyEntity(EnforcementDebtDto debtDto, WebEnforcementDebtContext webEnforcementDebtContext)
         {

@@ -37,8 +37,9 @@ namespace DataMigrationSystem.Services
             await using var webUnreliableTaxpayerContext = new WebUnreliableTaxpayerContext();
             await using var parsedUnreliableTaxpayerContext = new ParsedUnreliableTaxpayerContext();
             var minDate = await parsedUnreliableTaxpayerContext.UnreliableTaxpayerDtos.MinAsync(x => x.RelevanceDate);
-            await webUnreliableTaxpayerContext.Database.ExecuteSqlInterpolatedAsync(
-                $"delete from avroradata.lists where relevance_date<{minDate}");
+            webUnreliableTaxpayerContext.UnreliableTaxpayers.RemoveRange(webUnreliableTaxpayerContext.UnreliableTaxpayers.Where(x=>x.RelevanceDate<minDate));
+            await webUnreliableTaxpayerContext.SaveChangesAsync();
+            await parsedUnreliableTaxpayerContext.Database.ExecuteSqlRawAsync("truncate table avroradata.unreliable_taxpayers;");
         }
 
         private async Task MigrateAsync(int numThread)
@@ -58,7 +59,7 @@ namespace DataMigrationSystem.Services
                 });
             foreach (var taxpayer in taxpayers)
             {
-                await webUnreliableTaxpayerContext.UnreliableTaxpayers.Upsert(taxpayer).On(x => x.BinCompany).RunAsync();
+                await webUnreliableTaxpayerContext.UnreliableTaxpayers.Upsert(taxpayer).On(x => new {x.BinCompany, x.IdListType}).RunAsync();
                 lock (_forLock)
                 {
                     Logger.Trace(_counter++);

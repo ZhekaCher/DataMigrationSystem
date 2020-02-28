@@ -27,18 +27,24 @@ namespace DataMigrationSystem.Services
 
         public override  async Task StartMigratingAsync()
         {
-            var reliableSkDtos = _parsedReliableSkContext.ReliableSkDtos
-                .Select(x => new ReliableSk
+            var reliableSkDtos = from reliableSkDto in _parsedReliableSkContext.ReliableSkDtos
+                join company in _parsedReliableSkContext.CompanyBinDtos
+                    on reliableSkDto.Bin equals company.Code
+                    select new ReliableSk
                 {
-                    Reason = x.Reason,
-                    AddingDate = x.AddingDate,
-                    RelevanceDate = x.RelevanceDate,
-                    Biin = x.Bin
-                });
+                    Reason = reliableSkDto.Reason,
+                    AddingDate = reliableSkDto.AddingDate,
+                    RelevanceDate = reliableSkDto.RelevanceDate,
+                    Biin = reliableSkDto.Bin
+                };
             foreach (var reliableSkDto in reliableSkDtos)
             {
                 await _webReliableSkContext.ReliableSks.Upsert(reliableSkDto).On(x => x.Biin).RunAsync();
             }
+            var lastDate = _webReliableSkContext.ReliableSks.Max(x => x.RelevanceDate).Date;
+            _webReliableSkContext.ReliableSks.RemoveRange(_webReliableSkContext.ReliableSks.Where(x=>x.RelevanceDate<lastDate));
+            await _webReliableSkContext.SaveChangesAsync();
+            await _parsedReliableSkContext.Database.ExecuteSqlRawAsync("truncate avroradata.reliable_suppliers_sk");
         }
     }
 }

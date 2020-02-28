@@ -38,6 +38,9 @@ namespace DataMigrationSystem.Services
                 var wantedIn = await DtoToEntity(wantedIndividualDto);
                 await _webWantedIndividualContext.WantedIndividuals.Upsert(wantedIn).On(x => x.Iin).RunAsync();
             }
+            var minDate = await _parsedWantedIndividualContext.WantedIndividualDtos.MinAsync(x => x.RelevanceDate);
+            _webWantedIndividualContext.WantedIndividuals.RemoveRange(_webWantedIndividualContext.WantedIndividuals.Where(x=>x.RelevanceDate<minDate));
+            await _webWantedIndividualContext.SaveChangesAsync();
         }
 
         private async Task MigrateReferences()
