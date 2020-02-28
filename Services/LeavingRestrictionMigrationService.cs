@@ -14,7 +14,7 @@ namespace DataMigrationSystem.Services
 
         private long _counter;
         private readonly object _forLock = new object();
-        public LeavingRestrictionMigrationService(int numOfThreads = 10)
+        public LeavingRestrictionMigrationService(int numOfThreads = 30)
         {
             NumOfThreads = numOfThreads;
         }

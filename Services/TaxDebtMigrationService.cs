@@ -20,7 +20,7 @@ namespace DataMigrationSystem.Services
 
         private readonly object _forLock;
         private int _counter = 0;
-        public TaxDebtMigrationService(int numOfThreads = 20)
+        public TaxDebtMigrationService(int numOfThreads = 30)
         {
             NumOfThreads = numOfThreads;
             _forLock = new object();

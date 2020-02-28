@@ -15,7 +15,7 @@ namespace DataMigrationSystem.Services
         private int _counter;
         private readonly object _forLock  = new object();
 
-        public EnforcementDebtMigrationService(int numOfThreads = 1)
+        public EnforcementDebtMigrationService(int numOfThreads = 30)
         {
             NumOfThreads = numOfThreads;
             _counter = 0;

@@ -14,7 +14,7 @@ namespace DataMigrationSystem.Services
     {
         private readonly object _forLock;
         private int _counter;
-        public CourtCaseMigrationService(int numOfThreads = 20)
+        public CourtCaseMigrationService(int numOfThreads = 30)
         {
             NumOfThreads = numOfThreads;
             _forLock = new object();
@@ -53,10 +53,8 @@ namespace DataMigrationSystem.Services
                 }
             }
             
-            var companyDtos = from courtCaseEntityDto in parsedCourtCaseContext.CourtCaseEntityDtos
-                join companies in parsedCourtCaseContext.CompanyDtos
-                    on courtCaseEntityDto.IinBin equals companies.Bin
-                orderby courtCaseEntityDto.IinBin where courtCaseEntityDto.Id%NumOfThreads == numThread
+            var companyDtos = from courtCaseEntityDto in parsedCourtCaseContext.CourtCaseEntityDtos 
+                where courtCaseEntityDto.Id%NumOfThreads == numThread
                 select courtCaseEntityDto;
             foreach (var companyDto in companyDtos)
             {

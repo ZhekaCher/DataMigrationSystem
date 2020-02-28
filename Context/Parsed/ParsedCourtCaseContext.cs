@@ -7,6 +7,6 @@ namespace DataMigrationSystem.Context.Parsed
     {
         public DbSet<CourtCaseDto> CourtCaseDtos { get; set; }    
         public DbSet<CourtCaseEntityDto> CourtCaseEntityDtos { get; set; }    
-        public DbSet<CompanyDto> CompanyDtos { get; set; }
+        public DbSet<CompanyBinDto> CompanyBinDtos { get; set; }
     }
 }
