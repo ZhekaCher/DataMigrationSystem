@@ -17,7 +17,7 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("contracts")]
         public long Contracts { get; set; }
         [Column("amount")]
-        public double? Amount { get; set; }
+        public string Amount { get; set; }
         [Column("place")]
         public int Place { get; set; }
         [Column("adding_date")]

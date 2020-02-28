@@ -8,8 +8,8 @@ namespace DataMigrationSystem.Models.Web.Avroradata
     {
         [Column("number_of_contracts")]
         public long Contracts { get; set; }
-        [Column("amount")]
-        public double? Amount { get; set; }
+        [Column("amount")]comm
+        public string Amount { get; set; }
         [Column("place")]
         public int Place { get; set; }
         [Column("date_of_adding")] 
