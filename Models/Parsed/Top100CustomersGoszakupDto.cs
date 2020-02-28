@@ -21,7 +21,7 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("place")]
         public int Place { get; set; }
         [Column("adding_date")]
-        public DateTime? AddingDate { get; set; }
+        public DateTime AddingDate { get; set; }
 
     }
 }

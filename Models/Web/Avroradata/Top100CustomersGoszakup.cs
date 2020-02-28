@@ -13,7 +13,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("place")]
         public int Place { get; set; }
         [Column("date_of_adding")] 
-        public DateTime? AddingDate { get; set; }
+        public DateTime AddingDate { get; set; }
         [Column("biin_companies")]
         public long Bin { get; set; }
 

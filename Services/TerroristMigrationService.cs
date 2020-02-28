@@ -48,8 +48,7 @@ namespace DataMigrationSystem.Services
 
             var lastDate = _webTerroristContext.Terrorists.Max(x => x.RelevanceDate).Date;
             _webTerroristContext.Terrorists.RemoveRange(_webTerroristContext.Terrorists.Where(x=>x.RelevanceDate.Date < lastDate));
-            
+            await _webTerroristContext.SaveChangesAsync();
         }
-        
     }
 }

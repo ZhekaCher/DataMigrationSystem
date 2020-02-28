@@ -41,6 +41,9 @@ namespace DataMigrationSystem.Services
             {
                 await webTop100GoszakupContext.Top100CustomersGoszakup.Upsert(top100).On(x => x.Bin).RunAsync();
             }
+            var lastDateC = webTop100GoszakupContext.Top100CustomersGoszakup.Max(x => x.AddingDate).Date;
+            webTop100GoszakupContext.Top100CustomersGoszakup.RemoveRange(webTop100GoszakupContext.Top100CustomersGoszakup.Where(x=>x.AddingDate.Date < lastDateC));
+            
             var top100Suppliers = parsedTop100GoszakupContext.Top100SuppliersgoszakupDtos.Select(x =>
                 new Top100SuppliersGoszakup
                 {
@@ -54,6 +57,10 @@ namespace DataMigrationSystem.Services
             {
                 await webTop100GoszakupContext.Top100Suppliersgoszakup.Upsert(top100).On(x => x.Bin).RunAsync();
             }
+
+            var lastDateS = webTop100GoszakupContext.Top100Suppliersgoszakup.Max(x => x.AddingDate).Date;
+            webTop100GoszakupContext.Top100Suppliersgoszakup.RemoveRange(webTop100GoszakupContext.Top100Suppliersgoszakup.Where(x=>x.AddingDate.Date < lastDateS));
+            await webTop100GoszakupContext.SaveChangesAsync();
         }
     }
 }
