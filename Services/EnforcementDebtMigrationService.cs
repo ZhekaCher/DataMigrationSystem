@@ -79,6 +79,8 @@ namespace DataMigrationSystem.Services
             }
 
             await Task.WhenAll(tasks);
+            await using var parsedEnforcementDebtContext = new ParsedEnforcementDebtContext();
+            await parsedEnforcementDebtContext.Database.ExecuteSqlRawAsync("truncate table avroradata.enforcement_debt cascade;");
         }
         private async Task<CompanyEnforcementDebt> DtoToCompanyEntity(EnforcementDebtDto debtDto, WebEnforcementDebtContext webEnforcementDebtContext)
         {

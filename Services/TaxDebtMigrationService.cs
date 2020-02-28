@@ -43,6 +43,8 @@ namespace DataMigrationSystem.Services
             }
 
             await Task.WhenAll(tasks);
+            await using var parsedTaxDebtContext = new ParsedTaxDebtContext();
+            await parsedTaxDebtContext.Database.ExecuteSqlRawAsync("truncate table avroradata.tax_debt;");
         }
 
         private async Task Migrate(int numThread)

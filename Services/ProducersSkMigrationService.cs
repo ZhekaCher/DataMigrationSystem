@@ -49,8 +49,7 @@ namespace DataMigrationSystem.Services
             {
                 await _webProducerSkContext.ProducerSks.Upsert(producersSkDto).On(x => x.Bin).RunAsync();
             }
-
-            var lastDate = _parsedProducerSkContext.ProducerSkDtos.Max(x => x.RelevanceDate).Date;
+            var lastDate = _webProducerSkContext.ProducerSks.Max(x => x.RelevanceDate).Date;
             _webProducerSkContext.ProducerSks.RemoveRange(_webProducerSkContext.ProducerSks.Where(x=>x.RelevanceDate<lastDate));
             await _webProducerSkContext.SaveChangesAsync();
         }
