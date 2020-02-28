@@ -38,12 +38,12 @@ namespace DataMigrationSystem.Services
                     Correction = x.Correction,
                     Iin = x.Iin,
                     RelevanceDate = x.RelevanceDate,
-                    Status = x.Status
+                    Type = x.Status
                 });
             foreach (var terroristDto in terroristDtos)
             {
                 await _webTerroristContext.Terrorists.Upsert(terroristDto)
-                    .On(x => x.Iin).RunAsync();
+                    .On(x => new{x.Iin, x.Type}).RunAsync();
             }
 
             var minDate = await _parsedTerroristContext.TerroristDtos.MinAsync(x => x.RelevanceDate);

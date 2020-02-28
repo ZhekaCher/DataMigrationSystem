@@ -26,7 +26,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         public long Iin { get; set; }
         [Column("relevance_date")]
         public DateTime RelevanceDate{ get; set; }
-        [Column("status")]
-        public string Status{ get; set; }
+        [Column("type")]
+        public int Type{ get; set; }
     }
 }
