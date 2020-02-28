@@ -28,36 +28,42 @@ namespace DataMigrationSystem.Services
         {
             await using var webTop100GoszakupContext = new WebTop100GoszakupContext();
             await using var parsedTop100GoszakupContext = new ParsedTop100GoszakupContext();
-            var top100Customers = parsedTop100GoszakupContext.Top100CustomersGoszakupDtos.Select(x =>
-                new Top100CustomersGoszakup
-                {
-                    Contracts  = x.Contracts,
-                    Amount = x.Amount,
-                    AddingDate = x.AddingDate,
-                    Bin = x.Bin,
-                    Place = x.Place
-                });
-            foreach (var top100 in top100Customers)
+            var top100CustomersDto = from top100Customer in parsedTop100GoszakupContext.Top100CustomersGoszakupDtos
+                join company in parsedTop100GoszakupContext.CompanyBinDtos
+                    on top100Customer.Bin equals company.Code
+                select
+                    new Top100CustomersGoszakup
+                    {
+                        Contracts = top100Customer.Contracts,
+                        Amount = top100Customer.Amount,
+                        AddingDate = top100Customer.AddingDate,
+                        Bin = top100Customer.Bin,
+                        Place = top100Customer.Place
+                    };
+            foreach (var top100 in top100CustomersDto)
             {
                 await webTop100GoszakupContext.Top100CustomersGoszakup.Upsert(top100).On(x => x.Bin).RunAsync();
             }
             var lastDateC = webTop100GoszakupContext.Top100CustomersGoszakup.Max(x => x.AddingDate).Date;
             webTop100GoszakupContext.Top100CustomersGoszakup.RemoveRange(webTop100GoszakupContext.Top100CustomersGoszakup.Where(x=>x.AddingDate.Date < lastDateC));
-            
-            var top100Suppliers = parsedTop100GoszakupContext.Top100SuppliersgoszakupDtos.Select(x =>
-                new Top100SuppliersGoszakup
-                {
-                    Contracts  = x.Contracts,
-                    Amount = x.Amount,
-                    AddingDate = x.AddingDate,
-                    Bin = x.Bin,
-                    Place = x.Place
-                });
-            foreach (var top100 in top100Suppliers)
+            await webTop100GoszakupContext.SaveChangesAsync();
+
+            var top100SuppliersDto = from top100Supplier in parsedTop100GoszakupContext.Top100SuppliersgoszakupDtos
+                join company in parsedTop100GoszakupContext.CompanyBinDtos
+                    on top100Supplier.Bin equals company.Code
+                select
+                    new Top100SuppliersGoszakup
+                    {
+                        Contracts = top100Supplier.Contracts,
+                        Amount = top100Supplier.Amount,
+                        AddingDate = top100Supplier.AddingDate,
+                        Bin = top100Supplier.Bin,
+                        Place = top100Supplier.Place
+                    };;
+            foreach (var top100 in top100SuppliersDto)
             {
                 await webTop100GoszakupContext.Top100Suppliersgoszakup.Upsert(top100).On(x => x.Bin).RunAsync();
             }
-
             var lastDateS = webTop100GoszakupContext.Top100Suppliersgoszakup.Max(x => x.AddingDate).Date;
             webTop100GoszakupContext.Top100Suppliersgoszakup.RemoveRange(webTop100GoszakupContext.Top100Suppliersgoszakup.Where(x=>x.AddingDate.Date < lastDateS));
             await webTop100GoszakupContext.SaveChangesAsync();
