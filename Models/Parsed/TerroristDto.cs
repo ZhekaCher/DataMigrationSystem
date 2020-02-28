@@ -27,6 +27,6 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("relevance_date")]
         public DateTime RelevanceDate{ get; set; }
         [Column("status")]
-        public string Status{ get; set; }
+        public int Status{ get; set; }
     }
 }
