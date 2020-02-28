@@ -58,7 +58,7 @@ namespace DataMigrationSystem.Services
                 });
             foreach (var taxpayer in taxpayers)
             {
-                await webUnreliableTaxpayerContext.UnreliableTaxpayers.Upsert(taxpayer).On(x => x.BinCompany).RunAsync();
+                await webUnreliableTaxpayerContext.UnreliableTaxpayers.Upsert(taxpayer).On(x => new {x.BinCompany, x.IdListType}).RunAsync();
                 lock (_forLock)
                 {
                     Logger.Trace(_counter++);
