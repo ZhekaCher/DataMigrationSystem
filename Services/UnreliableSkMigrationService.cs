@@ -10,8 +10,8 @@ namespace DataMigrationSystem.Services
 {
     public class UnreliableSkMigrationService:MigrationService
     {
-        private WebUnreliableSkContext _webUnreliableSkContext;
-        private ParsedUnreliableSkContext _parsedUnreliableSkContext;
+        private readonly WebUnreliableSkContext _webUnreliableSkContext;
+        private readonly ParsedUnreliableSkContext _parsedUnreliableSkContext;
 
         public UnreliableSkMigrationService(int numOfThreads=1)
         {
