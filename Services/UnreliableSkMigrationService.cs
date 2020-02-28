@@ -13,9 +13,8 @@ namespace DataMigrationSystem.Services
         private WebUnreliableSkContext _webUnreliableSkContext;
         private ParsedUnreliableSkContext _parsedUnreliableSkContext;
 
-        public UnreliableSkMigrationService(int numOfThreads)
+        public UnreliableSkMigrationService(int numOfThreads=1)
         {
-            NumOfThreads = numOfThreads;
             _webUnreliableSkContext = new WebUnreliableSkContext();
             _parsedUnreliableSkContext = new ParsedUnreliableSkContext();
         }
