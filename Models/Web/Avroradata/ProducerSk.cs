@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataMigrationSystem.Models.Web.Avroradata
 {
+    [Table("samruk_producer_company")]
     public class ProducersSk
     {
         [Key]
@@ -12,7 +13,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("bin")]
         public  long Bin { get; set; }
         [Column("producer_type")]
-        public string ProducerType { get; set; }
+        public int ProducerType { get; set; }
         [Column("relevance_date")]
         public DateTime RelevanceDate { get; set; }
     }

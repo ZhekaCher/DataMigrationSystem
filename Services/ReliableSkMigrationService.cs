@@ -44,6 +44,7 @@ namespace DataMigrationSystem.Services
             var lastDate = _webReliableSkContext.ReliableSks.Max(x => x.RelevanceDate).Date;
             _webReliableSkContext.ReliableSks.RemoveRange(_webReliableSkContext.ReliableSks.Where(x=>x.RelevanceDate<lastDate));
             await _webReliableSkContext.SaveChangesAsync();
+            await _parsedReliableSkContext.Database.ExecuteSqlRawAsync("truncate avroradata.reliable_suppliers_sk");
         }
     }
 }

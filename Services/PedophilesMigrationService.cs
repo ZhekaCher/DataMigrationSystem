@@ -51,6 +51,7 @@ namespace DataMigrationSystem.Services
             var minDate = await _parsedPedophilesContext.PedophileDtos.MinAsync(x => x.RelevanceDate);
             _webPedophilesContext.Pedophiles.RemoveRange(_webPedophilesContext.Pedophiles.Where(x=>x.RelevanceDate<minDate));
             await _webPedophilesContext.SaveChangesAsync();
+            await _parsedPedophilesContext.Database.ExecuteSqlRawAsync("truncate avroradata.pedophiles");
         }
     }
 }
