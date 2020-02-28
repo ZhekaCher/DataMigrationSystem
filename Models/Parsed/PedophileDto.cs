@@ -34,5 +34,7 @@ namespace DataMigrationSystem.Models.Parsed
         public DateTime JailReleaseDate { get;set; }
         [Column("address")]
         public string Address { get;set; }
+        [Column("relevance_date")]
+        public DateTime? RelevanceDate { get;set; }
     }
 }
