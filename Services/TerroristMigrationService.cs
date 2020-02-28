@@ -26,7 +26,7 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
-            var terroristDtos = _parsedTerroristContext.TerroristDtos
+            /*var terroristDtos = _parsedTerroristContext.TerroristDtos
                 .Select(x => new Terrorist
                 {
                     Id = x.Id,
@@ -39,7 +39,23 @@ namespace DataMigrationSystem.Services
                     Iin = x.Iin,
                     RelevanceDate = x.RelevanceDate,
                     Type = x.Status
-                });
+                });*/
+            var terroristDtos = from terroristDto in _parsedTerroristContext.TerroristDtos
+                join individual in  _parsedTerroristContext.IndividualIins
+                    on terroristDto.Iin equals individual.Code
+                    select new Terrorist
+                {
+                    Id = terroristDto.Id,
+                    LastName = terroristDto.LastName,
+                    FirstName = terroristDto.FirstName,
+                    MiddleName = terroristDto.MiddleName,
+                    Birthday = terroristDto.Birthday,
+                    Note = terroristDto.Note,
+                    Correction = terroristDto.Correction,
+                    Iin = terroristDto.Iin,
+                    RelevanceDate = terroristDto.RelevanceDate,
+                    Type = terroristDto.Status
+                };
             foreach (var terroristDto in terroristDtos)
             {
                 await _webTerroristContext.Terrorists.Upsert(terroristDto)
