@@ -59,7 +59,7 @@ namespace DataMigrationSystem.Services
                         AddingDate = top100Supplier.AddingDate,
                         Bin = top100Supplier.Bin,
                         Place = top100Supplier.Place
-                    };;
+                    };
             foreach (var top100 in top100SuppliersDto)
             {
                 await webTop100GoszakupContext.Top100Suppliersgoszakup.Upsert(top100).On(x => x.Bin).RunAsync();

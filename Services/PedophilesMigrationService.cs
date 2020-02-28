@@ -48,6 +48,11 @@ namespace DataMigrationSystem.Services
             {
                 await _webPedophilesContext.Pedophiles.Upsert(pedofilDto).On(x => x.Iin).RunAsync();
             }
+            await using var webUnreliableTaxpayerContext = new WebUnreliableTaxpayerContext();
+            await using var parsedUnreliableTaxpayerContext = new ParsedUnreliableTaxpayerContext();
+            var minDate = await parsedUnreliableTaxpayerContext.UnreliableTaxpayerDtos.MinAsync(x => x.RelevanceDate);
+            webUnreliableTaxpayerContext.UnreliableTaxpayers.RemoveRange(webUnreliableTaxpayerContext.UnreliableTaxpayers.Where(x=>x.RelevanceDate<minDate));
+            await webUnreliableTaxpayerContext.SaveChangesAsync();
         }
     }
 }
