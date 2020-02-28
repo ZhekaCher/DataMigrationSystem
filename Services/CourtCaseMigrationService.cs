@@ -32,13 +32,16 @@ namespace DataMigrationSystem.Services
 
             for (int i = 0; i < NumOfThreads; i++)
             {
-                tasks.Add(Migrate(i));
+                tasks.Add(MigrateAsync(i));
             }
 
             await Task.WhenAll(tasks);
+            
+            await using var parsedCourtCaseContext = new ParsedCourtCaseContext();
+            await parsedCourtCaseContext.Database.ExecuteSqlRawAsync("truncate table avroradata.court_case, avroradata.court_case_entity");
         }
 
-        private async Task Migrate(int numThread)
+        private async Task MigrateAsync(int numThread)
         {
             await using var parsedCourtCaseContext = new ParsedCourtCaseContext();
             await using var webCourtCaseContext = new WebCourtCaseContext();
