@@ -14,7 +14,7 @@ namespace DataMigrationSystem.Services
     {
         private readonly object _forLock;
         private int _total;
-        public CompanyMigrationService(int numOfThreads = 1)
+        public CompanyMigrationService(int numOfThreads = 20)
         {
             NumOfThreads = numOfThreads;
             using var parsedCompanyContext = new ParsedCompanyContext(); 
@@ -50,16 +50,16 @@ namespace DataMigrationSystem.Services
             {
                 var company = DtoToEntity(companyDto);
                 webCompanyContext.CompaniesOkeds.RemoveRange(company.CompanyOkeds);
-                await webCompanyContext.SaveChangesAsync();
+                // await webCompanyContext.SaveChangesAsync();
                 await webCompanyContext.Companies.Upsert(company).On(x => x.Bin).RunAsync();
-                await webCompanyContext.CompaniesOkeds.AddRangeAsync(company.CompanyOkeds);
-                await webCompanyContext.SaveChangesAsync();
+                // await webCompanyContext.CompaniesOkeds.AddRangeAsync(company.CompanyOkeds);
+                // await webCompanyContext.SaveChangesAsync();
                 lock (_forLock)
                 {
                     Logger.Trace(_total--);
                 }
             }
-            await parsedCompanyContext.Database.ExecuteSqlRawAsync("truncate avroradata.company restart identity restart identity;");
+            await parsedCompanyContext.Database.ExecuteSqlRawAsync("truncate avroradata.company restart identity;");
 
         }
 

@@ -70,7 +70,7 @@ namespace DataMigrationSystem.Services
             var toDelete = _webPedophilesContext.Pedophiles.Where(x => x.RelevanceDate < minDate);
             _webPedophilesContext.Pedophiles.RemoveRange(toDelete);
             await _webPedophilesContext.SaveChangesAsync();
-            // await _parsedPedophilesContext.Database.ExecuteSqlRawAsync("truncate avroradata.pedophiles");
+            await _parsedPedophilesContext.Database.ExecuteSqlRawAsync("truncate avroradata.pedophiles");
         }
     }
 }

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataMigrationSystem.Models.Parsed
 {
-    [Table("companies")]
+    [Table("company")]
     public class CompanyDto
     {
         [Key]
