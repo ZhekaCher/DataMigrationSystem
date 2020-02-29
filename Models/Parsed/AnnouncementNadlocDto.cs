@@ -9,7 +9,7 @@ namespace DataMigrationSystem.Models.Parsed
     {
         [Column("tender_id")] public long? TenderId{get; set;}
         [Column("full_id")] public string FullId{get; set;}
-        [Column("name")] public string? Name{get; set;}
+        [Column("name")] public string Name{get; set;}
         [Column("customer_name")] public string CustomerName{get; set;}
         [Column("customer_link")] public string CustomerLink{get; set;}
         [Column("price_offers")] public string PriceOffers{get; set;}

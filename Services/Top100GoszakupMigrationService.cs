@@ -11,7 +11,6 @@ namespace DataMigrationSystem.Services
     public class Top100GoszakupMigrationService : MigrationService
     {
         private readonly object _forLock;
-        private int _counter = 0;
         public Top100GoszakupMigrationService(int numOfThreads = 1)
         {
 

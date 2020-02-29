@@ -8,7 +8,6 @@ using DataMigrationSystem.Models.Parsed;
 using DataMigrationSystem.Models.Web.TradingFloor;
 using Microsoft.EntityFrameworkCore;
 using NLog;
-using NLog.Fluent;
 
 namespace DataMigrationSystem.Services
 {

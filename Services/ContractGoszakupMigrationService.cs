@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
-using DataMigrationSystem.Context.Web.Avroradata;
 using DataMigrationSystem.Context.Web.TradingFloor;
 using DataMigrationSystem.Models.Parsed;
 using DataMigrationSystem.Models.Web.TradingFloor;
