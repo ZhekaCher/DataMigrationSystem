@@ -47,7 +47,6 @@ namespace DataMigrationSystem.Services
             
             
             Logger.Info("Starting removing participants who out of unscrupulous");
-
             await using var webUnscrupulousGoszakupContext = new WebUnscrupulousGoszakupContext();
             await using var webUnscrupulousGoszakupContext2 = new WebUnscrupulousGoszakupContext();
             await using var parsedUnscrupulousGoszakupContext = new ParsedUnscrupulousGoszakupContext();
@@ -71,7 +70,8 @@ namespace DataMigrationSystem.Services
                     Program.NumOfErrors++;
                 }
             Logger.Info("Removing done");
-            
+            await parsedUnscrupulousGoszakupContext.Database.ExecuteSqlRawAsync("truncate table avroradata.unscrupulous_goszakup restart identity cascade;");
+            Logger.Info("Truncated");
         }
 
         private async Task Migrate(int threadNum)
