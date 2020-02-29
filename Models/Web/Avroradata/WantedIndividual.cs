@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataMigrationSystem.Models.Web.Avroradata
 {
-    [Table("i_lists")]
+    [Table("wanted_individuals")]
     public class WantedIndividual
     {
         [Key]
@@ -19,33 +19,33 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("middle_name")]
         public string MiddleName { get; set; }
         [Column("gender")] 
-        public string Gender { get; set; }
-        [Column("document_type")]
+        public int Gender { get; set; }
+        [Column("id_document_type")]
         public int? DocumentType { get; set; }
         [Column("code_of_document")]
         public string CodeOfDocument { get; set; }
-        [Column("issued_by")]
+        [Column("id_issued_by")]
         public int? IssuedBy { get; set; }
         [Column("issue_date")]
-        public string  IssueDate{ get; set; }
+        public DateTime?  IssueDate{ get; set; }
         [Column("searching_authority")]
         public string  SearchingAuthority{ get; set; }
         [Column("authority_phone")]
         public string  AuthotityPhone{ get; set; }
         [Column("reception_phone")]
         public string  ReceptionPhone{ get; set; }
-        [Column("birthday")]
-        public string  Birthday{ get; set; }
-        [Column("race")]
+        [Column("date_of_birth")]
+        public DateTime?  Birthday{ get; set; }
+        [Column("id_race_type")]
         public int?  Race{ get; set; }
-        [Column("list")]
+        [Column("id_list_type")]
         public int?  ListId{ get; set; }
         [Column("searching_reason")]
         public string  SearchingReason{ get; set; }
-        [Column("nationality")]
+        [Column("id_nationality")]
         public int?  Nationality{ get; set; }
         [Column("relevance_date")]
-        public DateTime RelevanceDate { get; set; }
+        public DateTime RelevanceDate { get; set; }  = DateTime.Now;
     }
 
     [Table("nationality")]
@@ -58,7 +58,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
     {
         
     }
-    [Table("i_list_type")]
+    [Table("wanted_individual_types")]
     public class ListType : BaseReferenceEntity
     {
         

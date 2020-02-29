@@ -6,7 +6,7 @@ namespace DataMigrationSystem.Context.Parsed
 {
     public class ParsedPedophilesContext : ParsedContext
     {
-        
+        public DbSet<IndividualIin> IndividualIins { get; set; }   
         public DbSet<PedophileDto> PedophileDtos { get; set; }
     }
 }

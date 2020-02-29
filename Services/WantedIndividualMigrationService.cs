@@ -36,11 +36,13 @@ namespace DataMigrationSystem.Services
             foreach (var wantedIndividualDto in wantedIndividualsDtos)
             {
                 var wantedIn = await DtoToEntity(wantedIndividualDto);
-                await _webWantedIndividualContext.WantedIndividuals.Upsert(wantedIn).On(x => x.Iin).RunAsync();
+                await _webWantedIndividualContext.WantedIndividuals.Upsert(wantedIn).On(x => new {x.Iin,x.ListId}).RunAsync();
             }
             var minDate = await _parsedWantedIndividualContext.WantedIndividualDtos.MinAsync(x => x.RelevanceDate);
             _webWantedIndividualContext.WantedIndividuals.RemoveRange(_webWantedIndividualContext.WantedIndividuals.Where(x=>x.RelevanceDate<minDate));
             await _webWantedIndividualContext.SaveChangesAsync();
+            await _parsedWantedIndividualContext.Database.ExecuteSqlRawAsync("truncate avroradata.wanted_individuals;");
+
         }
 
         private async Task MigrateReferences()
@@ -104,16 +106,33 @@ namespace DataMigrationSystem.Services
                 LastName = wantedIndividualDto.LastName,
                 FirstName = wantedIndividualDto.FirstName,
                 MiddleName = wantedIndividualDto.MiddleName,
-                Gender = wantedIndividualDto.Gender,
                 CodeOfDocument = wantedIndividualDto.CodeOfDocument,
                 IssueDate = wantedIndividualDto.IssueDate,
                 AuthotityPhone = wantedIndividualDto.AuthotityPhone,
                 ReceptionPhone = wantedIndividualDto.ReceptionPhone,
                 Birthday = wantedIndividualDto.Birthday,
                 SearchingAuthority = wantedIndividualDto.SearchingAuthority,
-                SearchingReason = wantedIndividualDto.SearchingAuthority
+                SearchingReason = wantedIndividualDto.SearchingAuthority,
+                RelevanceDate = wantedIndividualDto.RelevanceDate
             };
-
+            if (wantedIndividualDto.Gender != null)
+            {
+                if (wantedIndividualDto.Gender=="Мужской")
+                {
+                    wantedIndividual.Gender = 0;
+                }
+                else if (wantedIndividualDto.Gender == "Женский")
+                {
+                    wantedIndividual.Gender = 1;
+                }else
+                {
+                    wantedIndividual.Gender = 2;
+                }
+            }
+            else
+            {
+                wantedIndividual.Nationality = null;
+            }
             if (wantedIndividualDto.Nationality != null)
             {
                 wantedIndividual.Nationality =
