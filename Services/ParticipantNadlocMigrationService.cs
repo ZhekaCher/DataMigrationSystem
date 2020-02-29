@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,6 +15,8 @@ namespace DataMigrationSystem.Services
     public class ParticipantNadlocMigrationService : MigrationService
     {
         private int _total;
+        private int _total2;
+        private int _total3;
         private readonly object _lock = new object();
 
         public ParticipantNadlocMigrationService(int numOfThreads = 10)
@@ -21,6 +24,9 @@ namespace DataMigrationSystem.Services
             NumOfThreads = numOfThreads;
             using var parsedParticipantNadlocContext = new ParsedParticipantNadlocContext();
             _total = parsedParticipantNadlocContext.ParticipantNadlocDtos.Count();
+            _total2 = parsedParticipantNadlocContext.CustomersNadlocDtos.Count();
+            _total3 = parsedParticipantNadlocContext.SupplierNadlocDtos.Count();
+
         }
         protected override Logger InitializeLogger()
         {
@@ -29,12 +35,21 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
+            await using var webParticipantNadlocContext = new WebParticipantNadlocContext();
+            await using var parsedParticipantNadlocContext = new ParsedParticipantNadlocContext();
+            DateTime? startDate1 = await parsedParticipantNadlocContext.CustomersNadlocDtos.MinAsync(x=>x.RelevanceDate);
+            DateTime? startDate2 = await parsedParticipantNadlocContext.SupplierNadlocDtos.MinAsync(x=>x.RelevanceDate);
             Logger.Info($"Starting migration with '{NumOfThreads}' threads");
             var tasks = new List<Task>();
             for (var i = 0; i < NumOfThreads; i++)
                 tasks.Add(Migrate(i));
-
             await Task.WhenAll(tasks);
+            webParticipantNadlocContext.SupplierNadloc.RemoveRange(webParticipantNadlocContext.SupplierNadloc
+                .Where(x => x.RelevanceDate < startDate1));
+            await webParticipantNadlocContext.SaveChangesAsync();
+            webParticipantNadlocContext.CustomersNadloc.RemoveRange(webParticipantNadlocContext.CustomersNadloc
+                .Where(x => x.RelevanceDate < startDate2));
+            await webParticipantNadlocContext.SaveChangesAsync();
             Logger.Info("End of migration");
         }
 
@@ -52,7 +67,32 @@ namespace DataMigrationSystem.Services
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
             }
-            Logger.Info("completed thread");
+
+            foreach (var dto in parsedParticipantNadlocContext.CustomersNadlocDtos.Where(x=>x.Id% NumOfThreads==threadNum).Select(x=>new CustomerNadloc
+            {
+                Id = x.Id,
+                Bin = x.Bin,
+                RelevanceDate = x.RelevanceDate,
+                Status = x.Status
+            }))
+            {
+                await webParticipantNadlocContext.CustomersNadloc.Upsert(dto).On(x => x.Bin).RunAsync();
+                lock (_lock)
+                    Logger.Trace($"Left {--_total2}");
+            }
+            foreach (var dto in parsedParticipantNadlocContext.SupplierNadlocDtos.Where(x=>x.Id% NumOfThreads==threadNum).Where(x=>x.RelevanceDate!=null).Select(x=>new SupplierNadloc()
+            {
+                Id = x.Id,
+                Bin = x.Bin,
+                RelevanceDate = x.RelevanceDate,
+                Status = x.Status
+            }))
+            {
+                await webParticipantNadlocContext.SupplierNadloc.Upsert(dto).On(x => x.Bin).RunAsync();
+                lock (_lock)
+                    Logger.Trace($"Left {--_total3}");
+            }
+
         }
 
         private ParticipantNadloc DtoToWeb(ParticipantNadlocDto participantNadlocDto)

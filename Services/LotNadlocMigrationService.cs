@@ -43,6 +43,8 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("Ended");
+            await using var parsedLotNadlocContext = new ParsedLotNadlocContext();
+            await parsedLotNadlocContext.Database.ExecuteSqlRawAsync("truncate table avroradata.nadloc_lots");
         }
 
         private async Task Migrate(int threadNum)
@@ -50,7 +52,7 @@ namespace DataMigrationSystem.Services
             Logger.Info("Started Thread");
             await using var webLotContext = new WebLotContext();
             await using var parsedLotNadlocContext = new ParsedLotNadlocContext();
-            foreach (var dto in parsedLotNadlocContext.NadlocLotsDtos.Where(x => x.Id % NumOfThreads == threadNum)
+            var lotDtos =  parsedLotNadlocContext.NadlocLotsDtos.Where(x => x.TenderId % NumOfThreads == threadNum).OrderBy(x=>x.TenderId)
                 .Select(x => new Lot
                 {
                     IdTf = _sTradingFloorId,
@@ -58,14 +60,26 @@ namespace DataMigrationSystem.Services
                     IdAnno = x.TenderId,
                     NumberLot = x.LotNumber.ToString(),
                     NameRu = x.ScpDescription,
-                    Quantity = x.Quantity == null ? 1:x.Quantity ,
-                    Price = x.FullPrice/(x.Quantity == null ? 1:x.Quantity),
+                    Quantity = x.Quantity == 0 ? 1 : x.Quantity,
+                    Price = x.FullPrice/(x.Quantity == 0 ? 1 : x.Quantity),
                     Total = x.FullPrice,
                     RelevanceDate = x.RelevanceDate,
                     DeliveryAddress = x.DeliveryPlace
-                }))
+                });
+            long tenderId = 0;
+            
+            foreach (var dto in lotDtos)
             {
-                await webLotContext.Lots.Upsert(dto).On(x => new {x.IdLot, x.IdTf}).RunAsync();
+                if (tenderId != dto.IdAnno)
+                {
+                    tenderId = dto.IdAnno;
+                    webLotContext.Lots.RemoveRange(webLotContext.Lots.Where(x=>x.IdAnno==dto.IdAnno));
+                    await webLotContext.SaveChangesAsync();
+
+                }
+
+                await webLotContext.Lots.AddAsync(dto);
+                await webLotContext.SaveChangesAsync();
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
             }

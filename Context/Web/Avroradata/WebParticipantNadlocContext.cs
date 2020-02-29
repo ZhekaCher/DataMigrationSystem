@@ -6,7 +6,8 @@ namespace DataMigrationSystem.Context.Web.Avroradata
     public class WebParticipantNadlocContext : DbContext
     {
         public  DbSet<ParticipantNadloc> ParticipantsNadloc { get; set; }
-
+        public DbSet<CustomerNadloc> CustomersNadloc { get; set; }
+        public DbSet<SupplierNadloc> SupplierNadloc { get; set; }
         public WebParticipantNadlocContext(DbContextOptions<WebParticipantNadlocContext> options) 
             : base(options)
         {

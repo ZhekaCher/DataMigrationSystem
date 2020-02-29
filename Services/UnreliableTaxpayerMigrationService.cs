@@ -13,7 +13,7 @@ namespace DataMigrationSystem.Services
     {
         private readonly object _forLock;
         private int _counter;
-        public UnreliableTaxpayerMigrationService(int numOfThreads = 1)
+        public UnreliableTaxpayerMigrationService(int numOfThreads = 10)
         {
             NumOfThreads = numOfThreads;
             _forLock = new object();

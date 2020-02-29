@@ -43,6 +43,9 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
+            await using var parsedAnnouncementNadlocContext = new ParsedAnnouncementNadlocContext();
+            await parsedAnnouncementNadlocContext.Database.ExecuteSqlRawAsync(
+                "truncate table avroradata.nadloc_tenders");
         }
 
         private async Task Migrate(int threadNum)

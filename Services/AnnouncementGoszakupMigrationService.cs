@@ -51,6 +51,10 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
+            await using var parsedAnnouncementGoszakupContext = new ParsedAnnouncementGoszakupContext();
+            await parsedAnnouncementGoszakupContext.Database.ExecuteSqlRawAsync(
+                "truncate table avroradata.announcement_goszakup restart identity cascade;");
+            Logger.Info("Truncated");
         }
 
         private async Task Migrate(int threadNum)

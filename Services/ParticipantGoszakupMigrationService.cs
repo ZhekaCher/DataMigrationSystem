@@ -43,6 +43,33 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
+            
+            Logger.Info("Starting removing participants who out of goszakup");
+            await using var webParticipantGoszakupContext = new WebParticipantGoszakupContext();
+            await using var webParticipantGoszakupContext2 = new WebParticipantGoszakupContext();
+            await using var parsedParticipantGoszakupContext = new ParsedParticipantGoszakupContext();
+            var firstParsedTime = parsedParticipantGoszakupContext.ParticipantGoszakupDtos.OrderBy(x => x.Relevance).FirstOrDefault().Relevance; 
+            var old = webParticipantGoszakupContext.ParticipantsGoszakup.Where(x =>
+                x.RelevanceDate < firstParsedTime).Where(x => x.Status==true);
+            var left = old.Count();
+            foreach (var participantGoszakup in old)
+                try
+                {
+                    participantGoszakup.Status = false;
+                    participantGoszakup.RelevanceDate = firstParsedTime;
+                    webParticipantGoszakupContext2.ParticipantsGoszakup.Update(participantGoszakup);
+                    await webParticipantGoszakupContext2.SaveChangesAsync();
+                    Logger.Trace($"{participantGoszakup.BiinCompanies} Left: {--left}");
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(
+                        $"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|;");
+                    Program.NumOfErrors++;
+                }
+            Logger.Info("Removing done");
+            await parsedParticipantGoszakupContext.Database.ExecuteSqlRawAsync("truncate table avroradata.participant_goszakup restart identity cascade;");
+            Logger.Info("Truncated");
         }
 
         private async Task Migrate(int threadNum)
