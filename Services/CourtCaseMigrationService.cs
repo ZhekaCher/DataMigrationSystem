@@ -71,6 +71,7 @@ namespace DataMigrationSystem.Services
                     Logger.Trace(_counter++);
                 }
             }
+            await parsedCourtCaseContext.Database.ExecuteSqlRawAsync("truncate avroradata.court_case_entity, avroradata.court_case restart identity;");
         }
         private async Task MigrateReferences()
         {

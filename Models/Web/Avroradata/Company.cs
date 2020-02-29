@@ -61,8 +61,6 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         public string OkedId { get; set; }
         [Column("type")]
         public int Type { get; set; }
-        [Column("path")]
-        public string Path { get; set; }
         public Company Company { get; set; }
     }
 

@@ -4,9 +4,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataMigrationSystem.Models.Web.Avroradata
 {
-    [Table("lists")]
+    [Table("unreliable_taxpayers")]
     public class UnreliableTaxpayer
     {
+        [Key]
+        [Column("id")] public long Id {get; set;}
         [Column("bin_company")] public long? BinCompany{get; set;}
         [Column("document_number")] public string DocumentNumber{get; set;}
         [Column("document_date")] public DateTime? DocumentDate{get; set;}

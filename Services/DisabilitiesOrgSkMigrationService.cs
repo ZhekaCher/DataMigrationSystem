@@ -45,6 +45,7 @@ namespace DataMigrationSystem.Services
             var lastDate = _webDisabilitiesOrgSkContext.DisabilitiesOrgSk.Max(x => x.RelevanceDate).Date;
             _webDisabilitiesOrgSkContext.DisabilitiesOrgSk.RemoveRange(_webDisabilitiesOrgSkContext.DisabilitiesOrgSk.Where(x=>x.RelevanceDate<lastDate));
             await _webDisabilitiesOrgSkContext.SaveChangesAsync();
+            await _parsedDisabilitiesOrgSkContext.Database.ExecuteSqlRawAsync("truncate avroradata.disabilities_organizations_products_sk, avroradata.disabilities_organizations_sk restart identity;");
         }
     }
 }

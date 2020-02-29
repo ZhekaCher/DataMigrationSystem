@@ -6,5 +6,6 @@ namespace DataMigrationSystem.Context.Parsed
     public class ParsedUnreliableTaxpayerContext : ParsedContext
     {
         public DbSet<UnreliableTaxpayerDto> UnreliableTaxpayerDtos { get; set; }    
+        public DbSet<CompanyBinDto> CompanyBinDtos { get; set; }    
     }
 }

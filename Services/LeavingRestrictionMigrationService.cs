@@ -73,7 +73,7 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             await using var parsedLeavingRestrictionContext = new  ParsedLeavingRestrictionContext();
-            await parsedLeavingRestrictionContext.Database.ExecuteSqlRawAsync("truncate table avroradata.leaving_restriction;");
+            await parsedLeavingRestrictionContext.Database.ExecuteSqlRawAsync("truncate avroradata.leaving_restriction restart identity;");
         }
     }
 }

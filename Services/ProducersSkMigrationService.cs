@@ -52,6 +52,7 @@ namespace DataMigrationSystem.Services
             var lastDate = _webProducerSkContext.ProducerSks.Max(x => x.RelevanceDate).Date;
             _webProducerSkContext.ProducerSks.RemoveRange(_webProducerSkContext.ProducerSks.Where(x=>x.RelevanceDate<lastDate));
             await _webProducerSkContext.SaveChangesAsync();
+            await _parsedProducerSkContext.Database.ExecuteSqlRawAsync("truncate avroradata.producers_sk, avroradata.producer_products_sk restart identity;");
         }
     }
 }

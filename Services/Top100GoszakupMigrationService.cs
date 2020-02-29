@@ -67,7 +67,7 @@ namespace DataMigrationSystem.Services
             var lastDateS = webTop100GoszakupContext.Top100Suppliersgoszakup.Max(x => x.AddingDate).Date;
             webTop100GoszakupContext.Top100Suppliersgoszakup.RemoveRange(webTop100GoszakupContext.Top100Suppliersgoszakup.Where(x=>x.AddingDate.Date < lastDateS));
             await webTop100GoszakupContext.SaveChangesAsync();
-            await parsedTop100GoszakupContext.Database.ExecuteSqlRawAsync("truncate avroradata.top100customers, avroradata.top100suppliers;");
+            await parsedTop100GoszakupContext.Database.ExecuteSqlRawAsync("truncate avroradata.top100customers, avroradata.top100suppliers restart identity;");
         }
     }
 }

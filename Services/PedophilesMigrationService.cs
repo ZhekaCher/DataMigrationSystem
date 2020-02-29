@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
@@ -43,9 +44,9 @@ namespace DataMigrationSystem.Services
                     JailReleaseDate = x.JailReleaseDate,
                     RelevanceDate = x.RelevanceDate
                 });*/
-            var pedophilesDDtos = from pedophilesDDto in _parsedPedophilesContext.PedophileDtos
-                join indiv in _parsedPedophilesContext.IndividualIins
-                    on pedophilesDDto.Iin equals indiv.Code
+            var pedophiles = from pedophilesDDto in _parsedPedophilesContext.PedophileDtos
+                join individualIin in _parsedPedophilesContext.IndividualIins
+                    on pedophilesDDto.Iin equals individualIin.Code
                     select new Pedophile
                 {
                     Id = pedophilesDDto.Id,
@@ -61,15 +62,15 @@ namespace DataMigrationSystem.Services
                     JailReleaseDate = pedophilesDDto.JailReleaseDate,
                     RelevanceDate = pedophilesDDto.RelevanceDate
                 };
-            foreach (var pedofilDto in pedophilesDDtos)
+            foreach (var pedophile in pedophiles)
             {
-                await _webPedophilesContext.Pedophiles.Upsert(pedofilDto).On(x => x.Iin).RunAsync();
+                await _webPedophilesContext.Pedophiles.Upsert(pedophile).On(x => x.Iin).RunAsync();
             }
-            var minDate = await _parsedPedophilesContext.PedophileDtos.MinAsync(x => x.RelevanceDate);
+            DateTime? minDate = await _parsedPedophilesContext.PedophileDtos.MinAsync(x => x.RelevanceDate);
             var toDelete = _webPedophilesContext.Pedophiles.Where(x => x.RelevanceDate < minDate);
             _webPedophilesContext.Pedophiles.RemoveRange(toDelete);
             await _webPedophilesContext.SaveChangesAsync();
-//            await _parsedPedophilesContext.Database.ExecuteSqlRawAsync("truncate avroradata.pedophiles");
+            // await _parsedPedophilesContext.Database.ExecuteSqlRawAsync("truncate avroradata.pedophiles");
         }
     }
 }

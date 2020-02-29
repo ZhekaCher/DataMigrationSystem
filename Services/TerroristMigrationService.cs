@@ -65,7 +65,7 @@ namespace DataMigrationSystem.Services
             var minDate = await _parsedTerroristContext.TerroristDtos.MinAsync(x => x.RelevanceDate);
             _webTerroristContext.Terrorists.RemoveRange(_webTerroristContext.Terrorists.Where(x=>x.RelevanceDate<minDate));
             await _webTerroristContext.SaveChangesAsync();
-            await _parsedTerroristContext.Database.ExecuteSqlRawAsync("truncate avroradata.terrorists");
+            await _parsedTerroristContext.Database.ExecuteSqlRawAsync("truncate avroradata.terrorists restart identity;");
 
         }
     }

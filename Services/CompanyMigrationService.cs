@@ -49,14 +49,18 @@ namespace DataMigrationSystem.Services
             foreach (var companyDto in companyDtos)
             {
                 var company = DtoToEntity(companyDto);
+                webCompanyContext.CompaniesOkeds.RemoveRange(company.CompanyOkeds);
+                await webCompanyContext.SaveChangesAsync();
                 await webCompanyContext.Companies.Upsert(company).On(x => x.Bin).RunAsync();
-                // await _webCompanyContext.CompaniesOkeds.UpsertRange(company.CompanyOkeds)
-                // .On(x => new {x.CompanyId, x.OkedId}).RunAsync();
+                await webCompanyContext.CompaniesOkeds.AddRangeAsync(company.CompanyOkeds);
+                await webCompanyContext.SaveChangesAsync();
                 lock (_forLock)
                 {
                     Logger.Trace(_total--);
                 }
             }
+            await parsedCompanyContext.Database.ExecuteSqlRawAsync("truncate avroradata.company restart identity restart identity;");
+
         }
 
         private async Task MigrateReferences()
@@ -73,7 +77,6 @@ namespace DataMigrationSystem.Services
                     Id = distinct.KatoCode,
                     NameKz = distinct.SettlementNameKz,
                     NameRu = distinct.SettlementNameRu,
-                                    
                 }).On(x=>x.Id).RunAsync();
             }
             var krps = parsedCompanyContext.CompanyDtos
@@ -108,7 +111,10 @@ namespace DataMigrationSystem.Services
             {
                 company.CompanyOkeds = new List<CompanyOked>
                 {
-                    new CompanyOked {CompanyId = dto.Bin, OkedId = dto.OkedCode, Type = 1}
+                    new CompanyOked
+                    {
+                        CompanyId = dto.Bin, OkedId = dto.OkedCode, Type = 1
+                    }
                 };
                 if (dto.SecondOkedCode != null)
                 {
