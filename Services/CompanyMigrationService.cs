@@ -34,13 +34,13 @@ namespace DataMigrationSystem.Services
             Logger.Info("Start");
             var tasks = new List<Task>();
             for (var i = 0; i < NumOfThreads; i++)
-                tasks.Add(Migrate(i));
+                tasks.Add(MigrateAsync(i));
 
             await Task.WhenAll(tasks);
             Logger.Info("Ended");
         }
 
-        private async Task Migrate(int threadNum)
+        private async Task MigrateAsync(int threadNum)
         {
             await using var webCompanyContext = new WebCompanyContext();
             await using var parsedCompanyContext = new ParsedCompanyContext();
