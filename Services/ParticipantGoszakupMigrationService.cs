@@ -43,7 +43,7 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
-            
+
             Logger.Info("Starting removing participants who out of goszakup");
             await using var webParticipantGoszakupContext = new WebParticipantGoszakupContext();
             await using var webParticipantGoszakupContext2 = new WebParticipantGoszakupContext();
@@ -59,7 +59,7 @@ namespace DataMigrationSystem.Services
                     participantGoszakup.RelevanceDate = firstParsedTime;
                     webParticipantGoszakupContext2.ParticipantsGoszakup.Update(participantGoszakup);
                     await webParticipantGoszakupContext2.SaveChangesAsync();
-                    Logger.Trace($"{participantGoszakup.BiinCompanies} Left: {--left}");
+                    Logger.Trace($"Removing: {participantGoszakup.BiinCompanies} Left: {--left}");
                 }
                 catch (Exception e)
                 {
@@ -79,6 +79,7 @@ namespace DataMigrationSystem.Services
 
             await using var webParticipantGoszakupContext = new WebParticipantGoszakupContext();
             await using var parsedParticipantGoszakupContext = new ParsedParticipantGoszakupContext();
+            var a = parsedParticipantGoszakupContext.ParticipantGoszakupDtos.Count();
             foreach (var dto in parsedParticipantGoszakupContext.ParticipantGoszakupDtos.Where(x =>
                     x.Pid % NumOfThreads == threadNum)
                 .Where(x => x.Inn == null && x.Unp == null && (x.Bin != null || x.Iin != null)))
@@ -86,6 +87,7 @@ namespace DataMigrationSystem.Services
                 var temp = DtoToWeb(dto);
                 try
                 {
+                    Logger.Trace($"Moving: {dto.Bin}");
                     await webParticipantGoszakupContext.ParticipantsGoszakup.Upsert(temp)
                         .On(x => x.BiinCompanies).RunAsync();
                 }
@@ -110,6 +112,7 @@ namespace DataMigrationSystem.Services
 
             Logger.Info($"Completed thread at {_total}");
         }
+
 
         private ParticipantGoszakup DtoToWeb(ParticipantGoszakupDto participantGoszakupDto)
         {
