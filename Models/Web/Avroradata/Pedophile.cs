@@ -17,19 +17,19 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("middle_name")]
         public string MiddleName { get;set; }
         [Column("birthday")]
-        public DateTime Birthday{ get;set; }
+        public DateTime? Birthday{ get;set; }
         [Column("iin")]
         public long Iin { get;set; }
         [Column("court")]
         public string Court { get;set; }
         [Column("court_date")]
-        public DateTime CourtDate{ get;set; }
+        public DateTime? CourtDate{ get;set; }
         [Column("crime_article")]
         public string CrimeArticle { get;set; }
         [Column("judgement")]
         public string Judgement { get;set; }
         [Column("jail_release_date")]
-        public DateTime JailReleaseDate { get;set; }
+        public string JailReleaseDate { get;set; }
         [Column("relevance_date")]
         public DateTime? RelevanceDate { get;set; }
     }
