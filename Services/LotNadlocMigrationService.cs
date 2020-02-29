@@ -60,8 +60,8 @@ namespace DataMigrationSystem.Services
                     IdAnno = x.TenderId,
                     NumberLot = x.LotNumber.ToString(),
                     NameRu = x.ScpDescription,
-                    Quantity = x.Quantity == null ? 1 : x.Quantity,
-                    Price = x.FullPrice / (x.Quantity == null ? 1 : x.Quantity),
+                    Quantity = x.Quantity == 0 ? 1 : x.Quantity,
+                    Price = x.FullPrice/(x.Quantity == 0 ? 1 : x.Quantity),
                     Total = x.FullPrice,
                     RelevanceDate = x.RelevanceDate,
                     DeliveryAddress = x.DeliveryPlace
