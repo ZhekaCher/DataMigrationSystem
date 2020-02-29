@@ -50,10 +50,10 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         public long IinBin { get; set; }
     }
     
-    [Table("i_enforcement_debt")]
-    public class IndividualEnforcementDebt : EnforcementDebt{
-        [Column("iin")]
-        public long IinBin { get; set; }
-    }
+    // [Table("i_enforcement_debt")]
+    // public class IndividualEnforcementDebt : EnforcementDebt{
+    //     [Column("iin")]
+    //     public long IinBin { get; set; }
+    // }
     
 }

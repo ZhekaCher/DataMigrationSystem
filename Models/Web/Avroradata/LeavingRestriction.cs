@@ -29,10 +29,10 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         public long IinBin { get; set; }
     }
     
-    [Table("i_leaving_restriction")]
-    public class IndividualLeavingRestriction : LeavingRestriction
-    {
-        [Column("iin")]
-        public long IinBin { get; set; }
-    }
+    // [Table("i_leaving_restriction")]
+    // public class IndividualLeavingRestriction : LeavingRestriction
+    // {
+    //     [Column("iin")]
+    //     public long IinBin { get; set; }
+    // }
 }
