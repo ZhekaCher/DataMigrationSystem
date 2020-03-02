@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
@@ -49,10 +50,10 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
-            await using var parsedAnnouncementGoszakupContext = new ParsedAnnouncementGoszakupContext();
-            await parsedAnnouncementGoszakupContext.Database.ExecuteSqlRawAsync(
-                "truncate table avroradata.announcement_goszakup restart identity cascade;");
-            Logger.Info("Truncated");
+            // await using var parsedAnnouncementGoszakupContext = new ParsedAnnouncementGoszakupContext();
+            // await parsedAnnouncementGoszakupContext.Database.ExecuteSqlRawAsync(
+            // "truncate table avroradata.announcement_goszakup restart identity cascade;");
+            // Logger.Info("Truncated");
         }
 
         private async Task Migrate(int threadNum)
@@ -61,14 +62,34 @@ namespace DataMigrationSystem.Services
 
             await using var webAnnouncementContext = new WebAnnouncementContext();
             await using var parsedAnnouncementGoszakupContext = new ParsedAnnouncementGoszakupContext();
+                // {ChangeTracker = {QueryTrackingBehavior = QueryTrackingBehavior.NoTracking}};
             foreach (var dto in parsedAnnouncementGoszakupContext.AnnouncementGoszakupDtos.Where(x =>
                 x.Id % NumOfThreads == threadNum))
             {
                 var dtoIns = DtoToWeb(dto);
                 dtoIns.IdTf = _sTradingFloorId;
-                await webAnnouncementContext.Announcements.Upsert(dtoIns).On(x => new {x.IdAnno, x.IdTf}).RunAsync();
+                try
+                {
+                    await webAnnouncementContext.Announcements.Upsert(dtoIns).On(x => new {x.IdAnno, x.IdTf})
+                        .RunAsync();
+                }
+                catch (Exception e)
+                {
+                    if (e.Message.Contains("violates foreign key"))
+                    {
+                        Logger.Warn($"Message:|{e.Message}|; IdAnno:|{dtoIns.IdAnno}|;");
+                    }
+                    else
+                    {
+                        Logger.Error(
+                            $"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|; IdAnno:|{dtoIns.IdAnno}|; Id:|{dtoIns.Id}|");
+                        Program.NumOfErrors++;
+                    }
+                }
+
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
+                // parsedAnnouncementGoszakupContext.Entry(dto).State = EntityState.Detached;
             }
 
             Logger.Info($"Completed thread at {_total}");
