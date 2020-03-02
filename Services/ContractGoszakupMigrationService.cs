@@ -49,9 +49,9 @@ namespace DataMigrationSystem.Services
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
             
-            // await using var parsedContractGoszakupContext = new ParsedContractGoszakupContext();
-            // await parsedContractGoszakupContext.Database.ExecuteSqlRawAsync("truncate table avroradata.contract_goszakup restart identity cascade;");
-            // Logger.Info("Truncated");
+            await using var parsedContractGoszakupContext = new ParsedContractGoszakupContext();
+            await parsedContractGoszakupContext.Database.ExecuteSqlRawAsync("truncate table avroradata.contract_goszakup restart identity cascade;");
+            Logger.Info("Truncated");
         }
 
         private async Task Migrate(int threadNum)
@@ -79,7 +79,7 @@ namespace DataMigrationSystem.Services
                 {
                     if (e.Message.Contains("violates foreign key"))
                     {
-                        Logger.Warn($"Message:|{e.Message}|; IdContract:|{temp.IdContract}|;");
+                        // Logger.Warn($"Message:|{e.Message}|; IdContract:|{temp.IdContract}|;");
                     }
                     else
                     {

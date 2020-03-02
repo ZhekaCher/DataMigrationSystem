@@ -50,10 +50,10 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
-            // await using var parsedAnnouncementGoszakupContext = new ParsedAnnouncementGoszakupContext();
-            // await parsedAnnouncementGoszakupContext.Database.ExecuteSqlRawAsync(
-            // "truncate table avroradata.announcement_goszakup restart identity cascade;");
-            // Logger.Info("Truncated");
+            await using var parsedAnnouncementGoszakupContext = new ParsedAnnouncementGoszakupContext();
+            await parsedAnnouncementGoszakupContext.Database.ExecuteSqlRawAsync(
+            "truncate table avroradata.announcement_goszakup restart identity cascade;");
+            Logger.Info("Truncated");
         }
 
         private async Task Migrate(int threadNum)
@@ -62,7 +62,6 @@ namespace DataMigrationSystem.Services
 
             await using var webAnnouncementContext = new WebAnnouncementContext();
             await using var parsedAnnouncementGoszakupContext = new ParsedAnnouncementGoszakupContext();
-                // {ChangeTracker = {QueryTrackingBehavior = QueryTrackingBehavior.NoTracking}};
             foreach (var dto in parsedAnnouncementGoszakupContext.AnnouncementGoszakupDtos.Where(x =>
                 x.Id % NumOfThreads == threadNum))
             {
@@ -77,7 +76,7 @@ namespace DataMigrationSystem.Services
                 {
                     if (e.Message.Contains("violates foreign key"))
                     {
-                        Logger.Warn($"Message:|{e.Message}|; IdAnno:|{dtoIns.IdAnno}|;");
+                        // Logger.Warn($"Message:|{e.Message}|; IdAnno:|{dtoIns.IdAnno}|;");
                     }
                     else
                     {
@@ -89,7 +88,6 @@ namespace DataMigrationSystem.Services
 
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
-                // parsedAnnouncementGoszakupContext.Entry(dto).State = EntityState.Detached;
             }
 
             Logger.Info($"Completed thread at {_total}");
