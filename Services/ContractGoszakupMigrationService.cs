@@ -49,9 +49,9 @@ namespace DataMigrationSystem.Services
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
             
-            await using var parsedContractGoszakupContext = new ParsedContractGoszakupContext();
-            await parsedContractGoszakupContext.Database.ExecuteSqlRawAsync("truncate table avroradata.contract_goszakup restart identity cascade;");
-            Logger.Info("Truncated");
+            // await using var parsedContractGoszakupContext = new ParsedContractGoszakupContext();
+            // await parsedContractGoszakupContext.Database.ExecuteSqlRawAsync("truncate table avroradata.contract_goszakup restart identity cascade;");
+            // Logger.Info("Truncated");
         }
 
         private async Task Migrate(int threadNum)
@@ -67,9 +67,9 @@ namespace DataMigrationSystem.Services
                 Contract temp;
                 ContractGoszakup tempGoszakup;
                 (temp, tempGoszakup) = DtoToWeb(dto);
+                temp.IdTf = _sTradingFloorId;
                 try
                 {
-                    temp.IdTf = _sTradingFloorId;
                     await webContractContext.Contracts.Upsert(temp)
                         .On(x => new{x.IdContract, x.IdTf}).RunAsync();
                     await webContractContext.ContractsGoszakup.Upsert(tempGoszakup)
