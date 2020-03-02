@@ -14,11 +14,9 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("place")]
         public int Place { get; set; }
         [Column("date_of_adding")] public DateTime AddingDate { get; set; }
-        
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Column("biin_companies")]
-        public long Bin { get; set; }
-
+        public long? Bin { get; set; }
     }
 }
