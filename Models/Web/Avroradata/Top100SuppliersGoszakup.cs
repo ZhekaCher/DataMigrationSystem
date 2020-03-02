@@ -18,6 +18,6 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Column("biin_companies")]
-        public long Bin { get; set; }
+        public long? Bin { get; set; }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
@@ -29,7 +30,7 @@ namespace DataMigrationSystem.Services
             await using var parsedTop100GoszakupContext = new ParsedTop100GoszakupContext();
             var top100CustomersDto = from top100Customer in parsedTop100GoszakupContext.Top100CustomersGoszakupDtos
                 join company in parsedTop100GoszakupContext.CompanyBinDtos
-                    on top100Customer.Bin equals company.Code
+                    on top100Customer.Bin equals company.Code where top100Customer.Bin != null
                 select
                     new Top100CustomersGoszakup
                     {
@@ -41,6 +42,10 @@ namespace DataMigrationSystem.Services
                     };
             foreach (var top100 in top100CustomersDto)
             {
+                if (top100.Bin == null)
+                {
+                    Console.WriteLine("Hello");
+                }
                 await webTop100GoszakupContext.Top100CustomersGoszakup.Upsert(top100).On(x => x.Bin).RunAsync();
             }
             var lastDateC = webTop100GoszakupContext.Top100CustomersGoszakup.Max(x => x.AddingDate).Date;
@@ -66,7 +71,7 @@ namespace DataMigrationSystem.Services
             var lastDateS = webTop100GoszakupContext.Top100Suppliersgoszakup.Max(x => x.AddingDate).Date;
             webTop100GoszakupContext.Top100Suppliersgoszakup.RemoveRange(webTop100GoszakupContext.Top100Suppliersgoszakup.Where(x=>x.AddingDate.Date < lastDateS));
             await webTop100GoszakupContext.SaveChangesAsync();
-            await parsedTop100GoszakupContext.Database.ExecuteSqlRawAsync("truncate avroradata.top100customers, avroradata.top100suppliers restart identity;");
+            await parsedTop100GoszakupContext.Database.ExecuteSqlRawAsync("truncate avroradata.top100customers, avroradata.top100suppliers;");
         }
     }
 }

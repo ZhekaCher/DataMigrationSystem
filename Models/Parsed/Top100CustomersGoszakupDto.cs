@@ -13,7 +13,7 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("name")]
         public string Name { get; set; }
         [Column("bin")]
-        public long Bin { get; set; }
+        public long? Bin { get; set; }
         [Column("contracts")]
         public long Contracts { get; set; }
         [Column("amount")]
