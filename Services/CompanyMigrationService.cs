@@ -91,6 +91,20 @@ namespace DataMigrationSystem.Services
                                     
                 }).On(x=>x.Id).RunAsync();
             }
+
+            var okeds = parsedCompanyContext.CompanyDtos
+                .Select(x => new {x.OkedCode, x.ActivityNameKz, x.ActivityNameRu}).Distinct();
+            foreach (var distinct in okeds)
+            {
+                await webCompanyContext.Okeds.Upsert(
+                    new Oked
+                    {
+                        Id = distinct.OkedCode,
+                        NameKz = distinct.ActivityNameKz,
+                        NameRu = distinct.ActivityNameRu,
+                        Parent = distinct.OkedCode.Substring(0,distinct.OkedCode.Length-1)
+                    }).On(x=>x.Id).RunAsync();
+            }
         }
         private Company DtoToEntity(CompanyDto dto)
         {

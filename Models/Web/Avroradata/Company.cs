@@ -70,6 +70,12 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Key]
         [Column("i")]
         public string Id { get; set; }
+        [Column("name_ru")]
+        public string NameRu { get; set; }
+        [Column("name_kz")]
+        public string NameKz { get; set; }
+        [Column("parent_i")]
+        public string Parent { get; set; }
         [Column("path")]
         public string Path { get; set; }
     }
