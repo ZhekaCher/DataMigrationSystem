@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Reflection;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context;
+using DataMigrationSystem.Models;
 using DataMigrationSystem.Services;
 using NLog;
 using Npgsql;
@@ -40,8 +41,29 @@ namespace DataMigrationSystem
         {
             var listOfMigrations = ((List<string>) _configurations[ConfigurationElements.Migrations]).ToList();
             var threads = (int?) _configurations[ConfigurationElements.Threads];
+
             foreach (var migration in listOfMigrations)
             {
+                if (!_configurations.ContainsKey(ConfigurationElements.Force))
+                {
+                    await using var parserMonitoringContext = new ParserMonitoringContext();
+                    ParserMonitoring temp;
+                    if (!_configurations.ContainsKey(ConfigurationElements.Ignore))
+                    {
+                        temp = parserMonitoringContext.ParserMonitorings.FirstOrDefault(x =>
+                            x.Parsed == true && x.Active == true);
+                    }
+                    else
+                    {
+                        temp = parserMonitoringContext.ParserMonitorings.FirstOrDefault(x => x.Parsed == true);
+                    }
+
+                    if (temp == null && _configurations.ContainsKey(ConfigurationElements.Ignore))
+                        _logger.Warn("This parser hasn't been parsed yet");
+                    else
+                        _logger.Warn("This parser is unactive or hasn't been parsed yet");
+                }
+
                 MigrationService migrationService;
                 var migrationClass = GetMigrationServiceFromName(migration);
                 _logger.Info($"Trying to launch {migration}");
@@ -102,6 +124,8 @@ namespace DataMigrationSystem
         {
             _commandsDictionary.Add("--help (-h)", "prints commands list");
             _commandsDictionary.Add("--list (-l)", "prints the list of avaliable migrations");
+            _commandsDictionary.Add("--ignore (-i)", "ignores 'active' field in 'parser_monitoring_table'");
+            _commandsDictionary.Add("--force (-r)", "ignores 'active' and 'parsed' field in 'parser_monitoring_table'");
             _commandsDictionary.Add("--threads (-t)",
                 $"choose number of threads\n{"Example: -t 5 -> starting with 5 threads for all migrations",82}");
             _commandsDictionary.Add("--migrations (-m)",
@@ -116,7 +140,7 @@ namespace DataMigrationSystem
 
             using var parserMonitoringContext = new ParserMonitoringContext();
             var parserMonitorings =
-                parserMonitoringContext.ParserMonitorings.Where(x => x.Parsed == true && x.Active == true);
+                parserMonitoringContext.ParserMonitorings.ToList();
             var migrations = new List<string>();
             foreach (var parserMonitoring in parserMonitorings)
                 migrations.Add(parserMonitoring.Name);
@@ -167,6 +191,14 @@ namespace DataMigrationSystem
                             case "--migrations":
                                 arguments.Add(ConfigurationElements.Migrations, new List<string>());
                                 flag = ConfigurationElements.Migrations;
+                                break;
+                            case "-i":
+                            case "--ignore":
+                                arguments.Add(ConfigurationElements.Ignore, null);
+                                break;
+                            case "-f":
+                            case "--force":
+                                arguments.Add(ConfigurationElements.Force, null);
                                 break;
                             case "-h":
                             case "--help":
@@ -222,6 +254,13 @@ namespace DataMigrationSystem
                             _configurations[ConfigurationElements.Migrations] =
                                 ((List<string>) keyValuePair.Value).ToList();
                         break;
+                    case ConfigurationElements.Ignore:
+                        _configurations.Add(ConfigurationElements.Ignore, null);
+                        break;
+
+                    case ConfigurationElements.Force:
+                        _configurations.Add(ConfigurationElements.Force, null);
+                        break;
                 }
             }
         }
@@ -235,6 +274,8 @@ namespace DataMigrationSystem
         {
             Threads,
             Migrations,
+            Ignore,
+            Force,
             Help,
             List
         }
