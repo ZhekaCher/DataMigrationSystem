@@ -50,7 +50,7 @@ namespace DataMigrationSystem.Services
             Logger.Info("End of migration");
             
             await using var parsedContractGoszakupContext = new ParsedContractGoszakupContext();
-            await parsedContractGoszakupContext.Database.ExecuteSqlRawAsync("truncate table avroradata.contract_goszakup restart identity cascade;");
+            await parsedContractGoszakupContext.Database.ExecuteSqlRawAsync("truncate table trading_floor.contract_goszakup restart identity cascade;");
             Logger.Info("Truncated");
         }
 
@@ -79,7 +79,7 @@ namespace DataMigrationSystem.Services
                 {
                     if (e.Message.Contains("violates foreign key"))
                     {
-                        // Logger.Warn($"Message:|{e.Message}|; IdContract:|{temp.IdContract}|;");
+                        Logger.Warn($"Message:|{e.Message}|; IdContract:|{temp.IdContract}|;");
                     }
                     else
                     {
@@ -118,11 +118,13 @@ namespace DataMigrationSystem.Services
             contractGoszakup.DescriptionRu = contractGoszakupDto.DescriptionRu;
             contractGoszakup.IdContract = contractGoszakupDto.Id;
             contractGoszakup.FaktSumWnds = contractGoszakupDto.FaktSumWnds;
-            contractGoszakup.CustomerBankNameKz = contractGoszakup.CustomerBankNameKz;
-            contractGoszakup.CustomerBankNameRu = contractGoszakup.CustomerBankNameRu;
-            contractGoszakup.SupplierBankNameKz = contractGoszakup.SupplierBankNameKz;
-            contractGoszakup.SupplierBankNameRu = contractGoszakup.SupplierBankNameRu;
+            contractGoszakup.CustomerBankNameKz = contractGoszakupDto.CustomerBankNameKz;
+            contractGoszakup.CustomerBankNameRu = contractGoszakupDto.CustomerBankNameRu;
+            contractGoszakup.SupplierBankNameKz = contractGoszakupDto.SupplierBankNameKz;
+            contractGoszakup.SupplierBankNameRu = contractGoszakupDto.SupplierBankNameRu;
             contractGoszakup.SignReasonDocName = contractGoszakupDto.SignReasonDocName;
+            contractGoszakup.TypeContract = contractGoszakupDto.RefContractTypeId;
+            contractGoszakup.TradeMethod = contractGoszakupDto.FaktTradeMethodsId;
             return (contract, contractGoszakup);
         }
     }

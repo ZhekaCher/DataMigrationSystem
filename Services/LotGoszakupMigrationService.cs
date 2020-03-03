@@ -50,7 +50,7 @@ namespace DataMigrationSystem.Services
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
             await using var parsedLotGoszakupContext = new ParsedLotGoszakupContext();
-            await parsedLotGoszakupContext.Database.ExecuteSqlRawAsync("truncate table avroradata.lot_goszakup restart identity cascade;");
+            await parsedLotGoszakupContext.Database.ExecuteSqlRawAsync("truncate table trading_floor.lot_goszakup restart identity cascade;");
             Logger.Info("Truncated");
         }
 

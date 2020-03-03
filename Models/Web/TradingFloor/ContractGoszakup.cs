@@ -10,6 +10,8 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
 		[Column("description_kz")] public string DescriptionKz{get; set;}
 		[Column("description_ru")] public string DescriptionRu{get; set;}
 		[Column("fakt_sum_wnds")] public double? FaktSumWnds{get; set;}
+		[Column("type_contract")] public int? TypeContract{get; set;}
+		[Column("trade_method")] public int? TradeMethod{get; set;}
 		[Column("sign_reason_doc_name")] public string SignReasonDocName{get; set;}
 		[Column("supplier_bank_name_ru")] public string SupplierBankNameRu{get; set;}
 		[Column("supplier_bank_name_kz")] public string SupplierBankNameKz{get; set;}
