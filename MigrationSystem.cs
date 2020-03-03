@@ -59,9 +59,16 @@ namespace DataMigrationSystem
                     }
 
                     if (temp == null && _configurations.ContainsKey(ConfigurationElements.Ignore))
+                    {
                         _logger.Warn("This parser hasn't been parsed yet");
-                    else
+                        continue;
+                    }
+                    else if (temp == null)
+                    {
                         _logger.Warn("This parser is unactive or hasn't been parsed yet");
+                        continue;
+                    }.
+                    
                 }
 
                 MigrationService migrationService;
