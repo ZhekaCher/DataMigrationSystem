@@ -50,10 +50,10 @@ namespace DataMigrationSystem.Services
             {
                 var company = DtoToEntity(companyDto);
                 webCompanyContext.CompaniesOkeds.RemoveRange(company.CompanyOkeds);
-                // await webCompanyContext.SaveChangesAsync();
+                await webCompanyContext.SaveChangesAsync();
                 await webCompanyContext.Companies.Upsert(company).On(x => x.Bin).RunAsync();
-                // await webCompanyContext.CompaniesOkeds.AddRangeAsync(company.CompanyOkeds);
-                // await webCompanyContext.SaveChangesAsync();
+                await webCompanyContext.CompaniesOkeds.AddRangeAsync(company.CompanyOkeds);
+                await webCompanyContext.SaveChangesAsync();
                 lock (_forLock)
                 {
                     Logger.Trace(_total--);
