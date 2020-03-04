@@ -9,7 +9,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
 		[Column("company_bin")] public long? CompanyBin{get; set;}
 		[Column("director_iin")] public long? DirectorIin{get; set;}
 		[Column("relevance_date")] public DateTime? RelevanceDate{get; set;}
-		[Column("i_datasource")] public long? IDatasource{get; set;}
+		[Column("i_datasource")] public long? IDataSource{get; set;}
 		[Column("date_begin")] public DateTime? DateBegin{get; set;}
 		[Column("date_end")] public DateTime? DateEnd{get; set;}
 		
