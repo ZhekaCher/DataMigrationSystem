@@ -49,11 +49,11 @@ namespace DataMigrationSystem.Services
             foreach (var companyDto in companyDtos)
             {
                 var company = DtoToEntity(companyDto);
-                webCompanyContext.CompaniesOkeds.RemoveRange(company.CompanyOkeds);
-                await webCompanyContext.SaveChangesAsync();
                 await webCompanyContext.Companies.Upsert(company).On(x => x.Bin).RunAsync();
-                await webCompanyContext.CompaniesOkeds.AddRangeAsync(company.CompanyOkeds);
-                await webCompanyContext.SaveChangesAsync();
+                foreach (var oked in company.CompanyOkeds)
+                {
+                    await webCompanyContext.CompaniesOkeds.Upsert(oked).On(x=>new {x.CompanyId, x.OkedId}).RunAsync();
+                }
                 lock (_forLock)
                 {
                     Logger.Trace(_total--);
@@ -91,7 +91,24 @@ namespace DataMigrationSystem.Services
                                     
                 }).On(x=>x.Id).RunAsync();
             }
-
+            var secondOkeds = parsedCompanyContext.CompanyDtos.Select(x => new {x.SecondOkedCode}).Distinct();
+            foreach (var secondOked in secondOkeds)
+            {
+                if (secondOked != null)
+                {
+                    var secOkeds = secondOked.SecondOkedCode.Split(',');
+                    foreach (var oked in secOkeds)
+                    {
+                        await webCompanyContext.Okeds.Upsert(
+                            new Oked
+                            {
+                                Id = oked,
+                                NameKz = "",
+                                NameRu = "",
+                            }).On(x => x.Id).RunAsync();
+                    }
+                }
+            }
             var okeds = parsedCompanyContext.CompanyDtos
                 .Select(x => new {x.OkedCode, x.ActivityNameKz, x.ActivityNameRu}).Distinct();
             foreach (var distinct in okeds)
@@ -102,7 +119,6 @@ namespace DataMigrationSystem.Services
                         Id = distinct.OkedCode,
                         NameKz = distinct.ActivityNameKz,
                         NameRu = distinct.ActivityNameRu,
-                        Parent = distinct.OkedCode.Substring(0,distinct.OkedCode.Length-1)
                     }).On(x=>x.Id).RunAsync();
             }
         }
