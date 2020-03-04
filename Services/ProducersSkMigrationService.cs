@@ -40,7 +40,8 @@ namespace DataMigrationSystem.Services
                     on producersSkDto.Bin equals company.Code
                     select new ProducersSk
                 {
-                    Id = producersSkDto.Id,
+                    Ceo = producersSkDto.Ceo,
+                    Contacts = producersSkDto.Contacts,
                     Bin = producersSkDto.Bin,
                     ProducerType = 1,
                     RelevanceDate = producersSkDto.RelevanceDate
@@ -49,9 +50,33 @@ namespace DataMigrationSystem.Services
             {
                 await _webProducerSkContext.ProducerSks.Upsert(producersSkDto).On(x => x.Bin).RunAsync();
             }
+
+            var producerProductsDtos = from producerProductsDto in _parsedProducerSkContext.ProducerProductsDtos
+                select new ProducerProducts
+                {
+                    Bin = producerProductsDto.Bin,
+                    Products = producerProductsDto.Products,
+                    AddingDate = producerProductsDto.AddingDate,
+                    Certificates = producerProductsDto.Certificates,
+                    Positions = producerProductsDto.Positions,
+                    DocDate = producerProductsDto.DocumentDate,
+                    Validity = producerProductsDto.Validity,
+                    RelevanceDate = producerProductsDto.RelevanceDate
+                };
+
+            await _webProducerSkContext.Database.ExecuteSqlRawAsync(
+                "truncate avroradata.samruk_producer_company_products restart identity;");
+            
+            foreach (var producerProductsDto in producerProductsDtos)
+            {
+                await _webProducerSkContext.ProducerProductses.AddAsync(producerProductsDto);
+            }
+            await _webProducerSkContext.SaveChangesAsync();
+            
             var lastDate = _webProducerSkContext.ProducerSks.Max(x => x.RelevanceDate).Date;
             _webProducerSkContext.ProducerSks.RemoveRange(_webProducerSkContext.ProducerSks.Where(x=>x.RelevanceDate<lastDate));
             await _webProducerSkContext.SaveChangesAsync();
+            
             await _parsedProducerSkContext.Database.ExecuteSqlRawAsync("truncate avroradata.producers_sk, avroradata.producer_products_sk restart identity;");
         }
     }

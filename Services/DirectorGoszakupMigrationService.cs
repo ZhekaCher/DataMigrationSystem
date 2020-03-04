@@ -46,7 +46,7 @@ namespace DataMigrationSystem.Services
             Logger.Info("End of migration");
             await using var parsedDirectorGoszakupContext = new ParsedDirectorGoszakupContext();
             await parsedDirectorGoszakupContext.Database.ExecuteSqlRawAsync(
-                "truncate table avroradata.company_director restart identity cascade;");
+                "truncate table avroradata.director_goszakup restart identity cascade;");
             Logger.Info("Truncated");
         }
         
@@ -95,7 +95,7 @@ namespace DataMigrationSystem.Services
             var companyDirector = new CompanyDirector();
             companyDirector.CompanyBin = directorGoszakupDto.Bin;
             companyDirector.DirectorIin = directorGoszakupDto.Iin;
-            companyDirector.IDatasource = 2;
+            companyDirector.DataSource = 2;
             companyDirector.RelevanceDate = directorGoszakupDto.Relevance;
             return companyDirector;
         }

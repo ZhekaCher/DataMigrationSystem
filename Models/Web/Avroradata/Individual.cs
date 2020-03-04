@@ -15,11 +15,4 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("relevance_date")]
         public DateTime? RelevanceDate { get; set; }
     }
-    [Table("individual")]
-    public class ParsedIndividual
-    {
-        [Key]
-        [Column("iin")]
-        public long Iin { get; set; }
-    }
 }

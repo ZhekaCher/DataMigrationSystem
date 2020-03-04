@@ -7,5 +7,6 @@ namespace DataMigrationSystem.Context.Web.Avroradata
     public class WebProducerSkContext: WebContext
     {
         public DbSet<ProducersSk> ProducerSks { get; set; }
+        public DbSet<ProducerProducts> ProducerProductses { get; set; }
     }
 }

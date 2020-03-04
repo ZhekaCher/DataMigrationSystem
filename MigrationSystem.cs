@@ -51,24 +51,18 @@ namespace DataMigrationSystem
                     if (!_configurations.ContainsKey(ConfigurationElements.Ignore))
                     {
                         temp = parserMonitoringContext.ParserMonitorings.FirstOrDefault(x =>
-                            x.Parsed == true && x.Active == true);
+                            x.Parsed == true && x.Active == true && x.Name.Equals(migration));
                     }
                     else
                     {
-                        temp = parserMonitoringContext.ParserMonitorings.FirstOrDefault(x => x.Parsed == true);
+                        temp = parserMonitoringContext.ParserMonitorings.FirstOrDefault(x => x.Parsed == true  && x.Name.Equals(migration));
                     }
 
-                    if (temp == null && _configurations.ContainsKey(ConfigurationElements.Ignore))
+                    if (temp == null)
                     {
-                        _logger.Warn("This parser hasn't been parsed yet");
+                        _logger.Warn($"This parser is unactive or hasn't been parsed yet: {migration}");
                         continue;
                     }
-                    else if (temp == null)
-                    {
-                        _logger.Warn("This parser is unactive or hasn't been parsed yet");
-                        continue;
-                    }
-                    
                 }
 
                 MigrationService migrationService;
