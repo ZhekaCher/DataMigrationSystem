@@ -4,8 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace DataMigrationSystem.Models.Web.Avroradata
 {
 	[Table("company_director")]
-	public class CompanyDirector
-	{
+	public class CompanyDirector{
 		[Column("company_bin")] public long? CompanyBin{get; set;}
 		[Column("director_iin")] public long? DirectorIin{get; set;}
 		[Column("relevance_date")] public DateTime? RelevanceDate{get; set;}

@@ -13,6 +13,11 @@ namespace DataMigrationSystem.Context.Web.Avroradata
     public class WebCompanyDirectorContext : WebContext
     {
         public DbSet<CompanyDirector> CompanyDirectors { get; set; }    
-        public DbSet<DataSource> DataSources { get; set; }    
+        public DbSet<DataSource> DataSources { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CompanyDirector>().HasKey(x => new {x.CompanyBin, x.DirectorIin});
+        }
     }
 }

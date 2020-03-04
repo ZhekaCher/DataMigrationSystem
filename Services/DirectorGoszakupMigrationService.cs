@@ -32,7 +32,7 @@ namespace DataMigrationSystem.Services
         {
             NumOfThreads = numOfThreads;
             using var parsedDirectorGoszakupContext = new ParsedDirectorGoszakupContext();
-            _total = parsedDirectorGoszakupContext.DirectorGoszakupDtos.Count();
+            _total = parsedDirectorGoszakupContext.DirectorGoszakupDtos.Count(x => x.Bin!=null && x.Iin!= null);
         }
         
         public async override Task StartMigratingAsync()
@@ -44,6 +44,10 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
+            await using var parsedDirectorGoszakupContext = new ParsedDirectorGoszakupContext();
+            await parsedDirectorGoszakupContext.Database.ExecuteSqlRawAsync(
+                "truncate table avroradata.company_director restart identity cascade;");
+            Logger.Info("Truncated");
         }
         
         private async Task Migrate(int threadNum)
@@ -53,7 +57,7 @@ namespace DataMigrationSystem.Services
 
             await using var webCompanyDirectorContext = new WebCompanyDirectorContext();
             await using var parsedDirectorGoszakupContext = new ParsedDirectorGoszakupContext();
-            foreach (var dto in parsedDirectorGoszakupContext.DirectorGoszakupDtos)
+            foreach (var dto in parsedDirectorGoszakupContext.DirectorGoszakupDtos.Where(x => x.Bin!=null && x.Iin!= null && x.Id%NumOfThreads==threadNum))
             {
                 var temp = DtoToWeb(dto);
                 try
@@ -92,6 +96,7 @@ namespace DataMigrationSystem.Services
             companyDirector.CompanyBin = directorGoszakupDto.Bin;
             companyDirector.DirectorIin = directorGoszakupDto.Iin;
             companyDirector.IDatasource = 2;
+            companyDirector.RelevanceDate = directorGoszakupDto.Relevance;
             return companyDirector;
         }
     }

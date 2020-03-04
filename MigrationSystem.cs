@@ -67,7 +67,7 @@ namespace DataMigrationSystem
                     {
                         _logger.Warn("This parser is unactive or hasn't been parsed yet");
                         continue;
-                    }.
+                    }
                     
                 }
 
