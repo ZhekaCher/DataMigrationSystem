@@ -91,7 +91,7 @@ namespace DataMigrationSystem.Services
             var companyDirector = new CompanyDirector();
             companyDirector.CompanyBin = directorGoszakupDto.Bin;
             companyDirector.DirectorIin = directorGoszakupDto.Iin;
-            companyDirector.IDatasource = 2;
+            companyDirector.DataSource = 2;
             return companyDirector;
         }
     }
