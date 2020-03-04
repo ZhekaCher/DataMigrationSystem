@@ -51,11 +51,11 @@ namespace DataMigrationSystem
                     if (!_configurations.ContainsKey(ConfigurationElements.Ignore))
                     {
                         temp = parserMonitoringContext.ParserMonitorings.FirstOrDefault(x =>
-                            x.Parsed == true && x.Active == true);
+                            x.Parsed == true && x.Active == true && x.Name.Equals(migration));
                     }
                     else
                     {
-                        temp = parserMonitoringContext.ParserMonitorings.FirstOrDefault(x => x.Parsed == true);
+                        temp = parserMonitoringContext.ParserMonitorings.FirstOrDefault(x => x.Parsed == true  && x.Name.Equals(migration));
                     }
 
                     if (temp == null)
