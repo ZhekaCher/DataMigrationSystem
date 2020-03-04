@@ -5,7 +5,7 @@ namespace DataMigrationSystem.Context.Web.Avroradata
 {
     public class WebDisabilitiesOrgSkContext: WebContext
     {
-        
         public DbSet<DisabilitiesOrgSk> DisabilitiesOrgSk { get; set; }
+        public DbSet<DisabilitiesOrganizationsProductsSk> DisabilitiesOrganizationsProductsSks { get; set; }
     }
 }
