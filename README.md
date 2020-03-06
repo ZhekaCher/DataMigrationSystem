@@ -22,17 +22,14 @@
 * Pedophiles
 * ProducersSk
 * ReliableSk
+* SamrukParticipants
 * TaxDebt
 * Terrorist
 * Top100Goszakup
+* UnreliableSk
 * UnreliableTaxpayer
-* WantedIndividual
-
-Goszakup:
-
 * UnscrupulousGoszakup
-* AnnouncementGoszakup
-
+* WantedIndividual
 
 
 
