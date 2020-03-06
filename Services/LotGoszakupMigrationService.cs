@@ -56,7 +56,7 @@ namespace DataMigrationSystem.Services
 
         private async Task Migrate(int threadNum)
         {
-            Logger.Info("Started thread");
+            // Logger.Info("Started thread");
 
             await using var webLotContext = new WebLotContext();
             await using var parsedLotGoszakupContext = new ParsedLotGoszakupContext();
@@ -72,8 +72,16 @@ namespace DataMigrationSystem.Services
                 }
                 catch (Exception e)
                 {
-                    Logger.Warn(e);
-                    Program.NumOfErrors++;
+                    if (e.Message.Contains("violates foreign key"))
+                    {
+                        // Logger.Warn($"Message:|{e.Message}|; IdContract:|{temp.IdContract}|;");
+                    }
+                    else
+                    {
+                        Logger.Error(
+                            $"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|; IdLot:|{dtoIns.IdLot}|; Id:|{dtoIns.Id}|");
+                        Program.NumOfErrors++;
+                    }
                 }
 
                 lock (_lock)

@@ -75,7 +75,7 @@ namespace DataMigrationSystem.Services
 
         private async Task Migrate(int threadNum)
         {
-            Logger.Info("Started thread");
+            // Logger.Info("Started thread");
 
 
             await using var webUnscrupulousGoszakupContext = new WebUnscrupulousGoszakupContext();
@@ -94,7 +94,7 @@ namespace DataMigrationSystem.Services
                 {
                     if (e.Message.Contains("violates foreign key"))
                     {
-                        Logger.Warn($"Message:|{e.Message}|; Biin:|{temp.BiinCompanies}|;");
+                        // Logger.Warn($"Message:|{e.Message}|; Biin:|{temp.BiinCompanies}|;");
                     }
                     else
                     {

@@ -58,7 +58,7 @@ namespace DataMigrationSystem.Services
 
         private async Task Migrate(int threadNum)
         {
-            Logger.Info("Started thread");
+            // Logger.Info("Started thread");
 
             await using var webAnnouncementContext = new WebAnnouncementContext();
             await using var parsedAnnouncementGoszakupContext = new ParsedAnnouncementGoszakupContext();
