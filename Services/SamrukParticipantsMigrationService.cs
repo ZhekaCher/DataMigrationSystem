@@ -15,7 +15,7 @@ namespace DataMigrationSystem.Services
 
         public SamrukParticipantsMigrationService(int numOfThreads = 1)
         {
-            NumOfThreads = numOfThreats;
+            NumOfThreads = numOfThreads;
             _webSamrukParticipantsContext = new WebSamrukParticipantsContext();
             _parsedSamrukParticipantsContext = new ParsedSamrukParticipantsContext();
         }
