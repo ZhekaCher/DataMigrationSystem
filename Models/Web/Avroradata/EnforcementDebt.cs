@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataMigrationSystem.Models.Web.Avroradata
 {
+    [Table("enforcement_debt")]
     public class EnforcementDebt
     {
         [Key]
@@ -30,11 +31,13 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("agency")]
         public string Agency { get; set; }
         [Column("status")] 
-        public bool Status { get; set; } = true;
+        public bool Status { get; set; }
         [Column("type_id")]
         public int? TypeId { get; set; }
         [Column("relevance_date")]
         public DateTime? RelevanceDate { get; set; } = DateTime.Now;
+        [Column("biin")]
+        public long IinBin { get; set; }
 
     }
     
@@ -43,17 +46,20 @@ namespace DataMigrationSystem.Models.Web.Avroradata
     {
 
     }
-    [Table("c_enforcement_debt")]
-    public class CompanyEnforcementDebt : EnforcementDebt
+    [Table("enforcement_debt_history")]
+    public class EnforcementDebtHistory
     {
-        [Column("bin")]
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public long Id { get; set; }
+        [Column("biin")]
         public long IinBin { get; set; }
+        [Column("relevance_date")]
+        public DateTime? RelevanceDate { get; set; } = DateTime.Now;
+        [Column("count")]
+        public int Count { get; set; }
+        [Column("amount")]
+        public double Amount { get; set; }
     }
-    
-    // [Table("i_enforcement_debt")]
-    // public class IndividualEnforcementDebt : EnforcementDebt{
-    //     [Column("iin")]
-    //     public long IinBin { get; set; }
-    // }
-    
+
 }

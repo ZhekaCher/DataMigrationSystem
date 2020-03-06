@@ -31,47 +31,48 @@ namespace DataMigrationSystem.Services
             await using var parsedEnforcementDebtContext = new ParsedEnforcementDebtContext();
             await using var webEnforcementDebtContext = new WebEnforcementDebtContext();
 
-            var companyDtos = 
-                from debtDto in parsedEnforcementDebtContext.EnforcementDebtDtos
-                join debtDetail in parsedEnforcementDebtContext.EnforcementDebtDetailDtos 
-                    on debtDto.Uid equals debtDetail.Uid into outer
-                from debtDetailOuter in outer.DefaultIfEmpty() where debtDto.IinBin % NumOfThreads == numThread
-                orderby debtDto.IinBin
-                select new EnforcementDebtDto
-                {
-                    DetailDto = debtDetailOuter,
-                    Date = debtDto.Date,
-                    Agency = debtDto.Agency,
-                    Uid = debtDto.Uid,
-                    EssenceRequirements = debtDto.EssenceRequirements,
-                    JudicialExecutor = debtDto.JudicialExecutor,
-                    IinBin = debtDto.IinBin
-                };
-            var oldCounter = 0;
-            double oldAmount = 0;
-            long bin = 0;
+            var companyDtos =
+                parsedEnforcementDebtContext.EnforcementDebtDtos
+                    .Where(x => x.IinBin % NumOfThreads == numThread)
+                    .OrderBy(x => x.IinBin)
+                    .Include(x => x.DetailDto);
+            // var oldList = new List<EnforcementDebt>();
+            // var newList = new List<EnforcementDebt>();
+            // long bin = 0;
             foreach (var companyDto in companyDtos)
             {
-                if (bin != companyDto.IinBin)
-                {
-                    await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"select avroradata.enforcement_debt_history({bin}, {oldCounter}, {oldAmount}::numeric(18,2))");
-                    oldCounter = await
-                        webEnforcementDebtContext.CompanyEnforcementDebts.CountAsync(x => x.IinBin == companyDto.IinBin);
-                    oldAmount = await
-                        webEnforcementDebtContext.CompanyEnforcementDebts.Where(x => x.IinBin == companyDto.IinBin).SumAsync(x=>x.Amount);
-                    bin = companyDto.IinBin;
-                }
+                // if (bin != companyDto.IinBin)
+                // {
+                //     var oldAmount = oldList.Sum(x => x.Amount);
+                //     if ((long) newList.Sum(x => x.Amount) != (long) oldAmount || newList.Count != oldList.Count)
+                //     {
+                //         await webEnforcementDebtContext.EnforcementDebtHistories.AddAsync(new EnforcementDebtHistory
+                //         {
+                //             Amount = oldAmount,
+                //             Count = oldList.Count,
+                //             IinBin = bin
+                //         });
+                //     }
+                //     var newDate = newList.Min(x => x.RelevanceDate);
+                //     await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"update avroradata.enforcement_debt set status = false where relevance_date < {newDate};");
+                //     bin = companyDto.IinBin;
+                //     oldList = webEnforcementDebtContext.EnforcementDebts.Where(x => x.IinBin == bin && x.Status).ToList();
+                //     newList = new List<EnforcementDebt>();
+                // }
                 var enforcementDebt = await DtoToCompanyEntity(companyDto, webEnforcementDebtContext);
-                await webEnforcementDebtContext.CompanyEnforcementDebts.Upsert(enforcementDebt).On(x => x.Uid).RunAsync();
+                // await webEnforcementDebtContext.EnforcementDebts.Upsert(enforcementDebt).On(x => x.Uid).RunAsync();
+                // newList.Add(enforcementDebt);
                 lock (_forLock)
                 {
-                    Logger.Trace(_counter++);
+                    Logger.Trace(++_counter);
                 }
             }
+            // await webEnforcementDebtContext.SaveChangesAsync();
+
         }
         public override async Task StartMigratingAsync()
         {
-            await MigrateReferences();
+            // await MigrateReferences();
             var tasks = new List<Task>();
             for (int i = 0; i < NumOfThreads; i++)
             {
@@ -82,9 +83,9 @@ namespace DataMigrationSystem.Services
             await using var parsedEnforcementDebtContext = new ParsedEnforcementDebtContext();
             await parsedEnforcementDebtContext.Database.ExecuteSqlRawAsync("truncate avroradata.enforcement_debt, avroradata.enforcement_debt_detail restart identity;");
         }
-        private async Task<CompanyEnforcementDebt> DtoToCompanyEntity(EnforcementDebtDto debtDto, WebEnforcementDebtContext webEnforcementDebtContext)
+        private async Task<EnforcementDebt> DtoToCompanyEntity(EnforcementDebtDto debtDto, WebEnforcementDebtContext webEnforcementDebtContext)
         {
-            var enforcementDebt = new CompanyEnforcementDebt
+            var enforcementDebt = new EnforcementDebt
             {
                 Agency =  debtDto.Agency,
                 JudicialExecutor = debtDto.JudicialExecutor,

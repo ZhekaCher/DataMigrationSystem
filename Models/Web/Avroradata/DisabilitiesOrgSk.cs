@@ -6,7 +6,8 @@ namespace DataMigrationSystem.Models.Web.Avroradata
 { 
     [Table("samruk_disabled_company")]
     public class DisabilitiesOrgSk
-    {
+    {        [Key]
+
         [Column("i")] public long? I{get; set;}
         [Column("contacts")] public string Contacts{get; set;}
         [Column("id_producer_type")] public long? IdProducerType{get; set;}
@@ -16,6 +17,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
     [Table("samruk_disabled_company_products")]
     public class DisabilitiesOrganizationsProductsSk
     {
+        [Key]
         [Column("i")] public long? I{get; set;}
         [Column("bin")] public long? Bin{get; set;}
         [Column("products")] public string Products{get; set;}
