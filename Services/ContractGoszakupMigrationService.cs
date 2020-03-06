@@ -50,7 +50,7 @@ namespace DataMigrationSystem.Services
             Logger.Info("End of migration");
             
             await using var parsedContractGoszakupContext = new ParsedContractGoszakupContext();
-            await parsedContractGoszakupContext.Database.ExecuteSqlRawAsync("truncate table trading_floor.contract_goszakup restart identity cascade;");
+            await parsedContractGoszakupContext.Database.ExecuteSqlRawAsync("truncate table avroradata.contract_goszakup restart identity cascade;");
             Logger.Info("Truncated");
         }
 
@@ -105,7 +105,7 @@ namespace DataMigrationSystem.Services
             contract.AmountSum = contractGoszakupDto.ContractSumWnds;
             contract.BinCustomer = contractGoszakupDto.CustomerBin;
             contract.BiinSupplier = contractGoszakupDto.SupplierBiin;
-            contract.DtEnd = contractGoszakupDto.ContractEndDate;
+            contract.DtEnd = contractGoszakupDto.EcEndDate;
             contract.DtStart = contractGoszakupDto.SignDate;
             contract.FinYear = contractGoszakupDto.FinYear;
             contract.IdAnno = contractGoszakupDto.TrdBuyId;
