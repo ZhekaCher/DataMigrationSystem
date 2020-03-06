@@ -49,4 +49,5 @@
 
 * **Кенжетаев Галымжан** - *Initial work* - [capomafiosoken](https://github.com/capomafiosoken)
 * **Евгений Черданцев** - *Initial work* - [ZhekaCher](https://github.com/ZhekaCher)
+* **Yersin Abdirazak** - *Initial work* - [yerss](https://github.com/yerss)
 * **Айбекич** - *Not Initial work* - [aibekzh](https://github.com/aibekzh)
