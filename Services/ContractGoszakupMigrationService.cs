@@ -113,7 +113,8 @@ namespace DataMigrationSystem.Services
             contract.IdStatus = contractGoszakupDto.RefContractStatusId;
             contract.IdType = contractGoszakupDto.RefContractTypeId;
             contract.NumberContract = contractGoszakupDto.ContractNumber;
-            contract.RelevanceDate = contractGoszakupDto.Relevance;
+            //TODO(Relevance loading from dto incorrect)
+            contract.RelevanceDate = DateTime.Now;
             contractGoszakup.DescriptionKz = contractGoszakupDto.DescriptionKz;
             contractGoszakup.DescriptionRu = contractGoszakupDto.DescriptionRu;
             contractGoszakup.IdContract = contractGoszakupDto.Id;

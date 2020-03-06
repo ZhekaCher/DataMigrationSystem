@@ -6,11 +6,19 @@
 
 ### List of Avaliable Migrations:
 
+* AnnouncementGoszakup
+* AnnouncementNadloc
 * Company
+* ContractGoszakup
 * CourtCase
-* Disabilities
+* DirectorGoszakup
+* DisabilitiesOrgSk
 * EnforcementDebt
 * LeavingRestriction
+* LotGoszakup
+* LotNadloc
+* ParticipantGoszakup
+* ParticipantNadloc
 * Pedophiles
 * ProducersSk
 * ReliableSk
@@ -21,11 +29,11 @@
 * WantedIndividual
 
 Goszakup:
-* ParticipantGoszakup
+
 * UnscrupulousGoszakup
 * AnnouncementGoszakup
-* LotGoszakup
-* ContractGoszakup
+
+
 
 
 ## Libraries
