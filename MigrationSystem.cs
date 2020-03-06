@@ -66,8 +66,8 @@ namespace DataMigrationSystem
                 }
 
                 MigrationService migrationService;
-                var migrationClass = GetMigrationServiceFromName("SamrukParticipants");
-                _logger.Info($"Trying to launch {"SamrukParticipants"}");
+                var migrationClass = GetMigrationServiceFromName(migration);
+                _logger.Info($"Trying to launch {migration}");
                 try
                 {
                     if (threads == null)
