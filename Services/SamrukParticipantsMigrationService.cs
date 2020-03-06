@@ -13,7 +13,7 @@ namespace DataMigrationSystem.Services
         private readonly WebSamrukParticipantsContext _webSamrukParticipantsContext;
         private readonly ParsedSamrukParticipantsContext _parsedSamrukParticipantsContext;
 
-        public SamrukParticipantsMigrationService(int numOfThreats = 1)
+        public SamrukParticipantsMigrationService(int numOfThreads = 1)
         {
             NumOfThreads = numOfThreats;
             _webSamrukParticipantsContext = new WebSamrukParticipantsContext();
