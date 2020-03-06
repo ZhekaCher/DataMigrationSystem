@@ -7,6 +7,6 @@ namespace DataMigrationSystem.Context.Web.Avroradata
     public class WebLeavingRestrictionContext: WebContext
     {
 
-        public DbSet<CompanyLeavingRestriction> CompanyLeavingRestrictions { get; set; }
+        public DbSet<LeavingRestriction> LeavingRestrictions { get; set; }
     }
 }

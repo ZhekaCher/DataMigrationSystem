@@ -45,6 +45,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
     public class CourtCaseCategory : BaseReferenceEntity
     {
     }
+    [Table("court_case_entity")]
     public class CourtCaseEntity
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -52,17 +53,8 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         public long Id { get; set; }
         [Column("number")]
         public string Number { get; set; }
-    }
-    [Table("i_court_case_entity")]
-    public class IndividualCourtCaseEntity : CourtCaseEntity
-    {
-        [Column("iin")]
+        [Column("biin")]
         public long IinBin { get; set; }
     }
-    [Table("court_case_entity")]
-    public class CompanyCourtCaseEntity : CourtCaseEntity
-    {
-        [Column("bin")]
-        public long IinBin { get; set; }
-    }
+   
 }

@@ -31,7 +31,7 @@ namespace DataMigrationSystem.Services
             var companyDtos = from leavingRestrictionDto in parsedLeavingRestrictionContext.LeavingRestrictionDtos
                 where leavingRestrictionDto.IinBin%NumOfThreads==numThread
                 orderby leavingRestrictionDto.IinBin
-                select new CompanyLeavingRestriction
+                select new LeavingRestriction
                 {
                     Date = leavingRestrictionDto.Date,
                     JudicialExecutor = leavingRestrictionDto.JudicialExecutor,
@@ -49,14 +49,14 @@ namespace DataMigrationSystem.Services
                 { 
                     await leavingRestrictionContext.Database.ExecuteSqlInterpolatedAsync($"select avroradata.leaving_restriction_history({bin}, {oldCounter})");
                     oldCounter =
-                        leavingRestrictionContext.CompanyLeavingRestrictions.Count(x => x.IinBin == companyDto.IinBin);
+                        leavingRestrictionContext.LeavingRestrictions.Count(x => x.IinBin == companyDto.IinBin);
                     bin = companyDto.IinBin;
-                    leavingRestrictionContext.CompanyLeavingRestrictions.RemoveRange(
-                        leavingRestrictionContext.CompanyLeavingRestrictions.Where(x =>
+                    leavingRestrictionContext.LeavingRestrictions.RemoveRange(
+                        leavingRestrictionContext.LeavingRestrictions.Where(x =>
                             x.IinBin == companyDto.IinBin));
                     await leavingRestrictionContext.SaveChangesAsync();
                 }
-                await leavingRestrictionContext.CompanyLeavingRestrictions.AddAsync(companyDto);
+                await leavingRestrictionContext.LeavingRestrictions.AddAsync(companyDto);
                 await leavingRestrictionContext.SaveChangesAsync();
                 Logger.Trace(_counter++);
             }

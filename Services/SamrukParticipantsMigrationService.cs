@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Web.Avroradata;
 using DataMigrationSystem.Models.Web.Avroradata;
@@ -10,14 +11,13 @@ namespace DataMigrationSystem.Services
 {
     public class SamrukParticipantsMigrationService:MigrationService
     {
-        private readonly WebSamrukParticipantsContext _webSamrukParticipantsContext;
-        private readonly ParsedSamrukParticipantsContext _parsedSamrukParticipantsContext;
 
-        public SamrukParticipantsMigrationService(int numOfThreads = 1)
+
+        private readonly  object _forLock  = new object();
+        private int _counter;
+        public SamrukParticipantsMigrationService(int numOfThreads = 20)
         {
             NumOfThreads = numOfThreads;
-            _webSamrukParticipantsContext = new WebSamrukParticipantsContext();
-            _parsedSamrukParticipantsContext = new ParsedSamrukParticipantsContext();
         }
         
         protected override Logger InitializeLogger()
@@ -25,32 +25,51 @@ namespace DataMigrationSystem.Services
             return LogManager.GetCurrentClassLogger();
         }
 
+        private async Task MigrateAsync(int threadNum)
+        {
+            {
+                var webSamrukParticipantsContext = new WebSamrukParticipantsContext();
+                var parsedSamrukParticipantsContext = new ParsedSamrukParticipantsContext();
+                var samrukParticipantsDtos =
+                    from samrukParticipantsDto in parsedSamrukParticipantsContext.SamrukParticipantsDtos
+                    where samrukParticipantsDto.Id % NumOfThreads == threadNum
+                    select new SamrukParticipants
+                    {
+                        CodeBin = samrukParticipantsDto.CodeBin,
+                        DirectorFullname = samrukParticipantsDto.DirectorFullname,
+                        DirectorIin = samrukParticipantsDto.DirectorIin,
+                        Customer = samrukParticipantsDto.Customer,
+                        Supplier = samrukParticipantsDto.Supplier,
+                        RelevanceDate = samrukParticipantsDto.RelevanceDate
+                    };
+                foreach (var samrukParticipantsDto in samrukParticipantsDtos)
+                {
+                    await webSamrukParticipantsContext.SamrukParticipantses.Upsert(samrukParticipantsDto)
+                        .On(x => x.CodeBin).RunAsync();
+                    lock (_forLock)
+                    {
+                        Logger.Trace(_counter++);
+                    }
+                }
+
+            }
+        }
+
         public override async Task StartMigratingAsync()
         {
-            var samrukParticipantsDtos =
-                from samrukParticipantsDto in _parsedSamrukParticipantsContext.SamrukParticipantsDtos
-                select new SamrukParticipants
-                {
-                    CodeBin = samrukParticipantsDto.CodeBin,
-                    DirectorFullname = samrukParticipantsDto.DirectorFullname,
-                    DirectorIin = samrukParticipantsDto.DirectorIin,
-                    Customer = samrukParticipantsDto.Customer,
-                    Supplier = samrukParticipantsDto.Supplier,
-                    RelevanceDate = samrukParticipantsDto.RelevanceDate
-                };
-            foreach (var samrukParticipantsDto in samrukParticipantsDtos)
+            var tasks = new List<Task>();
+            for (int i = 0; i < NumOfThreads; i++)
             {
-                await _webSamrukParticipantsContext.SamrukParticipantses.Upsert(samrukParticipantsDto)
-                    .On(x => x.CodeBin).RunAsync();
+                tasks.Add(MigrateAsync(i));
             }
-
-            var minDate = _parsedSamrukParticipantsContext.SamrukParticipantsDtos.Min(x => x.RelevanceDate);
-            _webSamrukParticipantsContext.SamrukParticipantses.RemoveRange(_webSamrukParticipantsContext.SamrukParticipantses.Where(x=>x.RelevanceDate<minDate));
-            await _webSamrukParticipantsContext.SaveChangesAsync();
-            await _parsedSamrukParticipantsContext.Database.ExecuteSqlRawAsync(
+            await Task.WhenAll(tasks);
+            var  webSamrukParticipantsContext = new WebSamrukParticipantsContext();
+            var parsedSamrukParticipantsContext = new ParsedSamrukParticipantsContext();
+            var minDate = parsedSamrukParticipantsContext.SamrukParticipantsDtos.Min(x => x.RelevanceDate);
+            webSamrukParticipantsContext.SamrukParticipantses.RemoveRange(webSamrukParticipantsContext.SamrukParticipantses.Where(x=>x.RelevanceDate<minDate));
+            await webSamrukParticipantsContext.SaveChangesAsync();
+            await parsedSamrukParticipantsContext.Database.ExecuteSqlRawAsync(
                 "truncate avroradata.samruk_all_participants restart identity");
-            
-            
         }
     }
 }

@@ -61,7 +61,7 @@ namespace DataMigrationSystem.Services
                 select courtCaseEntityDto;
             foreach (var companyDto in companyDtos)
             {
-                await webCourtCaseContext.CompanyCourtCaseEntities.Upsert(new CompanyCourtCaseEntity
+                await webCourtCaseContext.CourtCaseEntities.Upsert(new CourtCaseEntity
                 {
                     IinBin = companyDto.IinBin,
                     Number = companyDto.Number

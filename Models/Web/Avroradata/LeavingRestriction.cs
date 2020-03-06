@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataMigrationSystem.Models.Web.Avroradata
 {
+    [Table("leaving_restriction")]
     public class LeavingRestriction
     {
         [Key]
@@ -20,19 +21,8 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         public string JudicialExecutor { get; set; }
         [Column("cause")]
         public string Cause { get; set; }
-    }
-    
-    [Table("c_leaving_restriction")]
-    public class CompanyLeavingRestriction : LeavingRestriction
-    {
-        [Column("bin")]
+        [Column("biin")]
         public long IinBin { get; set; }
     }
-    
-    // [Table("i_leaving_restriction")]
-    // public class IndividualLeavingRestriction : LeavingRestriction
-    // {
-    //     [Column("iin")]
-    //     public long IinBin { get; set; }
-    // }
+
 }
