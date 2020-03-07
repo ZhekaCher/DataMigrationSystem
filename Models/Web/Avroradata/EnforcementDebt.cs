@@ -8,6 +8,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
     public class EnforcementDebt
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Column("uid")]
         public string Uid { get; set; }
         [Column("number")]
@@ -20,7 +21,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         public string Debtor { get; set; }
         [Column("claimer")]
         public string Claimer { get; set; }
-        [Column("amount")]
+        [Column("amount")] 
         public double Amount { get; set; }
         [Column("judicial_executor")]
         public string JudicialExecutor { get; set; }
@@ -35,7 +36,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("type_id")]
         public int? TypeId { get; set; }
         [Column("relevance_date")]
-        public DateTime? RelevanceDate { get; set; } = DateTime.Now;
+        public DateTime RelevanceDate { get; set; } = DateTime.Now;
         [Column("biin")]
         public long IinBin { get; set; }
 
@@ -46,20 +47,4 @@ namespace DataMigrationSystem.Models.Web.Avroradata
     {
 
     }
-    [Table("enforcement_debt_history")]
-    public class EnforcementDebtHistory
-    {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; }
-        [Column("biin")]
-        public long IinBin { get; set; }
-        [Column("relevance_date")]
-        public DateTime? RelevanceDate { get; set; } = DateTime.Now;
-        [Column("count")]
-        public int Count { get; set; }
-        [Column("amount")]
-        public double Amount { get; set; }
-    }
-
 }

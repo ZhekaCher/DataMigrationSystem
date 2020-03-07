@@ -48,6 +48,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
     [Table("court_case_entity")]
     public class CourtCaseEntity
     {
+        [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id")]
         public long Id { get; set; }

@@ -8,6 +8,5 @@ namespace DataMigrationSystem.Context.Web.Avroradata
 
         public DbSet<EnforcementDebt> EnforcementDebts { get; set; }    
         public DbSet<EnforcementDebtType> EnforcementDebtTypes { get; set; }
-        public DbSet<EnforcementDebtHistory> EnforcementDebtHistories { get; set; }
     }
 }

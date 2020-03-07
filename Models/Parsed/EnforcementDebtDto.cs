@@ -25,6 +25,8 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("iin_bin")]
         public long IinBin { get; set; }
         public EnforcementDebtDetailDto DetailDto { get; set; }
+        [Column("relevance_date")]
+        public DateTime RelevanceDate { get; set; }
     }
     [Table("enforcement_debt_detail")]
     public class EnforcementDebtDetailDto
