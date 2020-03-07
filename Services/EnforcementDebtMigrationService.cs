@@ -53,11 +53,8 @@ namespace DataMigrationSystem.Services
                     }
                     bin = companyDto.IinBin;
                     
-                        oldList = webEnforcementDebtContext.EnforcementDebts.Where(x => x.IinBin == bin && x.Status)
-                            .Select(x => x.Amount).ToList();
-
-                    
-
+                    oldList = webEnforcementDebtContext.EnforcementDebts.Where(x => x.IinBin == bin && x.Status)
+                        .Select(x => x.Amount).ToList();
                     newList = new List<double>();
                 }
                 var enforcementDebt = await DtoToCompanyEntity(companyDto, webEnforcementDebtContext);
@@ -83,8 +80,7 @@ namespace DataMigrationSystem.Services
             await using var webEnforcementDebtContext = new WebEnforcementDebtContext();
             var newDate = parsedEnforcementDebtContext.EnforcementDebtDtos.Min(x => x.RelevanceDate);
             await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"update avroradata.enforcement_debt set status = false where relevance_date < {newDate};");
-
-            // await parsedEnforcementDebtContext.Database.ExecuteSqlRawAsync("truncate avroradata.enforcement_debt, avroradata.enforcement_debt_detail restart identity;");
+            await parsedEnforcementDebtContext.Database.ExecuteSqlRawAsync("truncate avroradata.enforcement_debt, avroradata.enforcement_debt_detail restart identity;");
         }
         private async Task<EnforcementDebt> DtoToCompanyEntity(EnforcementDebtDto debtDto, WebEnforcementDebtContext webEnforcementDebtContext)
         {

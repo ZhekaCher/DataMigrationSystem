@@ -26,7 +26,7 @@ namespace DataMigrationSystem.Services
 
         private async Task MigrateAsync(int numThread)
         {
-            await using var leavingRestrictionContext = new WebLeavingRestrictionContext();
+            await using var webLeavingRestrictionContext = new WebLeavingRestrictionContext();
             await using var parsedLeavingRestrictionContext = new  ParsedLeavingRestrictionContext();
             var companyDtos = from leavingRestrictionDto in parsedLeavingRestrictionContext.LeavingRestrictionDtos
                 where leavingRestrictionDto.IinBin%NumOfThreads==numThread
@@ -43,21 +43,26 @@ namespace DataMigrationSystem.Services
 
             long bin = 0;
             int oldCounter = 0;
+            int newCounter = 0;
             foreach (var companyDto in companyDtos)
             {
                 if (bin != companyDto.IinBin)
                 { 
-                    await leavingRestrictionContext.Database.ExecuteSqlInterpolatedAsync($"select avroradata.leaving_restriction_history({bin}, {oldCounter})");
-                    oldCounter =
-                        leavingRestrictionContext.LeavingRestrictions.Count(x => x.IinBin == companyDto.IinBin);
+                    if (oldCounter!=newCounter)
+                    {
+                        await webLeavingRestrictionContext.Database.ExecuteSqlInterpolatedAsync($"insert into avroradata.leaving_restriction_history (biin, count) values ({bin}, {oldCounter});");
+                    }                    
                     bin = companyDto.IinBin;
-                    leavingRestrictionContext.LeavingRestrictions.RemoveRange(
-                        leavingRestrictionContext.LeavingRestrictions.Where(x =>
-                            x.IinBin == companyDto.IinBin));
-                    await leavingRestrictionContext.SaveChangesAsync();
+                    oldCounter = await webLeavingRestrictionContext.LeavingRestrictions.CountAsync(x => x.IinBin == bin);
+                    webLeavingRestrictionContext.LeavingRestrictions.RemoveRange(
+                        webLeavingRestrictionContext.LeavingRestrictions.Where(x =>
+                            x.IinBin == bin));
+                    await webLeavingRestrictionContext.SaveChangesAsync();
+                    newCounter = 0;
                 }
-                await leavingRestrictionContext.LeavingRestrictions.AddAsync(companyDto);
-                await leavingRestrictionContext.SaveChangesAsync();
+                await webLeavingRestrictionContext.LeavingRestrictions.AddAsync(companyDto);
+                await webLeavingRestrictionContext.SaveChangesAsync();
+                newCounter++;
                 Logger.Trace(_counter++);
             }
         }
