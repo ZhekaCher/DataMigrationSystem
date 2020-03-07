@@ -6,26 +6,31 @@
 
 ### List of Avaliable Migrations:
 
+* AnnouncementGoszakup
+* AnnouncementNadloc
 * Company
+* ContractGoszakup
 * CourtCase
-* Disabilities
+* DirectorGoszakup
+* DisabilitiesOrgSk
 * EnforcementDebt
 * LeavingRestriction
+* LotGoszakup
+* LotNadloc
+* ParticipantGoszakup
+* ParticipantNadloc
 * Pedophiles
 * ProducersSk
 * ReliableSk
+* SamrukParticipants
 * TaxDebt
 * Terrorist
 * Top100Goszakup
+* UnreliableSk
 * UnreliableTaxpayer
+* UnscrupulousGoszakup
 * WantedIndividual
 
-Goszakup:
-* ParticipantGoszakup
-* UnscrupulousGoszakup
-* AnnouncementGoszakup
-* LotGoszakup
-* ContractGoszakup
 
 
 ## Libraries
@@ -44,4 +49,5 @@ Goszakup:
 
 * **Кенжетаев Галымжан** - *Initial work* - [capomafiosoken](https://github.com/capomafiosoken)
 * **Евгений Черданцев** - *Initial work* - [ZhekaCher](https://github.com/ZhekaCher)
+* **Yersin Abdirazak** - *Initial work* - [yerss](https://github.com/yerss)
 * **Айбекич** - *Not Initial work* - [aibekzh](https://github.com/aibekzh)

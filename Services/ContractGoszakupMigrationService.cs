@@ -48,17 +48,16 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
-            
             await using var parsedContractGoszakupContext = new ParsedContractGoszakupContext();
-            await parsedContractGoszakupContext.Database.ExecuteSqlRawAsync("truncate table trading_floor.contract_goszakup restart identity cascade;");
+            await parsedContractGoszakupContext.Database.ExecuteSqlRawAsync(
+                "truncate table avroradata.contract_goszakup restart identity cascade;");
             Logger.Info("Truncated");
         }
 
         private async Task Migrate(int threadNum)
         {
             // Logger.Info("Started thread");
-
-
+            
             await using var webContractContext = new WebContractContext();
             await using var parsedContractGoszakupContext = new ParsedContractGoszakupContext();
             foreach (var dto in parsedContractGoszakupContext.ContractGoszakupDtos.Where(x =>
@@ -71,7 +70,7 @@ namespace DataMigrationSystem.Services
                 try
                 {
                     await webContractContext.Contracts.Upsert(temp)
-                        .On(x => new{x.IdContract, x.IdTf}).RunAsync();
+                        .On(x => new {x.IdContract, x.IdTf}).RunAsync();
                     await webContractContext.ContractsGoszakup.Upsert(tempGoszakup)
                         .On(x => x.IdContract).RunAsync();
                 }
@@ -105,7 +104,7 @@ namespace DataMigrationSystem.Services
             contract.AmountSum = contractGoszakupDto.ContractSumWnds;
             contract.BinCustomer = contractGoszakupDto.CustomerBin;
             contract.BiinSupplier = contractGoszakupDto.SupplierBiin;
-            contract.DtEnd = contractGoszakupDto.ContractEndDate;
+            contract.DtEnd = contractGoszakupDto.EcEndDate;
             contract.DtStart = contractGoszakupDto.SignDate;
             contract.FinYear = contractGoszakupDto.FinYear;
             contract.IdAnno = contractGoszakupDto.TrdBuyId;
@@ -113,7 +112,8 @@ namespace DataMigrationSystem.Services
             contract.IdStatus = contractGoszakupDto.RefContractStatusId;
             contract.IdType = contractGoszakupDto.RefContractTypeId;
             contract.NumberContract = contractGoszakupDto.ContractNumber;
-            contract.RelevanceDate = contractGoszakupDto.Relevance;
+            //TODO(Relevance loading from dto incorrect)
+            contract.RelevanceDate = DateTime.Now;
             contractGoszakup.DescriptionKz = contractGoszakupDto.DescriptionKz;
             contractGoszakup.DescriptionRu = contractGoszakupDto.DescriptionRu;
             contractGoszakup.IdContract = contractGoszakupDto.Id;

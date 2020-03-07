@@ -9,6 +9,8 @@ using NLog;
 using NLog.Config;
 using Npgsql;
 
+
+// FOR 200 COMMIT
 namespace DataMigrationSystem
 {
     internal static class Program
@@ -20,6 +22,31 @@ namespace DataMigrationSystem
         {
             Console.InputEncoding = Encoding.UTF8;
             Console.OutputEncoding = Encoding.UTF8;
+            Console.WriteLine("\n"+
+             "//                       _oo0oo_\n"+
+             "//                      o8888888o\n"+
+             "//                      88\" . \"88\n"+
+             "//                      (| -_- |)\n"+
+             "//                      0\\  =  /0\n"+
+             "//                    ___/`---'\\___\n"+
+             "//                  .' \\\\|     |// '.\n"+
+             "//                 / \\\\|||  :  |||// \\ \n"+
+             "  //             / _||||| -:- |||||- \\ \n"+
+             "  //            |   | \\\\\\  -  /// |   |\n"+
+             "  //            | \\_|  ''\\---/''  |_/ |\n"+
+             "  //            \\  .-\\__  '-'  ___/-. /\n"+
+             "  //          ___'. .'  /--.--\\  `. .'___\n"+
+             "  //       .\"\" '<  `.___\\_<|>_/___.' >' \"\".\n"+
+             "  //      | | :  `- \\`.;`\\ _ /`;.`/ - ` : | |\n"+
+             "  //      \\  \\ `_.   \\_ __\\ /__ _/   .-` /  /\n"+
+             "  //  =====`-.____`.___ \\_____/___.-`___.-'=====\n"+
+             "  //                       `=---='\n"+
+             "  // \n"+
+             "  // \n"+
+             "  //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"+
+             " // \n"+
+             " //            God Bless         No Bugs\n" +
+             " //\n");
             Console.Title = "Data Migration System";
             LogManager.Configuration = new XmlLoggingConfiguration("NLog.config");
             _logger = LogManager.GetCurrentClassLogger();
