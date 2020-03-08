@@ -48,7 +48,7 @@ namespace DataMigrationSystem
     /// @date 24.02.2020 13:34:45
     /// @version 1.0
     /// <summary>
-    /// INPUT
+    /// Main class that controls migration progress
     /// </summary>
     public class MigrationSystem
     {
