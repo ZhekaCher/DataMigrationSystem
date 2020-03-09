@@ -26,6 +26,14 @@ namespace DataMigrationSystem.Context
 
         }
 
+
+        /// @author Yevgeniy Cherdantsev
+        /// @date 09.03.2020 23:57:44
+        /// @version 1.0
+        /// <summary>
+        /// Запускается при создании контекста
+        /// </summary>
+        /// <param name="optionsBuilder"></param>
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql(
