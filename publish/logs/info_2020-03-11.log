@@ -1,0 +1,102 @@
+2020-03-11 14:48:23.3608 | Thread: 1 |   INFO | DataMigrationSystem.Program | Configuring and starting migrations...
+2020-03-11 14:48:25.3698 | Thread: 1 |   INFO | DataMigrationSystem.MigrationSystem | Trying to launch ContractGoszakup
+2020-03-11 14:48:28.1624 | Thread: 1 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Starting migration with '30' threads
+2020-03-11 16:33:09.1577 | Thread: 1 |   INFO | DataMigrationSystem.Program | Configuring and starting migrations...
+2020-03-11 16:33:11.1567 | Thread: 1 |   INFO | DataMigrationSystem.MigrationSystem | Trying to launch DirectorGoszakup
+2020-03-11 16:33:11.4405 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Starting migration with '30' threads
+2020-03-11 16:33:11.4522 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:11.6094 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:11.6506 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:11.7003 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:11.7290 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:11.7756 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:11.8231 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:11.8695 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:11.9321 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:11.9642 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.0120 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.0414 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.0747 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.1208 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.1674 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.2002 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.2291 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.2754 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.3237 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.3694 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.4160 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.4632 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.4960 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.5463 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.5891 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.6193 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.6579 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.6985 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.7759 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:33:12.8080 | Thread: 1 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Started thread
+2020-03-11 16:34:52.6045 | Thread: 37 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 2180
+2020-03-11 16:34:53.3220 | Thread: 29 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 1690
+2020-03-11 16:34:53.3384 | Thread: 37 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 1680
+2020-03-11 16:34:53.8540 | Thread: 39 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 1162
+2020-03-11 16:34:53.9318 | Thread: 9 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 1105
+2020-03-11 16:34:53.9318 | Thread: 35 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 1104
+2020-03-11 16:34:53.9318 | Thread: 29 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 1091
+2020-03-11 16:34:53.9948 | Thread: 39 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 1029
+2020-03-11 16:34:54.0101 | Thread: 33 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 1014
+2020-03-11 16:34:54.1047 | Thread: 36 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 945
+2020-03-11 16:34:54.3848 | Thread: 29 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 722
+2020-03-11 16:34:54.4944 | Thread: 36 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 635
+2020-03-11 16:34:54.5878 | Thread: 39 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 564
+2020-03-11 16:34:54.6596 | Thread: 16 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 528
+2020-03-11 16:34:54.6815 | Thread: 32 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 502
+2020-03-11 16:34:54.7628 | Thread: 33 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 456
+2020-03-11 16:34:54.8088 | Thread: 25 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 420
+2020-03-11 16:34:54.9010 | Thread: 35 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 372
+2020-03-11 16:34:54.9645 | Thread: 39 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 345
+2020-03-11 16:34:55.1227 | Thread: 30 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 257
+2020-03-11 16:34:55.2449 | Thread: 32 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 210
+2020-03-11 16:34:55.4992 | Thread: 35 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 125
+2020-03-11 16:34:55.6198 | Thread: 30 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 76
+2020-03-11 16:34:55.7133 | Thread: 32 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 54
+2020-03-11 16:34:55.7315 | Thread: 30 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 48
+2020-03-11 16:34:55.8186 | Thread: 9 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 31
+2020-03-11 16:34:55.8186 | Thread: 35 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 28
+2020-03-11 16:34:55.8384 | Thread: 9 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 26
+2020-03-11 16:34:56.0346 | Thread: 35 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 9
+2020-03-11 16:34:56.2425 | Thread: 35 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Completed thread at 0
+2020-03-11 16:34:56.2516 | Thread: 35 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | End of migration
+2020-03-11 16:34:56.3481 | Thread: 35 |   INFO | DataMigrationSystem.Services.DirectorGoszakupMigrationService | Truncated
+2020-03-11 16:34:56.5869 | Thread: 9 |   INFO | DataMigrationSystem.Program | Migration ended with '0' errors
+2020-03-11 18:01:35.7636 | Thread: 36 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 11742
+2020-03-11 18:01:36.4315 | Thread: 19 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 11216
+2020-03-11 18:01:37.5893 | Thread: 31 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 10347
+2020-03-11 18:01:40.0102 | Thread: 27 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 8914
+2020-03-11 18:01:41.1969 | Thread: 27 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 8092
+2020-03-11 18:01:43.1502 | Thread: 12 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 6778
+2020-03-11 18:01:43.2561 | Thread: 41 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 6757
+2020-03-11 18:01:43.6820 | Thread: 4 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 6484
+2020-03-11 18:01:43.9502 | Thread: 7 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 6331
+2020-03-11 18:01:45.0769 | Thread: 7 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 5852
+2020-03-11 18:01:47.6508 | Thread: 27 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 4422
+2020-03-11 18:01:49.4669 | Thread: 41 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 3508
+2020-03-11 18:01:50.0882 | Thread: 12 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 3192
+2020-03-11 18:01:50.1207 | Thread: 38 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 3178
+2020-03-11 18:01:50.8228 | Thread: 39 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 2863
+2020-03-11 18:01:50.9212 | Thread: 38 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 2825
+2020-03-11 18:01:51.0318 | Thread: 35 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 2786
+2020-03-11 18:01:52.3453 | Thread: 39 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 2315
+2020-03-11 18:01:52.5589 | Thread: 34 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 2238
+2020-03-11 18:01:53.6723 | Thread: 38 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 1888
+2020-03-11 18:01:54.7949 | Thread: 34 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 1690
+2020-03-11 18:01:55.9806 | Thread: 34 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 1382
+2020-03-11 18:01:56.7135 | Thread: 34 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 1207
+2020-03-11 18:02:01.0919 | Thread: 4 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 323
+2020-03-11 18:02:01.2937 | Thread: 38 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 287
+2020-03-11 18:02:01.3609 | Thread: 34 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 277
+2020-03-11 18:02:01.5414 | Thread: 34 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 266
+2020-03-11 18:02:02.8575 | Thread: 38 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 148
+2020-03-11 18:02:04.5791 | Thread: 38 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 44
+2020-03-11 18:02:06.0471 | Thread: 38 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Completed thread at 0
+2020-03-11 18:02:06.0471 | Thread: 38 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | End of migration
+2020-03-11 18:02:07.0026 | Thread: 38 |   INFO | DataMigrationSystem.Services.ContractGoszakupMigrationService | Truncated
+2020-03-11 18:02:07.2278 | Thread: 34 |   INFO | DataMigrationSystem.Program | Migration ended with '1204' errors
