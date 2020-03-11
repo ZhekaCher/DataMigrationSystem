@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Web.Avroradata;
 using DataMigrationSystem.Models.Parsed;
@@ -46,8 +47,25 @@ namespace DataMigrationSystem.Services
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
             await using var parsedDirectorGoszakupContext = new ParsedDirectorGoszakupContext();
-            await parsedDirectorGoszakupContext.Database.ExecuteSqlRawAsync(
-                "truncate table avroradata.director_goszakup restart identity cascade;");
+            await using var webCompanyDirectorContext = new WebCompanyDirectorContext();
+            await using var webCompanyDirectorContext2 = new WebCompanyDirectorContext();
+            var oldest = parsedDirectorGoszakupContext.DirectorGoszakupDtos.OrderBy(x => x.Relevance).First().Relevance;
+            
+            Logger.Info("Removing old information");
+            webCompanyDirectorContext.RemoveRange(webCompanyDirectorContext.CompanyDirectors.Where(x => x.RelevanceDate < oldest));
+            webCompanyDirectorContext.SaveChanges();
+            Logger.Info("Removing old information");
+            
+            
+            // foreach (var b in webCompanyDirectorContext.CompanyDirectors.Where(x => x.RelevanceDate < oldest))
+            // {
+            //     Logger.Trace($"Removing |{b.CompanyBin}| because of relevance; {b.RelevanceDate} older than {oldest}");
+            //     webCompanyDirectorContext2.Remove(b);
+            //     await webCompanyDirectorContext2.SaveChangesAsync();
+            // }
+
+            // await parsedDirectorGoszakupContext.Database.ExecuteSqlRawAsync(
+                // "truncate table avroradata.director_goszakup restart identity cascade;");
             Logger.Info("Truncated");
         }
 
@@ -59,12 +77,23 @@ namespace DataMigrationSystem.Services
             await using var webCompanyDirectorContext = new WebCompanyDirectorContext();
             await using var parsedDirectorGoszakupContext = new ParsedDirectorGoszakupContext();
             await using var webCompanyContext = new WebCompanyContext();
+
             foreach (var dto in parsedDirectorGoszakupContext.DirectorGoszakupDtos.Where(x =>
                 x.Bin != null && x.Iin != null && x.Id % NumOfThreads == threadNum))
             {
-                var founder = webCompanyContext.Companies.FirstOrDefault(x => x.Bin.Equals(dto.Bin))?.FullnameDirector;
-                if (founder != null && dto.Fullname.ToUpper().Replace(" ", string.Empty) != founder.ToUpper().Replace(" ", string.Empty))
+                try
+                {
+                    var founder = webCompanyContext.Companies.FirstOrDefault(x => x.Bin.Equals(dto.Bin) && x.FullnameDirector!=null)
+                        ?.FullnameDirector;
+                    if (founder != null && dto.Fullname.ToUpper().Replace(" ", string.Empty) !=
+                        founder.ToUpper().Replace(" ", string.Empty))
+                        continue;
+                }
+                catch (Exception)
+                {
                     continue;
+                }
+
                 var temp = DtoToWeb(dto);
                 try
                 {
