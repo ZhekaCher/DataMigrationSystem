@@ -47,6 +47,7 @@ namespace DataMigrationSystem.Services
             _webUnreliableSkContext.UnreliableSks.RemoveRange(_webUnreliableSkContext.UnreliableSks.Where(x=>x.RelevanceDate<lastDate));
             await _webUnreliableSkContext.SaveChangesAsync();
             await _parsedUnreliableSkContext.Database.ExecuteSqlRawAsync("truncate avroradata.unreliable_suppliers_sk restart identity;");
+            await _webUnreliableSkContext.Database.ExecuteSqlRawAsync($"call avroradata.unreliable_companies_updater();");
         }
     }
 }

@@ -40,7 +40,10 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             await using var parsedTaxDebtContext = new ParsedTaxDebtContext();
+            await using var webTaxDebtContext = new WebTaxDebtContext();
             await parsedTaxDebtContext.Database.ExecuteSqlRawAsync("truncate avroradata.tax_debt restart identity cascade;");
+            await webTaxDebtContext.Database.ExecuteSqlRawAsync($"call avroradata.unreliable_companies_updater();");
+
         }
 
         private async Task Migrate(int numThread)

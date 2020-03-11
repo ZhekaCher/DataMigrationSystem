@@ -42,8 +42,8 @@ namespace DataMigrationSystem.Services
                 };
 
             long bin = 0;
-            int oldCounter = 0;
-            int newCounter = 0;
+            var oldCounter = 0;
+            var newCounter = 0;
             foreach (var companyDto in companyDtos)
             {
                 if (bin != companyDto.IinBin)
@@ -63,7 +63,10 @@ namespace DataMigrationSystem.Services
                 await webLeavingRestrictionContext.LeavingRestrictions.AddAsync(companyDto);
                 await webLeavingRestrictionContext.SaveChangesAsync();
                 newCounter++;
-                Logger.Trace(_counter++);
+                lock (_forLock)
+                {
+                    Logger.Trace(_counter++);
+                }
             }
         }
         public override async Task StartMigratingAsync()
@@ -78,7 +81,10 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             await using var parsedLeavingRestrictionContext = new  ParsedLeavingRestrictionContext();
+            await using var webLeavingRestrictionContext = new  WebLeavingRestrictionContext();
             await parsedLeavingRestrictionContext.Database.ExecuteSqlRawAsync("truncate avroradata.leaving_restriction restart identity;");
+            await webLeavingRestrictionContext.Database.ExecuteSqlRawAsync($"call avroradata.unreliable_companies_updater();");
+
         }
     }
 }

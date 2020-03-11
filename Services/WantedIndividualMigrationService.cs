@@ -39,7 +39,7 @@ namespace DataMigrationSystem.Services
             _webWantedIndividualContext.WantedIndividuals.RemoveRange(_webWantedIndividualContext.WantedIndividuals.Where(x=>x.RelevanceDate<minDate));
             await _webWantedIndividualContext.SaveChangesAsync();
             await _parsedWantedIndividualContext.Database.ExecuteSqlRawAsync("truncate avroradata.wanted_individuals restart identity;");
-
+            await _webWantedIndividualContext.Database.ExecuteSqlRawAsync($"call avroradata.unreliable_companies_updater();");
         }
 
         private async Task MigrateReferences()

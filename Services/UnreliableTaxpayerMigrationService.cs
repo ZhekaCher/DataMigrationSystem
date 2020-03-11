@@ -40,6 +40,7 @@ namespace DataMigrationSystem.Services
             webUnreliableTaxpayerContext.UnreliableTaxpayers.RemoveRange(webUnreliableTaxpayerContext.UnreliableTaxpayers.Where(x=>x.RelevanceDate<minDate));
             await webUnreliableTaxpayerContext.SaveChangesAsync();
             await parsedUnreliableTaxpayerContext.Database.ExecuteSqlRawAsync("truncate table avroradata.unreliable_taxpayers;");
+            await webUnreliableTaxpayerContext.Database.ExecuteSqlRawAsync($"call avroradata.unreliable_companies_updater();");
         }
 
         private async Task MigrateAsync(int numThread)

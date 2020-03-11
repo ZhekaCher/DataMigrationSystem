@@ -71,6 +71,7 @@ namespace DataMigrationSystem.Services
             _webPedophilesContext.Pedophiles.RemoveRange(toDelete);
             await _webPedophilesContext.SaveChangesAsync();
             await _parsedPedophilesContext.Database.ExecuteSqlRawAsync("truncate avroradata.pedophiles");
+            await _webPedophilesContext.Database.ExecuteSqlRawAsync($"call avroradata.unreliable_companies_updater();");
         }
     }
 }

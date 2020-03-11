@@ -80,6 +80,7 @@ namespace DataMigrationSystem.Services
             await using var webEnforcementDebtContext = new WebEnforcementDebtContext();
             var newDate = parsedEnforcementDebtContext.EnforcementDebtDtos.Min(x => x.RelevanceDate);
             await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"update avroradata.enforcement_debt set status = false where relevance_date < {newDate};");
+            await webEnforcementDebtContext.Database.ExecuteSqlRawAsync($"call avroradata.unreliable_companies_updater();");
             await parsedEnforcementDebtContext.Database.ExecuteSqlRawAsync("truncate avroradata.enforcement_debt, avroradata.enforcement_debt_detail restart identity;");
         }
         private async Task<EnforcementDebt> DtoToCompanyEntity(EnforcementDebtDto debtDto, WebEnforcementDebtContext webEnforcementDebtContext)

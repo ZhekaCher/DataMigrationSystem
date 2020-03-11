@@ -66,6 +66,7 @@ namespace DataMigrationSystem.Services
             _webTerroristContext.Terrorists.RemoveRange(_webTerroristContext.Terrorists.Where(x=>x.RelevanceDate<minDate));
             await _webTerroristContext.SaveChangesAsync();
             await _parsedTerroristContext.Database.ExecuteSqlRawAsync("truncate avroradata.terrorists restart identity;");
+            await _webTerroristContext.Database.ExecuteSqlRawAsync($"call avroradata.unreliable_companies_updater();");
 
         }
     }

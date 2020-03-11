@@ -23,7 +23,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("fullname_director")] public string FullnameDirector{get; set;}
         // [Column("fullname_founders")] public string FullnameFounders{get; set;}
         [Column("relevance_date")] public DateTime? RelevanceDate{get; set;} = DateTime.Now;
-        [Column("i_datasource")] public int IdDataSource { get; set; } = 1;
+        [Column("i_datasource")] public int IdDataSource { get; set; } = 3;
         [Column("id_tc")] public int IdType { get; set; } = 1;
         public List<CompanyOked> CompanyOkeds { get; set; }
     }
