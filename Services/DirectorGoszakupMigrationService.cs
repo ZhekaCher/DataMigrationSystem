@@ -55,17 +55,9 @@ namespace DataMigrationSystem.Services
             webCompanyDirectorContext.RemoveRange(webCompanyDirectorContext.CompanyDirectors.Where(x => x.RelevanceDate < oldest));
             webCompanyDirectorContext.SaveChanges();
             Logger.Info("Removing old information");
-            
-            
-            // foreach (var b in webCompanyDirectorContext.CompanyDirectors.Where(x => x.RelevanceDate < oldest))
-            // {
-            //     Logger.Trace($"Removing |{b.CompanyBin}| because of relevance; {b.RelevanceDate} older than {oldest}");
-            //     webCompanyDirectorContext2.Remove(b);
-            //     await webCompanyDirectorContext2.SaveChangesAsync();
-            // }
 
-            // await parsedDirectorGoszakupContext.Database.ExecuteSqlRawAsync(
-                // "truncate table avroradata.director_goszakup restart identity cascade;");
+            await parsedDirectorGoszakupContext.Database.ExecuteSqlRawAsync(
+                "truncate table avroradata.director_goszakup restart identity cascade;");
             Logger.Info("Truncated");
         }
 
