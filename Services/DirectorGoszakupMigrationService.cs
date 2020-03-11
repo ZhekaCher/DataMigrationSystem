@@ -52,7 +52,7 @@ namespace DataMigrationSystem.Services
             var oldest = parsedDirectorGoszakupContext.DirectorGoszakupDtos.OrderBy(x => x.Relevance).First().Relevance;
             
             Logger.Info("Removing old information");
-            webCompanyDirectorContext.RemoveRange(webCompanyDirectorContext.CompanyDirectors.Where(x => x.RelevanceDate < oldest));
+            webCompanyDirectorContext.RemoveRange(webCompanyDirectorContext.CompanyDirectors.Where(x => x.RelevanceDate < oldest && x.DataSource==2));
             webCompanyDirectorContext.SaveChanges();
             Logger.Info("Removing old information");
 
