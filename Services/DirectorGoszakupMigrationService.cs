@@ -54,7 +54,7 @@ namespace DataMigrationSystem.Services
             Logger.Info("Removing old information");
             webCompanyDirectorContext.RemoveRange(webCompanyDirectorContext.CompanyDirectors.Where(x => x.RelevanceDate < oldest && x.DataSource==2));
             webCompanyDirectorContext.SaveChanges();
-            Logger.Info("Removing old information");
+            Logger.Info("Removing ended");
 
             await parsedDirectorGoszakupContext.Database.ExecuteSqlRawAsync(
                 "truncate table avroradata.director_goszakup restart identity cascade;");
