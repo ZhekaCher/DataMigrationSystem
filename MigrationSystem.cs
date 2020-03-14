@@ -53,9 +53,9 @@ namespace DataMigrationSystem
     public class MigrationSystem
     {
         private static Logger _logger;
-        private Dictionary<ConfigurationElements, object> _configurations = PreloadConfigurations();
-        private Dictionary<ConfigurationElements, object> _args;
-        private static Dictionary<string, string> _commandsDictionary = new Dictionary<string, string>();
+        private readonly Dictionary<ConfigurationElements, object> _configurations = PreloadConfigurations();
+        private readonly Dictionary<ConfigurationElements, object> _args;
+        private static readonly Dictionary<string, string> CommandsDictionary = new Dictionary<string, string>();
         private static string _helpString;
 
         internal MigrationSystem(string[] args)
@@ -152,16 +152,16 @@ namespace DataMigrationSystem
 
         private static Dictionary<ConfigurationElements, object> PreloadConfigurations()
         {
-            _commandsDictionary.Add("--help (-h)", "prints commands list");
-            _commandsDictionary.Add("--list (-l)", "prints the list of avaliable migrations");
-            _commandsDictionary.Add("--ignore (-i)", "ignores 'active' field in 'parser_monitoring_table'");
-            _commandsDictionary.Add("--force (-r)", "ignores 'active' and 'parsed' field in 'parser_monitoring_table'");
-            _commandsDictionary.Add("--threads (-t)",
+            CommandsDictionary.Add("--help (-h)", "prints commands list");
+            CommandsDictionary.Add("--list (-l)", "prints the list of avaliable migrations");
+            CommandsDictionary.Add("--ignore (-i)", "ignores 'active' field in 'parser_monitoring_table'");
+            CommandsDictionary.Add("--force (-r)", "ignores 'active' and 'parsed' field in 'parser_monitoring_table'");
+            CommandsDictionary.Add("--threads (-t)",
                 $"choose number of threads\n{"Example: -t 5 -> starting with 5 threads for all migrations",82}");
-            _commandsDictionary.Add("--migrations (-m)",
+            CommandsDictionary.Add("--migrations (-m)",
                 $"allows to choose migrations\n{"Example: -m tax_debt wanted_individual -> starting the given migrations",94}");
 
-            _helpString = _commandsDictionary.Aggregate("",
+            _helpString = CommandsDictionary.Aggregate("",
                 (current, command) => current + $"{command.Key,-20} : {command.Value}\n");
 
             var conf = new Dictionary<ConfigurationElements, object>();
@@ -245,8 +245,6 @@ namespace DataMigrationSystem
                                 break;
                         }
 
-                        break;
-                    default:
                         break;
                 }
             }
