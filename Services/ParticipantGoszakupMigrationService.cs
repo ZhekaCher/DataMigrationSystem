@@ -79,6 +79,8 @@ namespace DataMigrationSystem.Services
 
             await using var webParticipantGoszakupContext = new WebParticipantGoszakupContext();
             await using var parsedParticipantGoszakupContext = new ParsedParticipantGoszakupContext();
+            
+            //TODO(Contacts context)
             var a = parsedParticipantGoszakupContext.ParticipantGoszakupDtos.Count();
             foreach (var dto in parsedParticipantGoszakupContext.ParticipantGoszakupDtos.Where(x =>
                     x.Pid % NumOfThreads == threadNum)
@@ -90,6 +92,8 @@ namespace DataMigrationSystem.Services
                     Logger.Trace($"Moving: {dto.Bin}");
                     await webParticipantGoszakupContext.ParticipantsGoszakup.Upsert(temp)
                         .On(x => x.BiinCompanies).RunAsync();
+                    
+                    //TODO(Insert on conflict)
                 }
                 catch (Exception e)
                 {

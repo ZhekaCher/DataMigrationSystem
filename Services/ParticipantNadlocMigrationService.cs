@@ -45,11 +45,16 @@ namespace DataMigrationSystem.Services
                 tasks.Add(Migrate(i));
             await Task.WhenAll(tasks);
             webParticipantNadlocContext.SupplierNadloc.RemoveRange(webParticipantNadlocContext.SupplierNadloc
-                .Where(x => x.RelevanceDate < startDate1));
-            await webParticipantNadlocContext.SaveChangesAsync();
-            webParticipantNadlocContext.CustomersNadloc.RemoveRange(webParticipantNadlocContext.CustomersNadloc
                 .Where(x => x.RelevanceDate < startDate2));
             await webParticipantNadlocContext.SaveChangesAsync();
+            webParticipantNadlocContext.CustomersNadloc.RemoveRange(webParticipantNadlocContext.CustomersNadloc
+                .Where(x => x.RelevanceDate < startDate1));
+            await webParticipantNadlocContext.SaveChangesAsync();
+            
+            await parsedParticipantNadlocContext.Database.ExecuteSqlRawAsync("truncate table avroradata.nadloc_customers restart identity cascade;");
+            await parsedParticipantNadlocContext.Database.ExecuteSqlRawAsync("truncate table avroradata.nadloc_suppliers restart identity cascade;");
+            await parsedParticipantNadlocContext.Database.ExecuteSqlRawAsync("truncate table avroradata.nadloc_participants restart identity cascade;");
+            Logger.Info("Truncated");
             Logger.Info("End of migration");
         }
 
