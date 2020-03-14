@@ -13,7 +13,6 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         public long Bin { get; set; }
         [Column("id_region")] 
         public long? IdRegion{get; set;}
-        // [Column("rnn")] public long Rnn{get; set;}
         [Column("name_ru")] public string NameRu{get; set;}
         [Column("name_kz")] public string NameKz{get; set;}
         [Column("date_registration")] public DateTime? DateRegistration{get; set;}
@@ -21,7 +20,6 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("id_kato")] public int IdKato{get; set;}
         [Column("legal_address")] public string LegalAddress{get; set;}
         [Column("fullname_director")] public string FullnameDirector{get; set;}
-        // [Column("fullname_founders")] public string FullnameFounders{get; set;}
         [Column("relevance_date")] public DateTime? RelevanceDate{get; set;} = DateTime.Now;
         [Column("i_datasource")] public int IdDataSource { get; set; } = 3;
         [Column("id_tc")] public int IdType { get; set; } = 1;
