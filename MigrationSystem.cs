@@ -84,7 +84,7 @@ namespace DataMigrationSystem
                     }
                     else
                     {
-                        temp = parserMonitoringContext.ParserMonitorings.FirstOrDefault(x => x.Parsed == true  && x.Name.Equals(migration));
+                        temp = parserMonitoringContext.ParserMonitorings.FirstOrDefault(x => x.Active == true  && x.Name.Equals(migration));
                     }
 
                     if (temp == null)
