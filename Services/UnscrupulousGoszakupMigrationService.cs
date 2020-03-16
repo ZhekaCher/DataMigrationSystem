@@ -43,15 +43,16 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
-            
-            
+
+
             Logger.Info("Starting removing participants who out of unscrupulous");
             await using var webUnscrupulousGoszakupContext = new WebUnscrupulousGoszakupContext();
             await using var webUnscrupulousGoszakupContext2 = new WebUnscrupulousGoszakupContext();
             await using var parsedUnscrupulousGoszakupContext = new ParsedUnscrupulousGoszakupContext();
-            var firstParsedTime = parsedUnscrupulousGoszakupContext.UnscrupulousGoszakupDtos.OrderBy(x => x.Relevance).FirstOrDefault().Relevance; 
+            var firstParsedTime = parsedUnscrupulousGoszakupContext.UnscrupulousGoszakupDtos.OrderBy(x => x.Relevance)
+                .FirstOrDefault().Relevance;
             var old = webUnscrupulousGoszakupContext.UnscrupulousGoszakup.Where(x =>
-                x.RelevanceDate < firstParsedTime).Where(x => x.Status==true);
+                x.RelevanceDate < firstParsedTime).Where(x => x.Status == true);
             var left = old.Count();
             foreach (var unscrupulousGoszakup in old)
                 try
@@ -68,10 +69,13 @@ namespace DataMigrationSystem.Services
                         $"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|;");
                     Program.NumOfErrors++;
                 }
+
             Logger.Info("Removing done");
-            await parsedUnscrupulousGoszakupContext.Database.ExecuteSqlRawAsync("truncate table avroradata.unscrupulous_goszakup restart identity cascade;");
+            await parsedUnscrupulousGoszakupContext.Database.ExecuteSqlRawAsync(
+                "truncate table avroradata.unscrupulous_goszakup restart identity cascade;");
             Logger.Info("Truncated");
-            await webUnscrupulousGoszakupContext.Database.ExecuteSqlRawAsync($"call avroradata.unreliable_companies_updater();");
+            await webUnscrupulousGoszakupContext.Database.ExecuteSqlRawAsync(
+                $"call avroradata.unreliable_companies_updater();");
         }
 
         private async Task Migrate(int threadNum)

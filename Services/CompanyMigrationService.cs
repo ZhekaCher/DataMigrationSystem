@@ -94,7 +94,7 @@ namespace DataMigrationSystem.Services
             var secondOkeds = parsedCompanyContext.CompanyDtos.Select(x => new {x.SecondOkedCode}).Distinct();
             foreach (var secondOked in secondOkeds)
             {
-                if (secondOked != null)
+                if (secondOked.SecondOkedCode != null)
                 {
                     var secOkeds = secondOked.SecondOkedCode.Split(',');
                     foreach (var oked in secOkeds)

@@ -79,9 +79,8 @@ namespace DataMigrationSystem.Services
 
             await using var webParticipantGoszakupContext = new WebParticipantGoszakupContext();
             await using var parsedParticipantGoszakupContext = new ParsedParticipantGoszakupContext();
-            
-                //TODO(Contacts context)
-            var a = parsedParticipantGoszakupContext.ParticipantGoszakupDtos.Count();
+         
+            //TODO(Contacts context)
             foreach (var dto in parsedParticipantGoszakupContext.ParticipantGoszakupDtos.Where(x =>
                     x.Pid % NumOfThreads == threadNum)
                 .Where(x => x.Inn == null && x.Unp == null && (x.Bin != null || x.Iin != null)))
