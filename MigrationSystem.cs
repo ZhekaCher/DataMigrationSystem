@@ -68,6 +68,7 @@ namespace DataMigrationSystem
 
         public async Task StartMigrations()
         {
+            _logger.Info("Configuring and starting migrations...");
             var listOfMigrations = ((List<string>) _configurations[ConfigurationElements.Migrations]).ToList();
             var threads = (int?) _configurations[ConfigurationElements.Threads];
 
