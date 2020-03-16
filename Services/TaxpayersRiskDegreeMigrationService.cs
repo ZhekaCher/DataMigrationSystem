@@ -37,7 +37,7 @@ namespace DataMigrationSystem.Services
                     Degree = taxpayerRiskDegreeDto.Degree,
                     CalculationRelevanceDate = taxpayerRiskDegreeDto.CalculationRelevanceDate,
                     RelevanceDateFrom = taxpayerRiskDegreeDto.RelevanceDateFrom,
-                    RelevanceDateTo = taxpayerRiskDegreeDto.RelevanceDateFrom
+                    RelevanceDateTo = taxpayerRiskDegreeDto.RelevanceDateTo
                 };
             foreach (var taxpayerRiskDegree in taxpayerRiskDegrees)
             {
