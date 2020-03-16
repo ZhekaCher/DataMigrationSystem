@@ -15,9 +15,5 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("customer")] public bool? Customer { get; set; }
         [Column("supplier")] public bool? Supplier { get; set; }
         [Column("relevance_date")] public DateTime? RelevanceDate { get; set; }
-        [Column("phone")] public string? Phone { get; set; }
-
-        [Column("email")] public string? Email{get;set;}
-        [Column("site")] public string? Site{get;set;}
     }
 }
