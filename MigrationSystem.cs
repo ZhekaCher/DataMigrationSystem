@@ -158,7 +158,7 @@ namespace DataMigrationSystem
             CommandsDictionary.Add("--ignore (-i)", "ignores 'active' field in 'parser_monitoring_table'");
             CommandsDictionary.Add("--force (-r)", "ignores 'active' and 'parsed' field in 'parser_monitoring_table'");
             CommandsDictionary.Add("--threads (-t)",
-                $"choose number of threads\n{"Example: -t 5 -> starting with 5 threads for all migrations",82}");
+                $"choose number of threads\n{"Example: -t 5 -> starting with 5 threads for all migrations if maintained",82}");
             CommandsDictionary.Add("--migrations (-m)",
                 $"allows to choose migrations\n{"Example: -m TaxBebt WantedIndividual -> starting the given migrations",94}");
 
