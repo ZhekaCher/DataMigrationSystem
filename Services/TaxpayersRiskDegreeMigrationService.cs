@@ -41,6 +41,8 @@ namespace DataMigrationSystem.Services
                 };
             foreach (var taxpayerRiskDegree in taxpayerRiskDegrees)
             {
+                
+                Logger.Trace(taxpayerRiskDegree.Bin);
                 await _webTaxpayerRiskDegreeContext.TaxpayerRiskDegrees.Upsert(taxpayerRiskDegree).On(x=>x.Bin).RunAsync();
             }
         }
