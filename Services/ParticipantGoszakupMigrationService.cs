@@ -89,7 +89,7 @@ namespace DataMigrationSystem.Services
                 var contacts = OnlyContacts(dto);
                 try
                 {
-                    Logger.Trace($"Moving: {dto.Bin}");
+                    Logger.Trace($"Moving: {temp.BiinCompanies}");
                     await webParticipantGoszakupContext.ParticipantsGoszakup.Upsert(temp)
                         .On(x => x.BiinCompanies).RunAsync();
                     
