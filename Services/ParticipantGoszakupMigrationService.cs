@@ -79,21 +79,32 @@ namespace DataMigrationSystem.Services
 
             await using var webParticipantGoszakupContext = new WebParticipantGoszakupContext();
             await using var parsedParticipantGoszakupContext = new ParsedParticipantGoszakupContext();
-            
+         
             //TODO(Contacts context)
-            var a = parsedParticipantGoszakupContext.ParticipantGoszakupDtos.Count();
             foreach (var dto in parsedParticipantGoszakupContext.ParticipantGoszakupDtos.Where(x =>
                     x.Pid % NumOfThreads == threadNum)
                 .Where(x => x.Inn == null && x.Unp == null && (x.Bin != null || x.Iin != null)))
             {
                 var temp = DtoToWeb(dto);
+                var contacts = OnlyContacts(dto);
                 try
                 {
-                    Logger.Trace($"Moving: {dto.Bin}");
+                    Logger.Trace($"Moving: {temp.BiinCompanies}");
                     await webParticipantGoszakupContext.ParticipantsGoszakup.Upsert(temp)
                         .On(x => x.BiinCompanies).RunAsync();
                     
                     //TODO(Insert on conflict)
+                    try
+                    {
+                        await webParticipantGoszakupContext.Contacts.AddAsync(contacts);
+                        await webParticipantGoszakupContext.SaveChangesAsync();
+                    }
+                    catch (Exception)
+                    {
+                        // Console.WriteLine("This contacts is already exists");
+                    }
+                   
+
                 }
                 catch (Exception e)
                 {
@@ -138,6 +149,19 @@ namespace DataMigrationSystem.Services
             participantGoszakup.LastUpdateDate = participantGoszakupDto.LastUpdateDate;
             participantGoszakup.MarkNationalCompany = participantGoszakupDto.MarkNationalCompany;
             return participantGoszakup;
+        }
+
+        private Contact OnlyContacts(ParticipantGoszakupDto participantGoszakupDto)
+        {
+            var contact= new Contact();
+            var biin = participantGoszakupDto.Bin ?? participantGoszakupDto.Iin;
+            var source = participantGoszakupDto.Bin != null ? "goszakup_bin" : "goszakup_iin";
+            contact.Bin = biin;
+            contact.Telephone = participantGoszakupDto.Phone;
+            contact.Website = participantGoszakupDto.Website;
+            contact.Email = participantGoszakupDto.Email;
+            contact.Source = source;
+            return contact;
         }
     }
 }
