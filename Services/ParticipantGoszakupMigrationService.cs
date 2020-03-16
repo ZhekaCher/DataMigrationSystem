@@ -97,10 +97,11 @@ namespace DataMigrationSystem.Services
                     try
                     {
                         await webParticipantGoszakupContext.Contacts.AddAsync(contacts);
+                        await webParticipantGoszakupContext.SaveChangesAsync();
                     }
                     catch (Exception)
                     {
-                        Console.WriteLine("This contacts is already exists");
+                        // Console.WriteLine("This contacts is already exists");
                     }
                    
 
@@ -160,6 +161,7 @@ namespace DataMigrationSystem.Services
             contact.Website = participantGoszakupDto.Website;
             contact.Email = participantGoszakupDto.Email;
             contact.Source = source;
+            return contact;
         }
     }
 }
