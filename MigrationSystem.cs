@@ -68,6 +68,7 @@ namespace DataMigrationSystem
 
         public async Task StartMigrations()
         {
+            _logger.Info("Configuring and starting migrations...");
             var listOfMigrations = ((List<string>) _configurations[ConfigurationElements.Migrations]).ToList();
             var threads = (int?) _configurations[ConfigurationElements.Threads];
 
@@ -157,24 +158,16 @@ namespace DataMigrationSystem
             CommandsDictionary.Add("--ignore (-i)", "ignores 'active' field in 'parser_monitoring_table'");
             CommandsDictionary.Add("--force (-r)", "ignores 'active' and 'parsed' field in 'parser_monitoring_table'");
             CommandsDictionary.Add("--threads (-t)",
-                $"choose number of threads\n{"Example: -t 5 -> starting with 5 threads for all migrations",82}");
+                $"choose number of threads\n{"Example: -t 5 -> starting with 5 threads for all migrations if maintained",96}");
             CommandsDictionary.Add("--migrations (-m)",
-                $"allows to choose migrations\n{"Example: -m tax_debt wanted_individual -> starting the given migrations",94}");
+                $"allows to choose migrations\n{"Example: -m TaxBebt WantedIndividual -> starting the given migrations",92}");
 
             _helpString = CommandsDictionary.Aggregate("",
                 (current, command) => current + $"{command.Key,-20} : {command.Value}\n");
 
             var conf = new Dictionary<ConfigurationElements, object>();
             conf.Add(ConfigurationElements.Threads, null);
-
-
-            using var parserMonitoringContext = new ParserMonitoringContext();
-            var parserMonitorings =
-                parserMonitoringContext.ParserMonitorings.ToList();
-            var migrations = new List<string>();
-            foreach (var parserMonitoring in parserMonitorings)
-                migrations.Add(parserMonitoring.Name);
-            conf.Add(ConfigurationElements.Migrations, migrations);
+            
 
             return conf;
         }
@@ -256,18 +249,28 @@ namespace DataMigrationSystem
         {
             foreach (var keyValuePair in _args)
             {
+                
+                if (_args.ContainsKey(ConfigurationElements.Help))
+                {
+                    Console.Write(_helpString);
+                    Environment.Exit(0);
+                }
+                if (!_args.ContainsKey(ConfigurationElements.Migrations))
+                {
+                    using var parserMonitoringContext = new ParserMonitoringContext();
+                    var parserMonitorings =
+                        parserMonitoringContext.ParserMonitorings.ToList();
+                    var migrations = new List<string>();
+                    foreach (var parserMonitoring in parserMonitorings)
+                        migrations.Add(parserMonitoring.Name);
+                    _configurations.Add(ConfigurationElements.Migrations, migrations);
+                }
                 if (_args.ContainsKey(ConfigurationElements.List))
                 {
                     var migrations = ((List<string>) _configurations[ConfigurationElements.Migrations]).ToList();
                     Console.WriteLine("The list of avaliable migrations:");
                     foreach (var migration in migrations)
                         Console.WriteLine(migration);
-                    Environment.Exit(0);
-                }
-
-                if (_args.ContainsKey(ConfigurationElements.Help))
-                {
-                    Console.Write(_helpString);
                     Environment.Exit(0);
                 }
 

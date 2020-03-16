@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Parsed
 {
-    public class ParsedTaxpayerRiskDegreeContext:WebContext
+    public class ParsedTaxpayerRiskDegreeContext:ParsedContext
     {
         public DbSet<TaxpayerRiskDegreeDto> TaxpayerRiskDegreeDtos { get; set; }
     }

@@ -17,6 +17,7 @@
 * LeavingRestriction
 * LotGoszakup
 * LotNadloc
+* NdsDetails
 * ParticipantGoszakup
 * ParticipantNadloc
 * Pedophiles
@@ -24,6 +25,8 @@
 * ReliableSk
 * SamrukParticipants
 * TaxDebt
+* TaxDetails
+* TaxpayersRiskDegree
 * Terrorist
 * Top100Goszakup
 * UnreliableSk
@@ -41,7 +44,7 @@
 
 ## Versioning
 #### Last version:
-
+1.3 - Release
 
 ###### Older versions:
 
