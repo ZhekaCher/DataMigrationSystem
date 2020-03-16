@@ -54,10 +54,8 @@ namespace DataMigrationSystem.Services
                     }                    
                     bin = companyDto.IinBin;
                     oldCounter = await webLeavingRestrictionContext.LeavingRestrictions.CountAsync(x => x.IinBin == bin);
-                    webLeavingRestrictionContext.LeavingRestrictions.RemoveRange(
-                        webLeavingRestrictionContext.LeavingRestrictions.Where(x =>
-                            x.IinBin == bin));
-                    await webLeavingRestrictionContext.SaveChangesAsync();
+                    await webLeavingRestrictionContext.Database.ExecuteSqlInterpolatedAsync(
+                        $"delete from avroradata.leaving_restriction where biin = {bin}");
                     newCounter = 0;
                 }
                 await webLeavingRestrictionContext.LeavingRestrictions.AddAsync(companyDto);
