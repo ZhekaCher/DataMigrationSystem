@@ -74,13 +74,9 @@ namespace DataMigrationSystem.Services
 
         private async Task Migrate(int threadNum)
         {
-            // Logger.Info("Started thread");
-
-
             await using var webParticipantGoszakupContext = new WebParticipantGoszakupContext();
             await using var parsedParticipantGoszakupContext = new ParsedParticipantGoszakupContext();
          
-            //TODO(Contacts context)
             foreach (var dto in parsedParticipantGoszakupContext.ParticipantGoszakupDtos.Where(x =>
                     x.Pid % NumOfThreads == threadNum)
                 .Where(x => x.Inn == null && x.Unp == null && (x.Bin != null || x.Iin != null)))
@@ -89,11 +85,9 @@ namespace DataMigrationSystem.Services
                 var contacts = OnlyContacts(dto);
                 try
                 {
-                    Logger.Trace($"Moving: {dto.Bin}");
                     await webParticipantGoszakupContext.ParticipantsGoszakup.Upsert(temp)
                         .On(x => x.BiinCompanies).RunAsync();
                     
-                    //TODO(Insert on conflict)
                     try
                     {
                         await webParticipantGoszakupContext.Contacts.AddAsync(contacts);
