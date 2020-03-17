@@ -247,23 +247,22 @@ namespace DataMigrationSystem
 
         private void ProceedArguments()
         {
+            if (!_args.ContainsKey(ConfigurationElements.Migrations))
+            {
+                using var parserMonitoringContext = new ParserMonitoringContext();
+                var parserMonitorings =
+                    parserMonitoringContext.ParserMonitorings.ToList();
+                var migrations = new List<string>();
+                foreach (var parserMonitoring in parserMonitorings)
+                    migrations.Add(parserMonitoring.Name);
+                _configurations.Add(ConfigurationElements.Migrations, migrations);
+            }
             foreach (var keyValuePair in _args)
             {
-                
                 if (_args.ContainsKey(ConfigurationElements.Help))
                 {
                     Console.Write(_helpString);
                     Environment.Exit(0);
-                }
-                if (!_args.ContainsKey(ConfigurationElements.Migrations))
-                {
-                    using var parserMonitoringContext = new ParserMonitoringContext();
-                    var parserMonitorings =
-                        parserMonitoringContext.ParserMonitorings.ToList();
-                    var migrations = new List<string>();
-                    foreach (var parserMonitoring in parserMonitorings)
-                        migrations.Add(parserMonitoring.Name);
-                    _configurations.Add(ConfigurationElements.Migrations, migrations);
                 }
                 if (_args.ContainsKey(ConfigurationElements.List))
                 {
