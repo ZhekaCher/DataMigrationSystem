@@ -43,7 +43,7 @@ namespace DataMigrationSystem.Services
                     AgencyRu = egovEnforcementDebtDto.AgencyKk,
                     Number = egovEnforcementDebtDto.Number,
                     Amount = egovEnforcementDebtDto.Amount,
-                    TypeId = _enforcementDebtTypes.FirstOrDefault(x=>x.Name == egovEnforcementDebtDto.TypeRu)?.Id
+                    TypeId = _enforcementDebtTypes.FirstOrDefault(x=>x.Name == egovEnforcementDebtDto.TypeRu).Id
                 };
 
             long bin = 0;
