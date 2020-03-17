@@ -19,6 +19,6 @@ namespace DataMigrationSystem.Models.Web.Avroradata
     public class NdsDetailReason
     {
         [Column("id")] public int? Id{get; set;}
-        [Column("name")] public string? Name{get; set;}
+        [Column("name")] public string Name{get; set;}
     }
 }

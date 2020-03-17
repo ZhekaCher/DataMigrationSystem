@@ -160,7 +160,7 @@ namespace DataMigrationSystem
             CommandsDictionary.Add("--threads (-t)",
                 $"choose number of threads\n{"Example: -t 5 -> starting with 5 threads for all migrations if maintained",96}");
             CommandsDictionary.Add("--migrations (-m)",
-                $"allows to choose migrations\n{"Example: -m TaxBebt WantedIndividual -> starting the given migrations",92}");
+                $"allows to choose migrations\n{"Example: -m TaxDebt WantedIndividual -> starting the given migrations",92}");
 
             _helpString = CommandsDictionary.Aggregate("",
                 (current, command) => current + $"{command.Key,-20} : {command.Value}\n");

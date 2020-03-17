@@ -48,20 +48,21 @@ namespace DataMigrationSystem.Services
             await using var webUnreliableTaxpayerContext = new WebUnreliableTaxpayerContext();
             await using var parsedUnreliableTaxpayerContext = new ParsedUnreliableTaxpayerContext();
             
-            var taxpayers = from unreliableTaxpayerDto in parsedUnreliableTaxpayerContext.UnreliableTaxpayerDtos
-                join companyBinDto in parsedUnreliableTaxpayerContext.CompanyBinDtos
-                    on unreliableTaxpayerDto.BinCompany equals companyBinDto.Code
-                    where unreliableTaxpayerDto.Id % NumOfThreads == numThread
-                select new UnreliableTaxpayer
+            var taxpayers = parsedUnreliableTaxpayerContext.UnreliableTaxpayerDtos
+                .Join(parsedUnreliableTaxpayerContext.CompanyBinDtos,
+                    unreliableTaxpayerDto => unreliableTaxpayerDto.BinCompany, companyBinDto => companyBinDto.Code,
+                    (unreliableTaxpayerDto, companyBinDto) => new {unreliableTaxpayerDto, companyBinDto})
+                .Where(t => t.unreliableTaxpayerDto.Id % NumOfThreads == numThread)
+                .Select(t => new UnreliableTaxpayer
                 {
-                    RelevanceDate = unreliableTaxpayerDto.RelevanceDate,
-                    DocumentDate = unreliableTaxpayerDto.DocumentDate,
-                    IdListType = unreliableTaxpayerDto.IdListType,
-                    IdTypeDocument = unreliableTaxpayerDto.IdTypeDocument,
-                    Note = unreliableTaxpayerDto.Note,
-                    DocumentNumber = unreliableTaxpayerDto.DocumentNumber,
-                    BinCompany = unreliableTaxpayerDto.BinCompany
-                };
+                    RelevanceDate = t.unreliableTaxpayerDto.RelevanceDate,
+                    DocumentDate = t.unreliableTaxpayerDto.DocumentDate,
+                    IdListType = t.unreliableTaxpayerDto.IdListType,
+                    IdTypeDocument = t.unreliableTaxpayerDto.IdTypeDocument,
+                    Note = t.unreliableTaxpayerDto.Note,
+                    DocumentNumber = t.unreliableTaxpayerDto.DocumentNumber,
+                    BinCompany = t.unreliableTaxpayerDto.BinCompany
+                });
             foreach (var taxpayer in taxpayers)
             {
                 await webUnreliableTaxpayerContext.UnreliableTaxpayers.Upsert(taxpayer).On(x => new {x.BinCompany, x.IdListType}).RunAsync();

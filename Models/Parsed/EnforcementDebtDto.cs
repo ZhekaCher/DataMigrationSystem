@@ -8,44 +8,32 @@ namespace DataMigrationSystem.Models.Parsed
     public class EnforcementDebtDto
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id")]
         public long Id { get; set; }
-        [Column("uid")]
-        public string Uid { get; set; }
-        [Column("essence_requirements")]
-        public string EssenceRequirements { get; set; }
-        [Column("debtor")]
-        public string Debtor { get; set; }
-        [Column("agency")]
-        public string Agency { get; set; }
-        [Column("judicial_executor")]
-        public string JudicialExecutor { get; set; }
-        [Column("date")]
-        public DateTime? Date { get; set; }
-        [Column("iin_bin")]
+        [Column("biin")]
         public long IinBin { get; set; }
-        public EnforcementDebtDetailDto DetailDto { get; set; }
-        [Column("relevance_date")]
-        public DateTime RelevanceDate { get; set; }
-    }
-    [Table("enforcement_debt_detail")]
-    public class EnforcementDebtDetailDto
-    {
-        [Key]
-        [Column("uid")]
-        public string Uid { get; set; }
         [Column("number")]
         public string Number { get; set; }
-        [Column("claimer")]
-        public string Claimer { get; set; }
         [Column("amount")]
         public double Amount { get; set; }
-        [Column("history")]
-        public string History { get; set; }
-        [Column("judicial_doc")]
-        public string JudicialDoc { get; set; }
-        [Column("type")]
-        public string Type { get; set; }
-        public EnforcementDebtDto EnforcementDebtDto { get; set; }
+        [Column("agency_kk")]
+        public string AgencyKk { get; set; }
+        [Column("agency_ru")]
+        public string AgencyRu { get; set; }
+        [Column("judicial_executor_kk")]
+        public string JudicialExecutorKk { get; set; }
+        [Column("judicial_executor_ru")]
+        public string JudicialExecutorRu { get; set; }
+        [Column("enforcement_start_date")]
+        public DateTime? EnforcementStartDate { get; set; }
+        [Column("restriction_start_date")]
+        public DateTime? RestrictionStartDate { get; set; }
+        [Column("relevance_date")]
+        public DateTime RelevanceDate { get; set; }
+        [Column("type_kk")]
+        public string TypeKk { get; set; }
+        [Column("type_ru")]
+        public string TypeRu { get; set; }
     }
 }
