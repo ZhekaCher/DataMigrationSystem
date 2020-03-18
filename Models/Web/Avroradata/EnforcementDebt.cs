@@ -22,7 +22,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id")]
-        public string Id { get; set; }
+        public long Id { get; set; }
         [Column("type_id")]
         public int? TypeId { get; set; }
         [Column("relevance_date")]

@@ -28,45 +28,32 @@ namespace DataMigrationSystem.Services
         {
             await using var webEnforcementDebtContext = new WebEnforcementDebtContext();
             await using var parsedEnforcementDebtContext = new ParsedEnforcementDebtContext();
-            var egovEnforcementDebts = from egovEnforcementDebtDto in parsedEnforcementDebtContext.EgovEnforcementDebtDtos
-                where egovEnforcementDebtDto.IinBin%NumOfThreads==numThread
-                orderby egovEnforcementDebtDto.IinBin
-                select new EgovEnforcementDebt
-                {
-                    RelevanceDate = egovEnforcementDebtDto.RelevanceDate,
-                    IinBin = egovEnforcementDebtDto.IinBin,
-                    EnforcementStartDate = egovEnforcementDebtDto.EnforcementStartDate,
-                    RestrictionStartDate = egovEnforcementDebtDto.RestrictionStartDate,
-                    JudicialExecutorKk = egovEnforcementDebtDto.JudicialExecutorKk,
-                    JudicialExecutorRu = egovEnforcementDebtDto.JudicialExecutorRu,
-                    AgencyKk = egovEnforcementDebtDto.JudicialExecutorKk,
-                    AgencyRu = egovEnforcementDebtDto.AgencyKk,
-                    Number = egovEnforcementDebtDto.Number,
-                    Amount = egovEnforcementDebtDto.Amount,
-                    TypeId = _enforcementDebtTypes.FirstOrDefault(x=>x.Name == egovEnforcementDebtDto.TypeRu).Id
-                };
-
-            long bin = 0;
-            var oldList = new List<double>();
-            var newList = new List<double>();
-            foreach (var companyDto in egovEnforcementDebts)
+            var companiesDto = parsedEnforcementDebtContext.CompanyBinDtos
+                .Where(x => x.Code % NumOfThreads == numThread)
+                .Include(x => x.EnforcementDebtDtos);
+            foreach (var h in companiesDto)
             {
-                if (bin != companyDto.IinBin)
+                var newList = h.EnforcementDebtDtos.Select(x => new EgovEnforcementDebt
                 {
-                    var oldAmount = oldList.Sum();
-                    if ((long) newList.Sum() != (long) oldAmount || newList.Count != oldList.Count)
-                    {
-                        await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"insert into avroradata.enforcement_debt_history (biin, count, amount) values ({bin}, {oldList.Count}, {oldAmount} :: numeric)");
-                    }                    
-                    bin = companyDto.IinBin;
-                    oldList = webEnforcementDebtContext.EgovEnforcementDebts.Where(x => x.IinBin == bin)
-                        .Select(x => x.Amount).ToList();
-                    await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"delete from avroradata.egov_enforcement_debt where biin = {bin}");
-                    newList = new List<double>();
+                    RelevanceDate = x.RelevanceDate,
+                    IinBin = x.IinBin,
+                    EnforcementStartDate = x.EnforcementStartDate,
+                    RestrictionStartDate = x.RestrictionStartDate,
+                    JudicialExecutorKk = x.JudicialExecutorKk,
+                    JudicialExecutorRu = x.JudicialExecutorRu,
+                    AgencyKk = x.JudicialExecutorKk,
+                    AgencyRu = x.AgencyKk,
+                    Number = x.Number,
+                    Amount = x.Amount,
+                    TypeId = _enforcementDebtTypes.FirstOrDefault(f => f.Name == x.TypeRu)?.Id
+                }).ToList();
+                var oldList = webEnforcementDebtContext.EgovEnforcementDebts.Where(x => x.IinBin == h.Code).ToList();
+                if (oldList.Count != newList.Count || (long) oldList.Sum(x => x.Amount) != (long) newList.Sum(x => x.Amount))
+                {
+                    await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"insert into avroradata.enforcement_debt_history (biin, count, amount) values ({h.Code}, {oldList.Count}, {oldList.Sum(x => x.Amount)} :: numeric)");
                 }
-                await webEnforcementDebtContext.EgovEnforcementDebts.AddAsync(companyDto);
-                await webEnforcementDebtContext.SaveChangesAsync();
-                newList.Add(companyDto.Amount);
+                await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"delete from avroradata.egov_enforcement_debt where biin = {h.Code}");
+                await webEnforcementDebtContext.EgovEnforcementDebts.AddRangeAsync(newList);
                 lock (_forLock)
                 {
                     Logger.Trace(_counter++);

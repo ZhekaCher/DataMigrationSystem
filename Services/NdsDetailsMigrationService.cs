@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Web.Avroradata;
@@ -14,8 +15,9 @@ namespace DataMigrationSystem.Services
         
         private readonly object _forLock;
         private int _total;
+        private List<NdsDetailReason> _ndsDetailReasons;
 
-        public NdsDetailsMigrationService(int numOfThreads=1)
+        public NdsDetailsMigrationService(int numOfThreads = 20)
         {
             NumOfThreads = numOfThreads;
             using var parsedNdsDetailsContext = new ParsedNdsDetailsContext();
@@ -27,42 +29,49 @@ namespace DataMigrationSystem.Services
             return LogManager.GetCurrentClassLogger();
         }
 
-        public override async Task StartMigratingAsync()
+        private async Task MigrateAsync(int threadNum)
         {
-            WebNdsDetailsContext webNdsDetailsContext = new WebNdsDetailsContext();
-            ParsedNdsDetailsContext parsedNdsDetailsContext = new ParsedNdsDetailsContext();
-            await MigrateReferences();
-            var ndsDetailsDtos = parsedNdsDetailsContext.NdsDetailsDtos;
+            var webNdsDetailsContext = new WebNdsDetailsContext();
+            var parsedNdsDetailsContext = new ParsedNdsDetailsContext();
+            var ndsDetailsDtos = parsedNdsDetailsContext.NdsDetailsDtos.Where(x=>x.Id%NumOfThreads == threadNum);
             foreach (var ndsDetailsDto in ndsDetailsDtos)
             {
-                var ndsDetail = await DtoToEntity(ndsDetailsDto,webNdsDetailsContext);
-                await webNdsDetailsContext.NdsDetailses.Upsert(ndsDetail).On(x => x.Bin).RunAsync();
+                var ndsDetails = DtoToEntity(ndsDetailsDto);
+                await webNdsDetailsContext.NdsDetailses.Upsert(ndsDetails).On(x => x.Bin).RunAsync();
                 lock (_forLock)
                 {
                     Logger.Trace(_total--);
                 }
             }
         }
+        public override async Task StartMigratingAsync()
+        {
+            await MigrateReferences();
+            var tasks = new List<Task>();
+            for (int i = 0; i < NumOfThreads; i++)
+            {
+                tasks.Add(MigrateAsync(i));
+            }
+            await Task.WhenAll(tasks);
+        }
 
-        private async Task<NdsDetails> DtoToEntity(NdsDetailsDto ndsDetailsDto, WebNdsDetailsContext webNdsDetailsContext)
+        private NdsDetails DtoToEntity(NdsDetailsDto ndsDetailsDto)
         {
             var ndsDetails = new NdsDetails
             {
                 Rnn = ndsDetailsDto.Rnn,
                 Bin = ndsDetailsDto.Bin,
                 StartDate = ndsDetailsDto.StartDate,
-                FinishDate = ndsDetailsDto.FinishDate
+                FinishDate = ndsDetailsDto.FinishDate,
+                RelevanceDate = ndsDetailsDto.RelevanceDate,
+                ReasonId = _ndsDetailReasons.FirstOrDefault(x => x.Name == ndsDetailsDto.Reason)?.Id
             };
-            if (ndsDetailsDto.Reason!=null)
-            {
-                ndsDetails.ReasonId = (await webNdsDetailsContext.NdsDetailReasons.FirstOrDefaultAsync(x=>x.Name == ndsDetailsDto.Reason)).Id;
-            }
             return ndsDetails;
         }
         private async Task MigrateReferences()
         {
-         WebNdsDetailsContext webNdsDetailsContext = new WebNdsDetailsContext();
-         ParsedNdsDetailsContext parsedNdsDetailsContext = new ParsedNdsDetailsContext();
+            var webNdsDetailsContext = new WebNdsDetailsContext();
+            var parsedNdsDetailsContext = new ParsedNdsDetailsContext();
             var reasons = parsedNdsDetailsContext.NdsDetailsDtos
                 .Select(x => new {x.Reason}).Distinct();
 
@@ -71,8 +80,10 @@ namespace DataMigrationSystem.Services
                 await webNdsDetailsContext.NdsDetailReasons.Upsert(new NdsDetailReason
                 {
                     Name = distinct.Reason
-                }).On(x=>x.Name).RunAsync();
+                }).On(x => x.Name).RunAsync();
             }
+
+            _ndsDetailReasons = webNdsDetailsContext.NdsDetailReasons.ToList();
         }
     }
 }
