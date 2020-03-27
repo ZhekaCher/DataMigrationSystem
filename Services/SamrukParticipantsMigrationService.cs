@@ -36,11 +36,20 @@ namespace DataMigrationSystem.Services
                 {
                     var samrukParticipantsDto = DtoToWeb(dto);
                     var contacts = OnlyContacts(dto);
+                    var contacts_copies = OnlyContactsCopies(dto);
                     await webSamrukParticipantsContext.SamrukParticipantses.Upsert(samrukParticipantsDto)
                         .On(x => x.CodeBin).RunAsync();
                     try
                     {
                         await webSamrukParticipantsContext.Contacts.AddAsync(contacts);
+                        await webSamrukParticipantsContext.SaveChangesAsync();
+                    }
+                    catch (Exception)
+                    {
+                    }
+                    try
+                    {
+                        await webSamrukParticipantsContext.ContactCopies.AddAsync(contacts_copies);
                         await webSamrukParticipantsContext.SaveChangesAsync();
                     }
                     catch (Exception)
@@ -87,6 +96,16 @@ namespace DataMigrationSystem.Services
         private Contact OnlyContacts(SamrukParticipantsDto samrukParticipantsDto)
         {
             var contact= new Contact();
+            contact.Bin = samrukParticipantsDto.CodeBin;
+            contact.Telephone = samrukParticipantsDto.Phone;
+            contact.Website = samrukParticipantsDto.Site;
+            contact.Email = samrukParticipantsDto.Email;
+            contact.Source = "samruk";
+            return contact;
+        }
+        private Contact_copy OnlyContactsCopies(SamrukParticipantsDto samrukParticipantsDto)
+        {
+            var contact= new Contact_copy();
             contact.Bin = samrukParticipantsDto.CodeBin;
             contact.Telephone = samrukParticipantsDto.Phone;
             contact.Website = samrukParticipantsDto.Site;

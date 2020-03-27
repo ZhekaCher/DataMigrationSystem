@@ -11,10 +11,10 @@ namespace DataMigrationSystem.Services
 {
     public class TaxDetailsMigrationService : MigrationService
     {
-        private WebTaxDetailsContext _webTaxDetailsContext;
-        private ParsedTaxDetailsContext _parsedTaxDetailsContext;
+        private readonly WebTaxDetailsContext _webTaxDetailsContext;
+        private readonly ParsedTaxDetailsContext _parsedTaxDetailsContext;
         private int _total;
-        private object _lock = new object();
+        private readonly object _lock = new object();
 
         public TaxDetailsMigrationService(int numOfThreads=1)
         {

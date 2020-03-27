@@ -160,7 +160,7 @@ namespace DataMigrationSystem
             CommandsDictionary.Add("--threads (-t)",
                 $"choose number of threads\n{"Example: -t 5 -> starting with 5 threads for all migrations if maintained",96}");
             CommandsDictionary.Add("--migrations (-m)",
-                $"allows to choose migrations\n{"Example: -m TaxBebt WantedIndividual -> starting the given migrations",92}");
+                $"allows to choose migrations\n{"Example: -m TaxDebt WantedIndividual -> starting the given migrations",92}");
 
             _helpString = CommandsDictionary.Aggregate("",
                 (current, command) => current + $"{command.Key,-20} : {command.Value}\n");
@@ -247,23 +247,22 @@ namespace DataMigrationSystem
 
         private void ProceedArguments()
         {
+            if (!_args.ContainsKey(ConfigurationElements.Migrations))
+            {
+                using var parserMonitoringContext = new ParserMonitoringContext();
+                var parserMonitorings =
+                    parserMonitoringContext.ParserMonitorings.ToList();
+                var migrations = new List<string>();
+                foreach (var parserMonitoring in parserMonitorings)
+                    migrations.Add(parserMonitoring.Name);
+                _configurations.Add(ConfigurationElements.Migrations, migrations);
+            }
             foreach (var keyValuePair in _args)
             {
-                
                 if (_args.ContainsKey(ConfigurationElements.Help))
                 {
                     Console.Write(_helpString);
                     Environment.Exit(0);
-                }
-                if (!_args.ContainsKey(ConfigurationElements.Migrations))
-                {
-                    using var parserMonitoringContext = new ParserMonitoringContext();
-                    var parserMonitorings =
-                        parserMonitoringContext.ParserMonitorings.ToList();
-                    var migrations = new List<string>();
-                    foreach (var parserMonitoring in parserMonitorings)
-                        migrations.Add(parserMonitoring.Name);
-                    _configurations.Add(ConfigurationElements.Migrations, migrations);
                 }
                 if (_args.ContainsKey(ConfigurationElements.List))
                 {

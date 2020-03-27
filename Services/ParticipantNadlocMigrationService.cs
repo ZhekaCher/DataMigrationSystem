@@ -54,6 +54,7 @@ namespace DataMigrationSystem.Services
             await parsedParticipantNadlocContext.Database.ExecuteSqlRawAsync("truncate table avroradata.nadloc_customers restart identity cascade;");
             await parsedParticipantNadlocContext.Database.ExecuteSqlRawAsync("truncate table avroradata.nadloc_suppliers restart identity cascade;");
             await parsedParticipantNadlocContext.Database.ExecuteSqlRawAsync("truncate table avroradata.nadloc_participants restart identity cascade;");
+            await parsedParticipantNadlocContext.Database.ExecuteSqlRawAsync("truncate table avroradata.nadloc_tenders restart identity cascade;");
             Logger.Info("Truncated");
             Logger.Info("End of migration");
         }
@@ -64,13 +65,34 @@ namespace DataMigrationSystem.Services
             
             await using var webParticipantNadlocContext = new WebParticipantNadlocContext();
             await using var parsedParticipantNadlocContext = new ParsedParticipantNadlocContext();
-
+            await using var webContactContext = new WebContactContext();
             foreach (var dto in parsedParticipantNadlocContext.ParticipantNadlocDtos.Where(x=>x.Id % NumOfThreads==threadNum))
             {
                 var temp = DtoToWeb(dto);
+                var contacts = OnlyContacts(dto);
+                var contacts_copy = OnlyContactsCopy(dto);
                 await webParticipantNadlocContext.ParticipantsNadloc.Upsert(temp).On(x => x.Bin).RunAsync();
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
+
+                try
+                {
+                    await webContactContext.Contacts.AddAsync(contacts);
+                    await webContactContext.SaveChangesAsync();
+                }
+                catch (Exception)
+                {
+                }
+
+                try
+                {
+                    await webContactContext.ContactCopies.AddAsync(contacts_copy);
+                    await webContactContext.SaveChangesAsync();
+                }
+                catch (Exception)
+                {
+                }
+                
             }
 
             foreach (var dto in parsedParticipantNadlocContext.CustomersNadlocDtos.Where(x=>x.Id% NumOfThreads==threadNum).Select(x=>new CustomerNadloc
@@ -130,12 +152,29 @@ namespace DataMigrationSystem.Services
             participantNadloc.ContactEmail = participantNadlocDto.ContactEmail;
             participantNadloc.RegDate = participantNadlocDto.RegDate;
             participantNadloc.CustomerLink = participantNadlocDto.CustomerLink;
-
-
-
             return participantNadloc;
-
-
+        }
+        private Contact OnlyContacts(ParticipantNadlocDto participantNadlocDto)
+        {
+            var contact= new Contact();
+            var source = "nadloc";
+            contact.Bin =  participantNadlocDto.Bin;
+            contact.Telephone = participantNadlocDto.Tel1;
+            contact.Website = participantNadlocDto.WebSite;
+            contact.Email = participantNadlocDto.Email;
+            contact.Source = source;
+            return contact;
+        }
+        private Contact_copy OnlyContactsCopy(ParticipantNadlocDto participantNadlocDto)
+        {
+            var contact= new Contact_copy();
+            var source = "nadloc";
+            contact.Bin =  participantNadlocDto.Bin;
+            contact.Telephone = participantNadlocDto.Tel1;
+            contact.Website = participantNadlocDto.WebSite;
+            contact.Email = participantNadlocDto.Email;
+            contact.Source = source;
+            return contact;
         }
     }
 }
