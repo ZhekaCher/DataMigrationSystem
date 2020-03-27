@@ -11,25 +11,15 @@ namespace DataMigrationSystem.Context.Web.TradingFloor
     /// Контекст для работы с таблицей 'announcement'
     /// </summary>
 
-    public class WebAnnouncementContext : DbContext
+    public class WebAnnouncementContext : WebContext
     {
     
         public DbSet<Announcement> Announcements { get; set; }    
         public DbSet<STradingFloor> STradingFloors { get; set; }    
-        public WebAnnouncementContext(DbContextOptions<WebAnnouncementContext> options)
-            : base(options)
+        
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
-        }
-
-        public WebAnnouncementContext()
-        {
-
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql("Server = '192.168.1.158'; Database = 'avroradata'; Port='5432'; User ID = 'administrator'; Password = 'Z4P6PjEHnJ5nPT'; Search Path = 'trading_floor'; Integrated Security=true; Pooling=true;");
+            modelBuilder.HasDefaultSchema("trading_floor");
         }
     }
 }

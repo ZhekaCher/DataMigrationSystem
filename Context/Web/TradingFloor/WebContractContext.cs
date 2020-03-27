@@ -9,25 +9,15 @@ namespace DataMigrationSystem.Context.Web.TradingFloor
     /// <summary>
     /// Контекст для работы с таблицей 'contract' и 'contract_goszakup'
     /// </summary>
-    public class WebContractContext : DbContext
+    public class WebContractContext : WebContext
     {
         
         public DbSet<Contract> Contracts { get; set; }    
         public DbSet<ContractGoszakup> ContractsGoszakup { get; set; }    
         public DbSet<STradingFloor> STradingFloors { get; set; }    
-        public WebContractContext(DbContextOptions<WebContractContext> options)
-            : base(options)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-        }
-
-        public WebContractContext()
-        {
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql(
-                "Server = '192.168.1.158'; Database = 'avroradata'; Port='5432'; User ID = 'administrator'; Password = 'Z4P6PjEHnJ5nPT'; Search Path = 'trading_floor'; Integrated Security=true; Pooling=true;");
+            modelBuilder.HasDefaultSchema("trading_floor");
         }
     }
 }
