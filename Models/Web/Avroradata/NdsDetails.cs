@@ -11,7 +11,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("bin")] public long? Bin{get; set;}
         [Column("start_date")] public DateTime? StartDate{get; set;}
         [Column("finish_date")] public DateTime? FinishDate{get; set;}
-        [Column("relevance_date")] public DateTime? RelevanceDate{get; set;}
+        [Column("relevance_date")] public DateTime? RelevanceDate { get; set; } = DateTime.Now;
         [Column("reason_id")] public int? ReasonId{get; set;}
     }
 

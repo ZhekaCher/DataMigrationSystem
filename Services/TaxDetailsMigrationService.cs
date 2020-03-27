@@ -38,7 +38,7 @@ namespace DataMigrationSystem.Services
                     Bin = taxDetailsDto.Bin,
                     RelevanceDate = taxDetailsDto.RelevanceDate,
                     Year = taxDetailsDto.Year,
-                    Amount = taxDetailsDto.Amount*1000
+                    Amount = taxDetailsDto.Amount
                 };
                 await _webTaxDetailsContext.TaxDetailses.Upsert(taxDetails).On(x => new {x.Bin, x.Year}).RunAsync();
                 lock (_lock)

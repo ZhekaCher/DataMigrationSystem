@@ -10,7 +10,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("bin")] public long? Bin{get; set;}
         [Column("relevance_date")] public DateTime? RelevanceDate{get; set;}
         [Column("year")] public int? Year{get; set;}
-        [Column("amount")] public int? Amount{get; set;}
+        [Column("amount")] public long? Amount{get; set;}
 		
     }
 }
