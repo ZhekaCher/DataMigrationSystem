@@ -15,5 +15,9 @@ namespace DataMigrationSystem.Context
     public class ParserMonitoringContext : ParsedContext
     {
         public DbSet<ParserMonitoring> ParserMonitorings { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.HasDefaultSchema("monitoring");
+        }
     }
 }
