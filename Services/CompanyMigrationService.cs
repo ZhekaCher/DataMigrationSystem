@@ -52,7 +52,10 @@ namespace DataMigrationSystem.Services
                 await webCompanyContext.Companies.Upsert(company).On(x => x.Bin).RunAsync();
                 foreach (var oked in company.CompanyOkeds)
                 {
-                    await webCompanyContext.CompaniesOkeds.Upsert(oked).On(x=>new {x.CompanyId, x.OkedId}).RunAsync();
+                    if (!oked.OkedId.Equals("0"))
+                    {
+                        await webCompanyContext.CompaniesOkeds.Upsert(oked).On(x=>new {x.CompanyId, x.OkedId}).RunAsync();
+                    }
                 }
                 lock (_forLock)
                 {
