@@ -50,12 +50,9 @@ namespace DataMigrationSystem.Services
             {
                 var company = DtoToEntity(companyDto);
                 await webCompanyContext.Companies.Upsert(company).On(x => x.Bin).RunAsync();
-                foreach (var oked in company.CompanyOkeds)
+                foreach (var oked in company.CompanyOkeds.Where(x=>x.OkedId!="0"))
                 {
-                    if (!oked.OkedId.Equals("0"))
-                    {
-                        await webCompanyContext.CompaniesOkeds.Upsert(oked).On(x=>new {x.CompanyId, x.OkedId}).RunAsync();
-                    }
+                    await webCompanyContext.CompaniesOkeds.Upsert(oked).On(x=>new {x.CompanyId, x.OkedId}).RunAsync();
                 }
                 lock (_forLock)
                 {
