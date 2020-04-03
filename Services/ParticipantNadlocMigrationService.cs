@@ -61,7 +61,7 @@ namespace DataMigrationSystem.Services
 
         private  async Task Migrate(int threadNum)
         {
-            Logger.Info("startted thread");
+            Logger.Info("started thread");
             
             await using var webParticipantNadlocContext = new WebParticipantNadlocContext();
             await using var parsedParticipantNadlocContext = new ParsedParticipantNadlocContext();
