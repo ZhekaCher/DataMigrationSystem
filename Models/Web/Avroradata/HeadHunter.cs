@@ -36,5 +36,6 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("skills")] public string? Skills { get; set; }
         [Column("experience")] public string? Experience { get; set; }
         [Column("employment")] public string? Employment { get; set; }
+        [Column("source")] public string? Source { get; set; }
     }
 }

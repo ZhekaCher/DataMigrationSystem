@@ -112,6 +112,7 @@ namespace DataMigrationSystem.Services
             vacancyHh.Skills = vacancyHhDto.Skills;
             vacancyHh.Experience = vacancyHhDto.Experience;
             vacancyHh.Employment = vacancyHhDto.Employment;
+            vacancyHh.Source = vacancyHhDto.Source;
             return vacancyHh;
         }
     }
