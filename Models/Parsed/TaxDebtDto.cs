@@ -12,7 +12,7 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("iin_bin")]
         public long IinBin { get; set; }
         [Column("relevance_date")]
-        public DateTime? RelevanceDate { get; set; }
+        public DateTime RelevanceDate { get; set; } = DateTime.Now;
         [Column("total")]
         public double Total { get; set; }
         [Column("pension_contribution")]
