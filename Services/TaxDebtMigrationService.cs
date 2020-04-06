@@ -59,8 +59,8 @@ namespace DataMigrationSystem.Services
                     PensionContribution = taxDebt.PensionContribution,
                     SocialContribution = taxDebt.SocialContribution,
                     SocialHealthInsurance = taxDebt.SocialHealthInsurance,
-                    IinBin = taxDebt.IinBin
-                    
+                    IinBin = taxDebt.IinBin,
+                    RelevanceDate = taxDebt.RelevanceDate
                 };
 
             foreach (var taxDebt in taxDebts)
