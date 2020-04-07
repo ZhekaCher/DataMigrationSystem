@@ -35,9 +35,19 @@ namespace DataMigrationSystem.Services
         {
             await using var webHeadHunterContext = new WebHeadHunterContext();
             await using var parsedHeadHunterContext = new ParsedHeadHunterContext();
-            DateTime? startDate = await parsedHeadHunterContext.VacancyHhDtos.MinAsync(x => x.RelevanceDate);
-            var date = DateTime.ParseExact(startDate.ToString(), "dd.MM.yyyy HH:mm:ss",
-                CultureInfo.InvariantCulture).ToString("yyyy-MM-dd HH:mm:ss");
+            DateTime? starDate = await parsedHeadHunterContext.VacancyHhDtos.MinAsync(x => x.RelevanceDate);
+            DateTime startDate;
+            try
+            {
+                 startDate = DateTime.ParseExact(starDate.ToString(), "dd.MM.yyyy hh:mm:ss",
+                    CultureInfo.InvariantCulture);
+            }
+            catch (Exception e)
+            {
+                startDate = DateTime.ParseExact(starDate.ToString(), "dd.MM.yyyy h:mm:ss",
+                    CultureInfo.InvariantCulture);
+            }
+            var date = startDate.ToString("yyyy-MM-dd hh:mm:ss");
             Logger.Info($"Starting migration with '{NumOfThreads}' threads");
             var tasks = new List<Task>();
             for (int i = 0; i < NumOfThreads; i++)

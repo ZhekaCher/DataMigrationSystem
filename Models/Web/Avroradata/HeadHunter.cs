@@ -30,7 +30,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("vac_id")] public long? VacId { get; set; }
         [Column("contacts_phone")] public string ContactsPhone { get; set; }
         [Column("contacts_email")] public string ContactsEmail { get; set; }
-        [Column("relevance_date")] public DateTime? RelevanceDate { get; set; }
+        [Column("relevance_date")] public DateTime RelevanceDate { get; set; }
         [Column("active")] public bool? Active { get; set; }
         [Column("comp_id")] public long? CompId { get; set; }
         [Column("skills")] public string? Skills { get; set; }
