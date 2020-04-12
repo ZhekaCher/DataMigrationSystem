@@ -82,8 +82,8 @@ namespace DataMigrationSystem.Services
                 .Where(x => x.Inn == null && x.Unp == null && (x.Bin != null || x.Iin != null)))
             {
                 var temp = DtoToWeb(dto);
-                var contacts = OnlyContacts(dto);
-                var contacts_copies = OnlyContactsCopies(dto);
+                // var contacts = OnlyContacts(dto);
+                // var contacts_copies = OnlyContactsCopies(dto);
                 try
                 {
                     await webParticipantGoszakupContext.ParticipantsGoszakup.Upsert(temp)
@@ -104,24 +104,24 @@ namespace DataMigrationSystem.Services
                     }
                 }
                 
-                try
-                {
-                    await webParticipantGoszakupContext.Contacts.AddAsync(contacts);
-                    await webParticipantGoszakupContext.SaveChangesAsync();
-                }
-                catch (Exception)
-                {
-                    // Console.WriteLine("This contacts is already exists");
-                }
-                try
-                {
-                    await webParticipantGoszakupContext.ContactCopies.AddAsync(contacts_copies);
-                    await webParticipantGoszakupContext.SaveChangesAsync();
-                }
-                catch (Exception)
-                {
-                    // Console.WriteLine("This contacts is already exists");
-                }
+                // try
+                // {
+                //     await webParticipantGoszakupContext.Contacts.AddAsync(contacts);
+                //     await webParticipantGoszakupContext.SaveChangesAsync();
+                // }
+                // catch (Exception)
+                // {
+                //     // Console.WriteLine("This contacts is already exists");
+                // }
+                // try
+                // {
+                //     await webParticipantGoszakupContext.ContactCopies.AddAsync(contacts_copies);
+                //     await webParticipantGoszakupContext.SaveChangesAsync();
+                // }
+                // catch (Exception)
+                // {
+                //     // Console.WriteLine("This contacts is already exists");
+                // }
 
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
@@ -157,18 +157,6 @@ namespace DataMigrationSystem.Services
         private Contact OnlyContacts(ParticipantGoszakupDto participantGoszakupDto)
         {
             var contact= new Contact();
-            var biin = participantGoszakupDto.Bin ?? participantGoszakupDto.Iin;
-            var source = participantGoszakupDto.Bin != null ? "goszakup_bin" : "goszakup_iin";
-            contact.Bin = biin;
-            contact.Telephone = participantGoszakupDto.Phone;
-            contact.Website = participantGoszakupDto.Website;
-            contact.Email = participantGoszakupDto.Email;
-            contact.Source = source;
-            return contact;
-        }
-        private Contact_copy OnlyContactsCopies(ParticipantGoszakupDto participantGoszakupDto)
-        {
-            var contact= new Contact_copy();
             var biin = participantGoszakupDto.Bin ?? participantGoszakupDto.Iin;
             var source = participantGoszakupDto.Bin != null ? "goszakup_bin" : "goszakup_iin";
             contact.Bin = biin;
