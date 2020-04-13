@@ -37,6 +37,10 @@ namespace DataMigrationSystem.Services
                 tasks.Add(MigrateAsync(i));
 
             await Task.WhenAll(tasks);
+            await using var parsedCompanyContext = new ParsedCompanyContext();
+            await parsedCompanyContext.Database.ExecuteSqlRawAsync(
+                "insert into avroradata.company_bin (code) select bin from avroradata.company a where not exists(select from avroradata.company_bin b where a.bin = b.code);");
+            await parsedCompanyContext.Database.ExecuteSqlRawAsync("truncate avroradata.company restart identity;");
             Logger.Info("Ended");
         }
 
@@ -59,8 +63,6 @@ namespace DataMigrationSystem.Services
                     Logger.Trace(_total--);
                 }
             }
-            await parsedCompanyContext.Database.ExecuteSqlRawAsync("truncate avroradata.company restart identity;");
-
         }
 
         private async Task MigrateReferences()
