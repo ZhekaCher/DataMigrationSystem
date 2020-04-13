@@ -33,10 +33,10 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("relevance_date")] public DateTime RelevanceDate { get; set; }
         [Column("active")] public Boolean? Active { get; set; }
         [Column("comp_id")] public long? CompId { get; set; }
-        [Column("skills")] public string? Skills { get; set; }
-        [Column("experience")] public string? Experience { get; set; }
-        [Column("employment")] public string? Employment { get; set; }
-        [Column("source")] public string? Source { get; set; }
+        [Column("skills")] public string Skills { get; set; }
+        [Column("experience")] public string Experience { get; set; }
+        [Column("employment")] public string Employment { get; set; }
+        [Column("source")] public string Source { get; set; }
 
         
     }

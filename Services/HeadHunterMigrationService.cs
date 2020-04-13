@@ -42,7 +42,7 @@ namespace DataMigrationSystem.Services
                  startDate = DateTime.ParseExact(starDate.ToString(), "dd.MM.yyyy hh:mm:ss",
                     CultureInfo.InvariantCulture);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 startDate = DateTime.ParseExact(starDate.ToString(), "dd.MM.yyyy h:mm:ss",
                     CultureInfo.InvariantCulture);
