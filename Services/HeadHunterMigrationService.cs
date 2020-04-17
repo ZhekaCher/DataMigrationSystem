@@ -35,8 +35,8 @@ namespace DataMigrationSystem.Services
         {
             await using var webHeadHunterContext = new WebHeadHunterContext();
             await using var parsedHeadHunterContext = new ParsedHeadHunterContext();
-            DateTime starDate = await parsedHeadHunterContext.VacancyHhDtos.MinAsync(x => x.RelevanceDate);
-            DateTime startDate;
+            string starDate = await parsedHeadHunterContext.VacancyHhDtos.MinAsync(x => x.RelevanceDate.ToString());
+            /*DateTime startDate;
             try
             {
                  startDate = DateTime.ParseExact(starDate.ToString(), "dd.MM.yyyy HH:mm:ss",
@@ -47,7 +47,7 @@ namespace DataMigrationSystem.Services
                 startDate = DateTime.ParseExact(starDate.ToString(), "dd.MM.yyyy h:mm:ss",
                     CultureInfo.InvariantCulture);
             }
-            var date = startDate.ToString("yyyy-MM-dd HH:mm:ss");
+            var date = startDate.ToString("yyyy-MM-dd HH:mm:ss");*/
             Logger.Info($"Starting migration with '{NumOfThreads}' threads");
             var tasks = new List<Task>();
             
@@ -59,7 +59,7 @@ namespace DataMigrationSystem.Services
             await Task.WhenAll(tasks);
             
             await webHeadHunterContext.Database.ExecuteSqlRawAsync(
-                $"update avroradata.hh_vacancies set active = false where relevance_date <'{date}';");
+                $"update avroradata.hh_vacancies set active = false where relevance_date <'{starDate}';");
             
             await parsedHeadHunterContext.Database.ExecuteSqlRawAsync(
                 "truncate avroradata.hh_vacancies restart identity cascade;");
