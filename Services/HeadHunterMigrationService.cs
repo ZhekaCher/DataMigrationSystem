@@ -50,28 +50,23 @@ namespace DataMigrationSystem.Services
             var date = startDate.ToString("yyyy-MM-dd HH:mm:ss");
             Logger.Info($"Starting migration with '{NumOfThreads}' threads");
             var tasks = new List<Task>();
+            
             for (int i = 0; i < NumOfThreads; i++)
             {
-                tasks.Add(MigrateVac(i));
+                tasks.Add(Migrate(i));
             }
 
             await Task.WhenAll(tasks);
-            for (int i = 0; i < NumOfThreads; i++)
-            {
-                tasks.Add(MigrateComp(i));
-            }
-
-            await Task.WhenAll(tasks);
+            
             await webHeadHunterContext.Database.ExecuteSqlRawAsync(
                 $"update avroradata.hh_vacancies set active = false where relevance_date <'{date}';");
-            await parsedHeadHunterContext.Database.ExecuteSqlRawAsync(
-                "truncate avroradata.hh_companies restart identity cascade;");
+            
             await parsedHeadHunterContext.Database.ExecuteSqlRawAsync(
                 "truncate avroradata.hh_vacancies restart identity cascade;");
 
         }
 
-        private async Task MigrateVac(int threadNum)
+        private async Task Migrate(int threadNum)
         {
             Logger.Info("started thread");
             await using var webHeadHunterContext = new WebHeadHunterContext();
@@ -87,21 +82,7 @@ namespace DataMigrationSystem.Services
                 }
             }
         }
-        private async Task MigrateComp(int threadNum)
-        {
-            Logger.Info("started thread");
-            await using var webHeadHunterContext = new WebHeadHunterContext();
-            await using var parsedHeadHunterContext = new ParsedHeadHunterContext();
-            foreach (var dto in parsedHeadHunterContext.CompanyHhDtos.Where(x=>x.Id% NumOfThreads == threadNum))
-            {
-                var comp = CompdtoToWeb(dto);
-                await webHeadHunterContext.CompanyHhs.Upsert(comp).On(x => x.CompId).RunAsync();
-                lock (_lock)
-                {
-                    Logger.Trace($"Left {--_total}");
-                }
-            }
-        }
+        
 
         private CompanyHh CompdtoToWeb(CompanyHhDto companyHhDto)
         {
