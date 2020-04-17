@@ -48,13 +48,13 @@ namespace DataMigrationSystem.Services
                     TypeId = _enforcementDebtTypes.FirstOrDefault(f => f.Name == x.TypeRu)?.Id
                 }).ToList();
                 var oldList = webEnforcementDebtContext.EgovEnforcementDebts.Where(x => x.IinBin == binDto.Code).ToList();
-                if (oldList.Count != newList.Count || (long) oldList.Sum(x => x.Amount) != (long) newList.Sum(x => x.Amount))
+                if ((long) oldList.Sum(x => x.Amount) != (long) newList.Sum(x => x.Amount))
                 {
-                    await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"insert into avroradata.enforcement_debt_history (biin, count, amount) values ({binDto.Code}, {oldList.Count}, {oldList.Sum(x => x.Amount)} :: numeric)");
+                    await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"insert into avroradata.enforcement_debt_history (biin, count, amount) values ({binDto.Code}, {newList.Count}, {newList.Sum(x => x.Amount)} :: numeric)");
                 }
                 if (oldList.Count(x => x.RestrictionStartDate != null) != newList.Count(x => x.RestrictionStartDate != null))
                 {
-                    await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"insert into avroradata.leaving_restriction_history (biin, count) values ({binDto.Code}, {oldList.Count(x => x.RestrictionStartDate != null)})");
+                    await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"insert into avroradata.leaving_restriction_history (biin, count) values ({binDto.Code}, {newList.Count(x => x.RestrictionStartDate != null)})");
                 }
                 await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"delete from avroradata.egov_enforcement_debt where biin = {binDto.Code}");
                 await webEnforcementDebtContext.EgovEnforcementDebts.AddRangeAsync(newList);
