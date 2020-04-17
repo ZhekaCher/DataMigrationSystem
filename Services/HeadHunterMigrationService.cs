@@ -52,7 +52,13 @@ namespace DataMigrationSystem.Services
             var tasks = new List<Task>();
             for (int i = 0; i < NumOfThreads; i++)
             {
-                tasks.Add(Migrate(i));
+                tasks.Add(MigrateVac(i));
+            }
+
+            await Task.WhenAll(tasks);
+            for (int i = 0; i < NumOfThreads; i++)
+            {
+                tasks.Add(MigrateComp(i));
             }
 
             await Task.WhenAll(tasks);
@@ -65,7 +71,23 @@ namespace DataMigrationSystem.Services
 
         }
 
-        private async Task Migrate(int threadNum)
+        private async Task MigrateVac(int threadNum)
+        {
+            Logger.Info("started thread");
+            await using var webHeadHunterContext = new WebHeadHunterContext();
+            await using var parsedHeadHunterContext = new ParsedHeadHunterContext();
+
+            foreach (var dto in parsedHeadHunterContext.VacancyHhDtos.Where(x=>x.Id% NumOfThreads == threadNum))
+            {
+                var vac = VacDtoToWeb(dto);
+                await webHeadHunterContext.VacancyHhs.Upsert(vac).On(x => x.VacId).RunAsync();
+                lock (_lock)
+                {
+                    Logger.Trace($"Left {--_total2}");
+                }
+            }
+        }
+        private async Task MigrateComp(int threadNum)
         {
             Logger.Info("started thread");
             await using var webHeadHunterContext = new WebHeadHunterContext();
@@ -77,16 +99,6 @@ namespace DataMigrationSystem.Services
                 lock (_lock)
                 {
                     Logger.Trace($"Left {--_total}");
-                }
-            }
-
-            foreach (var dto in parsedHeadHunterContext.VacancyHhDtos.Where(x=>x.Id% NumOfThreads == threadNum))
-            {
-                var vac = VacDtoToWeb(dto);
-                await webHeadHunterContext.VacancyHhs.Upsert(vac).On(x => x.VacId).RunAsync();
-                lock (_lock)
-                {
-                    Logger.Trace($"Left {--_total2}");
                 }
             }
         }
