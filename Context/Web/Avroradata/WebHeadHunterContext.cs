@@ -8,6 +8,7 @@ namespace DataMigrationSystem.Context.Web.Avroradata
     {
         public DbSet<CompanyHh> CompanyHhs { get; set; }
         public DbSet<VacancyHh> VacancyHhs { get; set; }
+        public DbSet<CompBinhh> CompBinhhs { get; set; }
 
     }
 }

@@ -39,4 +39,13 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("source")] public string Source { get; set; }
 
     }
+    [Table("hhcompbins")]
+    public class CompBinhh
+    {
+        [Key][Column("id")] public long Id { get; set; }
+        [Column("comp_id")] public long CompId { get; set; }
+        [Column("code_bin")] public long CodeBin { get; set; }
+        [Column("name_ru")] public string NameRu { get; set; }
+        [Column("comp_name")] public string CompName { get; set; }
+    }
 }

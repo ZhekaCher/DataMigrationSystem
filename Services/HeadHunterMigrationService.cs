@@ -16,6 +16,7 @@ namespace DataMigrationSystem.Services
     {
         private int _total;
         private int _total2;
+        private int _total3;
         private readonly object _lock = new object();
 
         public HeadHunterMigrationService(int numOfThreads = 10)
@@ -24,6 +25,7 @@ namespace DataMigrationSystem.Services
             using var parsedHeadHunterContext = new ParsedHeadHunterContext();
             _total = parsedHeadHunterContext.CompanyHhDtos.Count();
             _total2 = parsedHeadHunterContext.VacancyHhDtos.Count();
+            _total3 = parsedHeadHunterContext.CompBinhhDtos.Count();
         }
 
         protected override Logger InitializeLogger()
@@ -63,6 +65,10 @@ namespace DataMigrationSystem.Services
             
             await parsedHeadHunterContext.Database.ExecuteSqlRawAsync(
                 "truncate avroradata.hh_vacancies restart identity cascade;");
+            await parsedHeadHunterContext.Database.ExecuteSqlRawAsync(
+                "truncate avroradata.hh_companies restart identity cascade;");
+            await parsedHeadHunterContext.Database.ExecuteSqlRawAsync(
+                "truncate avroradata.hhcompbins restart identity cascade;");
 
         }
 
@@ -79,6 +85,24 @@ namespace DataMigrationSystem.Services
                 lock (_lock)
                 {
                     Logger.Trace($"Left {--_total2}");
+                }
+            }
+            foreach (var dto in parsedHeadHunterContext.CompanyHhDtos.Where(x=>x.Id% NumOfThreads == threadNum))
+            {
+                var vac = CompdtoToWeb(dto);
+                await webHeadHunterContext.CompanyHhs.Upsert(vac).On(x => x.CompId).RunAsync();
+                lock (_lock)
+                {
+                    Logger.Trace($"Left {--_total}");
+                }
+            }
+            foreach (var dto in parsedHeadHunterContext.CompBinhhDtos.Where(x=>x.Id% NumOfThreads == threadNum))
+            {
+                var compBinhh = CompBinhhDtoToWeb(dto);
+                await webHeadHunterContext.CompBinhhs.Upsert(compBinhh).On(x => x.CompId).RunAsync();
+                lock (_lock)
+                {
+                    Logger.Trace($"Left {--_total3}");
                 }
             }
         }
@@ -117,6 +141,16 @@ namespace DataMigrationSystem.Services
             vacancyHh.Employment = vacancyHhDto.Employment;
             vacancyHh.Source = vacancyHhDto.Source;
             return vacancyHh;
+        }
+
+        private CompBinhh CompBinhhDtoToWeb(CompBinhhDto compBinhhDto)
+        {
+            var compBinhh = new CompBinhh();
+            compBinhh.CodeBin = compBinhhDto.CodeBin;
+            compBinhh.CompId = compBinhhDto.CompId;
+            compBinhh.CompName = compBinhhDto.CompName;
+            compBinhh.NameRu = compBinhhDto.NameRu;
+            return compBinhh;
         }
     }
 }
