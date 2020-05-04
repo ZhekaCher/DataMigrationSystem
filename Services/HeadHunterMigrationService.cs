@@ -96,7 +96,7 @@ namespace DataMigrationSystem.Services
                     Logger.Trace($"Left {--_total}");
                 }
             }
-            foreach (var dto in parsedHeadHunterContext.CompBinhhDtos.Where(x=>x.Id% NumOfThreads == threadNum))
+            foreach (var dto in parsedHeadHunterContext.CompBinhhDtos.Where(x=>x.Id% NumOfThreads==threadNum))
             {
                 var compBinhh = CompBinhhDtoToWeb(dto);
                 await webHeadHunterContext.CompBinhhs.Upsert(compBinhh).On(x => x.CompId).RunAsync();
