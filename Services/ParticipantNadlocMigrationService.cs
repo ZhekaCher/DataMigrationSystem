@@ -165,9 +165,9 @@ namespace DataMigrationSystem.Services
             contact.Source = source;
             return contact;
         }
-        private Contact_copy OnlyContactsCopy(ParticipantNadlocDto participantNadlocDto)
+        private ContactCopy OnlyContactsCopy(ParticipantNadlocDto participantNadlocDto)
         {
-            var contact= new Contact_copy();
+            var contact= new ContactCopy();
             var source = "nadloc";
             contact.Bin =  participantNadlocDto.Bin;
             contact.Telephone = participantNadlocDto.Tel1;
