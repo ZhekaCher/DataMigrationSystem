@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DataMigrationSystem.Models.Web.Avroradata
+namespace DataMigrationSystem.Models.Parsed.Avroradata
 {
     [Table("contacts")]
-    public class Contact
+    public class ContactDto
     {
         [Key][Column("id")] public long Id { get; set; }
         [Column("bin")] public long? Bin { get; set; }
