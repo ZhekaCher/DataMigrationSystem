@@ -166,9 +166,9 @@ namespace DataMigrationSystem.Services
             contact.Source = source;
             return contact;
         }
-        private Contact_copy OnlyContactsCopies(ParticipantGoszakupDto participantGoszakupDto)
+        private ContactCopy OnlyContactsCopies(ParticipantGoszakupDto participantGoszakupDto)
         {
-            var contact= new Contact_copy();
+            var contact= new ContactCopy();
             var biin = participantGoszakupDto.Bin ?? participantGoszakupDto.Iin;
             var source = participantGoszakupDto.Bin != null ? "goszakup_bin" : "goszakup_iin";
             contact.Bin = biin;

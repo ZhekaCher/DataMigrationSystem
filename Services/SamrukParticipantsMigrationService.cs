@@ -103,9 +103,9 @@ namespace DataMigrationSystem.Services
             contact.Source = "samruk";
             return contact;
         }
-        private Contact_copy OnlyContactsCopies(SamrukParticipantsDto samrukParticipantsDto)
+        private ContactCopy OnlyContactsCopies(SamrukParticipantsDto samrukParticipantsDto)
         {
-            var contact= new Contact_copy();
+            var contact= new ContactCopy();
             contact.Bin = samrukParticipantsDto.CodeBin;
             contact.Telephone = samrukParticipantsDto.Phone;
             contact.Website = samrukParticipantsDto.Site;
