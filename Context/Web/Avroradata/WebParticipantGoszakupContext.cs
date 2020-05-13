@@ -16,12 +16,10 @@ namespace DataMigrationSystem.Context.Web.Avroradata
     {
         public DbSet<ParticipantGoszakup> ParticipantsGoszakup { get; set; }
         public DbSet<Contact> Contacts { get; set; }
-        public DbSet<ContactCopy> ContactCopies { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Contact>().HasKey(x => new {x.Bin, x.Source});
-            modelBuilder.Entity<ContactCopy>().HasKey(x => new {x.Bin, x.Source});
         }
     }
 }

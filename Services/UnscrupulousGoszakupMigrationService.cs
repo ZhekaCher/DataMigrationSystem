@@ -49,8 +49,7 @@ namespace DataMigrationSystem.Services
             await using var webUnscrupulousGoszakupContext = new WebUnscrupulousGoszakupContext();
             await using var webUnscrupulousGoszakupContext2 = new WebUnscrupulousGoszakupContext();
             await using var parsedUnscrupulousGoszakupContext = new ParsedUnscrupulousGoszakupContext();
-            var firstParsedTime = parsedUnscrupulousGoszakupContext.UnscrupulousGoszakupDtos.OrderBy(x => x.Relevance)
-                .FirstOrDefault().Relevance;
+            var firstParsedTime = await parsedUnscrupulousGoszakupContext.UnscrupulousGoszakupDtos.MinAsync(x => x.Relevance);
             var old = webUnscrupulousGoszakupContext.UnscrupulousGoszakup.Where(x =>
                 x.RelevanceDate < firstParsedTime).Where(x => x.Status == true);
             var left = old.Count();
@@ -74,8 +73,7 @@ namespace DataMigrationSystem.Services
             await parsedUnscrupulousGoszakupContext.Database.ExecuteSqlRawAsync(
                 "truncate table avroradata.unscrupulous_goszakup restart identity cascade;");
             Logger.Info("Truncated");
-            await webUnscrupulousGoszakupContext.Database.ExecuteSqlRawAsync(
-                $"call avroradata.unreliable_companies_updater();");
+            // await webUnscrupulousGoszakupContext.Database.ExecuteSqlRawAsync($"call avroradata.unreliable_companies_updater();");
         }
 
         private async Task Migrate(int threadNum)

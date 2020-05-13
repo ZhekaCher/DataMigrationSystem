@@ -70,29 +70,11 @@ namespace DataMigrationSystem.Services
             {
                 var temp = DtoToWeb(dto);
                 var contacts = OnlyContacts(dto);
-                var contacts_copy = OnlyContactsCopy(dto);
                 await webParticipantNadlocContext.ParticipantsNadloc.Upsert(temp).On(x => x.Bin).RunAsync();
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
 
-                try
-                {
-                    await webContactContext.Contacts.AddAsync(contacts);
-                    await webContactContext.SaveChangesAsync();
-                }
-                catch (Exception)
-                {
-                }
-
-                try
-                {
-                    await webContactContext.ContactCopies.AddAsync(contacts_copy);
-                    await webContactContext.SaveChangesAsync();
-                }
-                catch (Exception)
-                {
-                }
-                
+                await webContactContext.Contacts.Upsert(contacts).On(x=>new {x.Bin, x.Source}).NoUpdate().RunAsync();
             }
 
             foreach (var dto in parsedParticipantNadlocContext.CustomersNadlocDtos.Where(x=>x.Id% NumOfThreads==threadNum).Select(x=>new CustomerNadloc
@@ -157,17 +139,6 @@ namespace DataMigrationSystem.Services
         private Contact OnlyContacts(ParticipantNadlocDto participantNadlocDto)
         {
             var contact= new Contact();
-            var source = "nadloc";
-            contact.Bin =  participantNadlocDto.Bin;
-            contact.Telephone = participantNadlocDto.Tel1;
-            contact.Website = participantNadlocDto.WebSite;
-            contact.Email = participantNadlocDto.Email;
-            contact.Source = source;
-            return contact;
-        }
-        private ContactCopy OnlyContactsCopy(ParticipantNadlocDto participantNadlocDto)
-        {
-            var contact= new ContactCopy();
             var source = "nadloc";
             contact.Bin =  participantNadlocDto.Bin;
             contact.Telephone = participantNadlocDto.Tel1;
