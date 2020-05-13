@@ -32,14 +32,16 @@ namespace DataMigrationSystem.Services
             var wantedIndividualsDtos = _parsedWantedIndividualContext.WantedIndividualDtos;
             foreach (var wantedIndividualDto in wantedIndividualsDtos)
             {
-                var wantedIn = await DtoToEntity(wantedIndividualDto);
-                await _webWantedIndividualContext.WantedIndividuals.Upsert(wantedIn).On(x => new {x.Iin,x.ListId}).RunAsync();
+                if (wantedIndividualDto.Iin>999999)
+                {
+                    var wantedIn = await DtoToEntity(wantedIndividualDto);
+                    await _webWantedIndividualContext.WantedIndividuals.Upsert(wantedIn).On(x => new {x.Iin,x.ListId}).RunAsync();
+                }
             }
             var minDate = await _parsedWantedIndividualContext.WantedIndividualDtos.MinAsync(x => x.RelevanceDate);
             _webWantedIndividualContext.WantedIndividuals.RemoveRange(_webWantedIndividualContext.WantedIndividuals.Where(x=>x.RelevanceDate<minDate));
             await _webWantedIndividualContext.SaveChangesAsync();
-            await _parsedWantedIndividualContext.Database.ExecuteSqlRawAsync("truncate avroradata.wanted_individuals restart identity;");
-            await _webWantedIndividualContext.Database.ExecuteSqlRawAsync($"call avroradata.unreliable_companies_updater();");
+            //await _parsedWantedIndividualContext.Database.ExecuteSqlRawAsync("truncate avroradata.wanted_individuals restart identity;");
         }
 
         private async Task MigrateReferences()
