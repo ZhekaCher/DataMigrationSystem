@@ -75,8 +75,8 @@ namespace DataMigrationSystem.Services
             await Task.WhenAll(tasks);
             await using var parsedEnforcementDebtContext = new ParsedEnforcementDebtContext();
             await using var webEnforcementDebtContext = new  WebEnforcementDebtContext();
-            await webEnforcementDebtContext.Database.ExecuteSqlRawAsync($"call avroradata.unreliable_companies_updater();");
             await parsedEnforcementDebtContext.Database.ExecuteSqlRawAsync("truncate avroradata.enforcement_debt restart identity;");
+            await webEnforcementDebtContext.Database.ExecuteSqlRawAsync($"call avroradata.unreliable_companies_updater();");
         }
         private async Task MigrateReferences()
         {
