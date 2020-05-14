@@ -4,11 +4,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataMigrationSystem.Models.Parsed
 {
-    [Table("company_bin")]
+    [Table("companies")]
     public class CompanyBinDto
     {
         [Key] 
-        [Column("code")] 
+        [Column("biin")] 
         public long? Code {get; set;}
         [NotMapped]
         public List<EnforcementDebtDto> EnforcementDebtDtos { get; set; } 
