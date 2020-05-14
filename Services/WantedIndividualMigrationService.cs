@@ -41,7 +41,7 @@ namespace DataMigrationSystem.Services
             var minDate = await _parsedWantedIndividualContext.WantedIndividualDtos.MinAsync(x => x.RelevanceDate);
             _webWantedIndividualContext.WantedIndividuals.RemoveRange(_webWantedIndividualContext.WantedIndividuals.Where(x=>x.RelevanceDate<minDate));
             await _webWantedIndividualContext.SaveChangesAsync();
-            //await _parsedWantedIndividualContext.Database.ExecuteSqlRawAsync("truncate avroradata.wanted_individuals restart identity;");
+            await _parsedWantedIndividualContext.Database.ExecuteSqlRawAsync("truncate avroradata.wanted_individuals restart identity;");
         }
 
         private async Task MigrateReferences()
@@ -84,17 +84,6 @@ namespace DataMigrationSystem.Services
                     Name = distinct
                 }).On(x=>x.Name).RunAsync();
             }
-
-            var listTypes = _parsedWantedIndividualContext.WantedIndividualDtos.Select(x => x.List).Distinct();
-            foreach (var distinct in listTypes)
-            {
-                
-                await _webWantedIndividualContext.ListTypes.Upsert(new ListType()
-                {
-                    Name = distinct
-                }).On(x=>x.Name).RunAsync();
-                
-            }
         }
 
         private async Task<WantedIndividual> DtoToEntity(WantedIndividualDto wantedIndividualDto)
@@ -112,7 +101,8 @@ namespace DataMigrationSystem.Services
                 Birthday = wantedIndividualDto.Birthday,
                 SearchingAuthority = wantedIndividualDto.SearchingAuthority,
                 SearchingReason = wantedIndividualDto.SearchingAuthority,
-                RelevanceDate = wantedIndividualDto.RelevanceDate
+                RelevanceDate = wantedIndividualDto.RelevanceDate,
+                ListId = int.Parse(wantedIndividualDto.List)
             };
             if (wantedIndividualDto.Gender != null)
             {
@@ -171,16 +161,6 @@ namespace DataMigrationSystem.Services
             else
             {
                 wantedIndividual.IssuedBy = null;
-            }
-            if (wantedIndividualDto.List != null)
-            {
-                wantedIndividual.ListId =
-                    (await _webWantedIndividualContext.ListTypes.FirstOrDefaultAsync(x =>
-                        x.Name == wantedIndividualDto.List))?.Id;
-            }
-            else
-            {
-                wantedIndividual.ListId = null;
             }
             return wantedIndividual;
         }
