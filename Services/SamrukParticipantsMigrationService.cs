@@ -36,25 +36,9 @@ namespace DataMigrationSystem.Services
                 {
                     var samrukParticipantsDto = DtoToWeb(dto);
                     var contacts = OnlyContacts(dto);
-                    var contacts_copies = OnlyContactsCopies(dto);
                     await webSamrukParticipantsContext.SamrukParticipantses.Upsert(samrukParticipantsDto)
                         .On(x => x.CodeBin).RunAsync();
-                    try
-                    {
-                        await webSamrukParticipantsContext.Contacts.AddAsync(contacts);
-                        await webSamrukParticipantsContext.SaveChangesAsync();
-                    }
-                    catch (Exception)
-                    {
-                    }
-                    try
-                    {
-                        await webSamrukParticipantsContext.ContactCopies.AddAsync(contacts_copies);
-                        await webSamrukParticipantsContext.SaveChangesAsync();
-                    }
-                    catch (Exception)
-                    {
-                    }
+                    await webSamrukParticipantsContext.Contacts.Upsert(contacts).On(x=>new {x.Bin, x.Source}).NoUpdate().RunAsync();
                     lock (_forLock)
                     {
                         Logger.Trace(_counter++);
@@ -74,7 +58,7 @@ namespace DataMigrationSystem.Services
             await Task.WhenAll(tasks);
             var  webSamrukParticipantsContext = new WebSamrukParticipantsContext();
             var parsedSamrukParticipantsContext = new ParsedSamrukParticipantsContext();
-            var minDate = parsedSamrukParticipantsContext.SamrukParticipantsDtos.Min(x => x.RelevanceDate);
+            var minDate = await parsedSamrukParticipantsContext.SamrukParticipantsDtos.MinAsync(x => x.RelevanceDate);
             webSamrukParticipantsContext.SamrukParticipantses.RemoveRange(webSamrukParticipantsContext.SamrukParticipantses.Where(x=>x.RelevanceDate<minDate));
             await webSamrukParticipantsContext.SaveChangesAsync();
             await parsedSamrukParticipantsContext.Database.ExecuteSqlRawAsync(
@@ -95,22 +79,14 @@ namespace DataMigrationSystem.Services
         }
         private Contact OnlyContacts(SamrukParticipantsDto samrukParticipantsDto)
         {
-            var contact= new Contact();
-            contact.Bin = samrukParticipantsDto.CodeBin;
-            contact.Telephone = samrukParticipantsDto.Phone;
-            contact.Website = samrukParticipantsDto.Site;
-            contact.Email = samrukParticipantsDto.Email;
-            contact.Source = "samruk";
-            return contact;
-        }
-        private ContactCopy OnlyContactsCopies(SamrukParticipantsDto samrukParticipantsDto)
-        {
-            var contact= new ContactCopy();
-            contact.Bin = samrukParticipantsDto.CodeBin;
-            contact.Telephone = samrukParticipantsDto.Phone;
-            contact.Website = samrukParticipantsDto.Site;
-            contact.Email = samrukParticipantsDto.Email;
-            contact.Source = "samruk";
+            var contact = new Contact
+            {
+                Bin = samrukParticipantsDto.CodeBin,
+                Telephone = samrukParticipantsDto.Phone,
+                Website = samrukParticipantsDto.Site,
+                Email = samrukParticipantsDto.Email,
+                Source = "samruk"
+            };
             return contact;
         }
     }

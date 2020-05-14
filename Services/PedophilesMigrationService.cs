@@ -66,12 +66,10 @@ namespace DataMigrationSystem.Services
             {
                 await _webPedophilesContext.Pedophiles.Upsert(pedophile).On(x => x.Iin).RunAsync();
             }
-            DateTime? minDate = await _parsedPedophilesContext.PedophileDtos.MinAsync(x => x.RelevanceDate);
-            var toDelete = _webPedophilesContext.Pedophiles.Where(x => x.RelevanceDate < minDate);
-            _webPedophilesContext.Pedophiles.RemoveRange(toDelete);
+            var minDate = await _parsedPedophilesContext.PedophileDtos.MinAsync(x => x.RelevanceDate);
+            _webPedophilesContext.Pedophiles.RemoveRange(_webPedophilesContext.Pedophiles.Where(x => x.RelevanceDate < minDate));
             await _webPedophilesContext.SaveChangesAsync();
-            await _parsedPedophilesContext.Database.ExecuteSqlRawAsync("truncate avroradata.pedophiles");
-            await _webPedophilesContext.Database.ExecuteSqlRawAsync($"call avroradata.unreliable_companies_updater();");
+            await _parsedPedophilesContext.Database.ExecuteSqlRawAsync("truncate avroradata.pedophiles restart identity;");
         }
     }
 }
