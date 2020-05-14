@@ -74,8 +74,16 @@ namespace DataMigrationSystem.Services
             await parsedUnscrupulousGoszakupContext.Database.ExecuteSqlRawAsync(
                 "truncate table avroradata.unscrupulous_goszakup restart identity cascade;");
             Logger.Info("Truncated");
-            await webUnscrupulousGoszakupContext.Database.ExecuteSqlRawAsync(
-                $"call avroradata.unreliable_companies_updater();");
+            try
+            {
+                await webUnscrupulousGoszakupContext.Database.ExecuteSqlRawAsync(
+                    "call avroradata.unreliable_companies_updater();");
+            }
+            catch (Exception e)
+            {
+                Logger.Warn(e);
+            }
+            
         }
 
         private async Task Migrate(int threadNum)
