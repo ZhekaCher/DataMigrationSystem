@@ -88,6 +88,7 @@ namespace DataMigrationSystem
                         temp = parserMonitoringContext.ParserMonitorings.FirstOrDefault(x => x.Active == true  && x.Name.Equals(migration));
                     }
 
+                    
                     if (temp == null)
                     {
                         _logger.Warn($"This parser is unactive or hasn't been parsed yet: {migration}");

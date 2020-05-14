@@ -83,7 +83,6 @@ namespace DataMigrationSystem.Services
             {
                 var temp = DtoToWeb(dto);
                 var contacts = OnlyContacts(dto);
-                var contacts_copies = OnlyContactsCopies(dto);
                 try
                 {
                     await webParticipantGoszakupContext.ParticipantsGoszakup.Upsert(temp)
@@ -103,26 +102,7 @@ namespace DataMigrationSystem.Services
                         Program.NumOfErrors++;
                     }
                 }
-                
-                try
-                {
-                    await webParticipantGoszakupContext.Contacts.AddAsync(contacts);
-                    await webParticipantGoszakupContext.SaveChangesAsync();
-                }
-                catch (Exception)
-                {
-                    // Console.WriteLine("This contacts is already exists");
-                }
-                try
-                {
-                    await webParticipantGoszakupContext.ContactCopies.AddAsync(contacts_copies);
-                    await webParticipantGoszakupContext.SaveChangesAsync();
-                }
-                catch (Exception)
-                {
-                    // Console.WriteLine("This contacts is already exists");
-                }
-
+                await webParticipantGoszakupContext.Contacts.Upsert(contacts).On(x=>new {x.Bin, x.Source}).NoUpdate().RunAsync();
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
             }
@@ -157,18 +137,6 @@ namespace DataMigrationSystem.Services
         private Contact OnlyContacts(ParticipantGoszakupDto participantGoszakupDto)
         {
             var contact= new Contact();
-            var biin = participantGoszakupDto.Bin ?? participantGoszakupDto.Iin;
-            var source = participantGoszakupDto.Bin != null ? "goszakup_bin" : "goszakup_iin";
-            contact.Bin = biin;
-            contact.Telephone = participantGoszakupDto.Phone;
-            contact.Website = participantGoszakupDto.Website;
-            contact.Email = participantGoszakupDto.Email;
-            contact.Source = source;
-            return contact;
-        }
-        private ContactCopy OnlyContactsCopies(ParticipantGoszakupDto participantGoszakupDto)
-        {
-            var contact= new ContactCopy();
             var biin = participantGoszakupDto.Bin ?? participantGoszakupDto.Iin;
             var source = participantGoszakupDto.Bin != null ? "goszakup_bin" : "goszakup_iin";
             contact.Bin = biin;

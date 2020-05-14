@@ -44,8 +44,6 @@ namespace DataMigrationSystem.Services
                     JailReleaseDate = x.JailReleaseDate,
                     RelevanceDate = x.RelevanceDate
                 });*/
-            DateTime? minDate = await _webPedophilesContext.Pedophiles.MaxAsync(x => x.RelevanceDate);
-
             var pedophiles = from pedophilesDDto in _parsedPedophilesContext.PedophileDtos
                 join individualIin in _parsedPedophilesContext.IndividualIins
                     on pedophilesDDto.Iin equals individualIin.Code
@@ -68,10 +66,10 @@ namespace DataMigrationSystem.Services
             {
                 await _webPedophilesContext.Pedophiles.Upsert(pedophile).On(x => x.Iin).RunAsync();
             }
-            var toDelete = _webPedophilesContext.Pedophiles.Where(x => x.RelevanceDate < minDate);
-            _webPedophilesContext.Pedophiles.RemoveRange(toDelete);
+            var minDate = await _parsedPedophilesContext.PedophileDtos.MinAsync(x => x.RelevanceDate);
+            _webPedophilesContext.Pedophiles.RemoveRange(_webPedophilesContext.Pedophiles.Where(x => x.RelevanceDate < minDate));
             await _webPedophilesContext.SaveChangesAsync();
-            await _parsedPedophilesContext.Database.ExecuteSqlRawAsync("truncate avroradata.pedophiles");
+            await _parsedPedophilesContext.Database.ExecuteSqlRawAsync("truncate avroradata.pedophiles restart identity;");
         }
     }
 }

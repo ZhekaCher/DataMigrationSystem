@@ -43,8 +43,8 @@ namespace DataMigrationSystem.Services
                     .On(x => x.Biin).RunAsync();
             }
 
-            var lastDate = _webUnreliableSkContext.UnreliableSks.Max(x => x.RelevanceDate).Date;
-            _webUnreliableSkContext.UnreliableSks.RemoveRange(_webUnreliableSkContext.UnreliableSks.Where(x=>x.RelevanceDate<lastDate));
+            var minDate = await _parsedUnreliableSkContext.UnreliableSkDtos.MinAsync(x => x.RelevanceDate);
+            _webUnreliableSkContext.UnreliableSks.RemoveRange(_webUnreliableSkContext.UnreliableSks.Where(x=>x.RelevanceDate<minDate));
             await _webUnreliableSkContext.SaveChangesAsync();
             await _parsedUnreliableSkContext.Database.ExecuteSqlRawAsync("truncate avroradata.unreliable_suppliers_sk restart identity;");
             await _webUnreliableSkContext.Database.ExecuteSqlRawAsync($"call avroradata.unreliable_companies_updater();");
