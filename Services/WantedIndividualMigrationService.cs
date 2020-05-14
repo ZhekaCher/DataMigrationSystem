@@ -29,14 +29,11 @@ namespace DataMigrationSystem.Services
         public override async Task StartMigratingAsync()
         {
             await MigrateReferences();
-            var wantedIndividualsDtos = _parsedWantedIndividualContext.WantedIndividualDtos;
+            var wantedIndividualsDtos = _parsedWantedIndividualContext.WantedIndividualDtos.Where(x=>x.Iin>999999);
             foreach (var wantedIndividualDto in wantedIndividualsDtos)
             {
-                if (wantedIndividualDto.Iin>999999)
-                {
-                    var wantedIn = await DtoToEntity(wantedIndividualDto);
-                    await _webWantedIndividualContext.WantedIndividuals.Upsert(wantedIn).On(x => new {x.Iin,x.ListId}).RunAsync();
-                }
+                var wantedIn = await DtoToEntity(wantedIndividualDto);
+                await _webWantedIndividualContext.WantedIndividuals.Upsert(wantedIn).On(x => new {x.Iin,x.ListId}).RunAsync();
             }
             var minDate = await _parsedWantedIndividualContext.WantedIndividualDtos.MinAsync(x => x.RelevanceDate);
             _webWantedIndividualContext.WantedIndividuals.RemoveRange(_webWantedIndividualContext.WantedIndividuals.Where(x=>x.RelevanceDate<minDate));
