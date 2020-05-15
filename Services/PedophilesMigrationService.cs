@@ -44,6 +44,7 @@ namespace DataMigrationSystem.Services
                     JailReleaseDate = x.JailReleaseDate,
                     RelevanceDate = x.RelevanceDate
                 });*/
+            int count = 0;
             var pedophiles = from pedophilesDDto in _parsedPedophilesContext.PedophileDtos
                 join individualIin in _parsedPedophilesContext.IndividualIins
                     on pedophilesDDto.Iin equals individualIin.Code
@@ -65,6 +66,7 @@ namespace DataMigrationSystem.Services
             foreach (var pedophile in pedophiles)
             {
                 await _webPedophilesContext.Pedophiles.Upsert(pedophile).On(x => x.Iin).RunAsync();
+                Logger.Trace(++count);
             }
             var minDate = await _parsedPedophilesContext.PedophileDtos.MinAsync(x => x.RelevanceDate);
             _webPedophilesContext.Pedophiles.RemoveRange(_webPedophilesContext.Pedophiles.Where(x => x.RelevanceDate < minDate));
