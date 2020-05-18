@@ -59,29 +59,25 @@ namespace DataMigrationSystem.Services
             
             var  webSamrukParticipantsContext = new WebSamrukParticipantsContext();
             var parsedSamrukParticipantsContext = new ParsedSamrukParticipantsContext();
-            var minDate = await parsedSamrukParticipantsContext.SamrukParticipantsDtos.MinAsync(x => x.RelevanceDate);
-            webSamrukParticipantsContext.SamrukParticipantses.RemoveRange(webSamrukParticipantsContext.SamrukParticipantses.Where(x=>x.RelevanceDate<minDate));
-            
             
             var webProducerSkContext = new WebProducerSkContext();
-            var parsedProducerSkContext = new ParsedProducerSkContext();
-            var lastDateP = await parsedProducerSkContext.ProducerSkDtos.MinAsync(x => x.RelevanceDate);
+            var lastDateP = await parsedSamrukParticipantsContext.SamrukParticipantsDtos.Where(x=>x.CommodityProducer==true).MinAsync(x => x.RelevanceDate);
             webProducerSkContext.ProducerSks.RemoveRange(webProducerSkContext.ProducerSks.Where(x=>x.RelevanceDate<lastDateP));
             
-            var parsedDisabilitiesOrgSkContext = new ParsedDisabilitiesOrgSkContext();
             var webDisabilitiesOrgSkContext= new WebDisabilitiesOrgSkContext();
-            var lastDateD = await parsedDisabilitiesOrgSkContext.DisabilitiesOrgSkDtos.MinAsync(x => x.RelevanceDate);
+            var lastDateD = await parsedSamrukParticipantsContext.SamrukParticipantsDtos.Where(x=>x.InvalidCompany==true).MinAsync(x => x.RelevanceDate);
             webDisabilitiesOrgSkContext.DisabilitiesOrgSk.RemoveRange(webDisabilitiesOrgSkContext.DisabilitiesOrgSk.Where(x=>x.RelevanceDate<lastDateD));
             
-            var parsedReliableSkContext = new ParsedReliableSkContext();
             var webReliableSkContext = new WebReliableSkContext();
-            var lastDateR = await parsedReliableSkContext.ReliableSkDtos.MinAsync(x => x.RelevanceDate);
+            var lastDateR = await parsedSamrukParticipantsContext.SamrukParticipantsDtos.Where(x=>x.GenuineSupplier==true).MinAsync(x => x.RelevanceDate);
             webReliableSkContext.ReliableSks.RemoveRange(webReliableSkContext.ReliableSks.Where(x=>x.RelevanceDate<lastDateR));
             
-            var parsedUnreliableSkContext = new ParsedUnreliableSkContext();
             var webUnreliableSkContext = new WebUnreliableSkContext();
-            var lastDateU = await parsedUnreliableSkContext.UnreliableSkDtos.MinAsync(x => x.RelevanceDate);
+            var lastDateU = await parsedSamrukParticipantsContext.SamrukParticipantsDtos.Where(x=>x.BadSupplier==true).MinAsync(x => x.RelevanceDate);
             webUnreliableSkContext.UnreliableSks.RemoveRange(webUnreliableSkContext.UnreliableSks.Where(x=>x.RelevanceDate<lastDateU));
+            
+            var minDate = await parsedSamrukParticipantsContext.SamrukParticipantsDtos.MinAsync(x => x.RelevanceDate);
+            webSamrukParticipantsContext.SamrukParticipantses.RemoveRange(webSamrukParticipantsContext.SamrukParticipantses.Where(x=>x.RelevanceDate<minDate));
             
             await webSamrukParticipantsContext.SaveChangesAsync();
             await parsedSamrukParticipantsContext.Database.ExecuteSqlRawAsync(
