@@ -15,5 +15,10 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("customer")] public bool? Customer { get; set; }
         [Column("supplier")] public bool? Supplier { get; set; }
         [Column("relevance_date")] public DateTime? RelevanceDate { get; set; }
+        [Column("reliable_company")] public bool? ReliableCompany{get; set;}
+        [Column("unreliable_company")] public bool? UnreliableCompany{get; set;}
+        [Column("disabled_company")] public bool? DisabledCompany{get; set;}
+        [Column("producer_company")] public bool? ProducerCompany{get; set;}
+
     }
 }
