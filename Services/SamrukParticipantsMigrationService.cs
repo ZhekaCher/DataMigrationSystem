@@ -30,10 +30,15 @@ namespace DataMigrationSystem.Services
         {
             var webSamrukParticipantsContext = new WebSamrukParticipantsContext();
             var parsedSamrukParticipantsContext = new ParsedSamrukParticipantsContext();
-            foreach (var dto in parsedSamrukParticipantsContext.SamrukParticipantsDtos.Where(x=>x.Id % NumOfThreads == threadNum))
+            var samrukParticipants = parsedSamrukParticipantsContext.SamrukParticipantsDtos
+                .Join(parsedSamrukParticipantsContext.CompanyBinDtos,
+                    samrukParticipantsDto => samrukParticipantsDto.CodeBin, companyBinDto => companyBinDto.Code,
+                    (samrukParticipantsDto, companyBinDto) => new {samrukParticipantsDto, companyBinDto})
+                .Where(x => x.samrukParticipantsDto.Id % NumOfThreads == threadNum);
+            foreach (var dto in samrukParticipants)
             {
-                var samrukParticipantsDto = DtoToWeb(dto);
-                var contacts = OnlyContacts(dto);
+                var samrukParticipantsDto = DtoToWeb(dto.samrukParticipantsDto);
+                var contacts = OnlyContacts(dto.samrukParticipantsDto);
                 await webSamrukParticipantsContext.SamrukParticipantses.Upsert(samrukParticipantsDto)
                     .On(x => x.CodeBin).RunAsync();
                 await webSamrukParticipantsContext.Contacts.Upsert(contacts).On(x=>new {x.Bin, x.Source}).NoUpdate().RunAsync();
@@ -81,23 +86,25 @@ namespace DataMigrationSystem.Services
             await webDisabilitiesOrgSkContext.SaveChangesAsync();
             await webProducerSkContext.SaveChangesAsync();
             
-            await parsedSamrukParticipantsContext.Database.ExecuteSqlRawAsync(
-                "truncate avroradata.samruk_all_participants restart identity");
+            //await parsedSamrukParticipantsContext.Database.ExecuteSqlRawAsync(
+           //  "truncate avroradata.samruk_all_participants restart identity");
         }
 
         private SamrukParticipants DtoToWeb(SamrukParticipantsDto samrukParticipantsDto)
         {
-            var samrukParticipants= new SamrukParticipants();
-            samrukParticipants.CodeBin = samrukParticipantsDto.CodeBin;
-            samrukParticipants.DirectorFullname = samrukParticipantsDto.DirectorFullname;
-            samrukParticipants.DirectorIin = samrukParticipantsDto.DirectorIin;
-            samrukParticipants.Customer = samrukParticipantsDto.Customer;
-            samrukParticipants.Supplier = samrukParticipantsDto.Supplier;
-            samrukParticipants.RelevanceDate = samrukParticipantsDto.RelevanceDate;
-            samrukParticipants.DisabledCompany = samrukParticipantsDto.InvalidCompany;
-            samrukParticipants.ProducerCompany = samrukParticipants.ProducerCompany;
-            samrukParticipants.UnreliableCompany = samrukParticipantsDto.GenuineSupplier;
-            samrukParticipants.ReliableCompany = samrukParticipantsDto.BadSupplier;
+            var samrukParticipants = new SamrukParticipants
+            {
+                CodeBin = samrukParticipantsDto.CodeBin,
+                DirectorFullname = samrukParticipantsDto.DirectorFullname,
+                DirectorIin = samrukParticipantsDto.DirectorIin,
+                Customer = samrukParticipantsDto.Customer,
+                Supplier = samrukParticipantsDto.Supplier,
+                RelevanceDate = samrukParticipantsDto.RelevanceDate,
+                DisabledCompany = samrukParticipantsDto.InvalidCompany,
+                ProducerCompany = samrukParticipantsDto.CommodityProducer,
+                UnreliableCompany = samrukParticipantsDto.BadSupplier,
+                ReliableCompany = samrukParticipantsDto.GenuineSupplier
+            };
             return samrukParticipants;
         }
         private Contact OnlyContacts(SamrukParticipantsDto samrukParticipantsDto)

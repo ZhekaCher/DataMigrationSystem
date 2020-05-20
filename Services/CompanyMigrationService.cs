@@ -69,18 +69,6 @@ namespace DataMigrationSystem.Services
         {
             await using var webCompanyContext = new WebCompanyContext();
             await using var parsedCompanyContext = new ParsedCompanyContext();
-
-            var katos = parsedCompanyContext.CompanyDtos
-                .Select(x => new {x.KatoCode, x.SettlementNameKz, x.SettlementNameRu}).Distinct();
-            foreach (var distinct in katos)
-            {
-                await webCompanyContext.Katos.Upsert(new Kato
-                {
-                    Id = distinct.KatoCode,
-                    NameKz = distinct.SettlementNameKz,
-                    NameRu = distinct.SettlementNameRu,
-                }).On(x=>x.Id).RunAsync();
-            }
             var krps = parsedCompanyContext.CompanyDtos
                 .Select(x => new {x.KrpCode, x.KrpNameKz, x.KrpNameRu}).Distinct();
             foreach (var distinct in krps)
