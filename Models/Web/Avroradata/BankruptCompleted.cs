@@ -14,7 +14,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("date_entry")] public DateTime? DateEntry{get; set;}
         [Column("date_decision_end")] public DateTime? DateDecisionEnd{get; set;}
         [Column("date_entry_end")] public DateTime? DateEntryEnd{get; set;}
-        [Column("date_of_relevance")] public DateTime? DateOfRelevance{get; set;}
+        [Column("date_of_relevance")] public DateTime? RelevanceDate{get; set;}
         [Key] [Column("biin_companies")] public long? BiinCompanies{get; set;}
     }
     
