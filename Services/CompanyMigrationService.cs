@@ -48,7 +48,8 @@ namespace DataMigrationSystem.Services
         {
             await using var webCompanyContext = new WebCompanyContext();
             await using var parsedCompanyContext = new ParsedCompanyContext();
-            var companyDtos = from companyDto in parsedCompanyContext.CompanyDtos where companyDto.Id % NumOfThreads == threadNum
+            var companyDtos = from companyDto in parsedCompanyContext.CompanyDtos 
+                where companyDto.Id % NumOfThreads == threadNum
                 select companyDto;
             foreach (var companyDto in companyDtos)
             {
