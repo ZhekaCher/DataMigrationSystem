@@ -37,7 +37,11 @@ namespace DataMigrationSystem.Services
             for (int i = 0; i < NumOfThreads; i++)
                 tasks.Add(MigrateAsync(i));
             await Task.WhenAll(tasks);
-            
+            await using var webBankruptAtStageContext = new WebBankruptAtStageContext();
+            await using var parsedBankruptAtStageContext = new ParsedBankruptAtStageContext();
+            var lastDate = await  parsedBankruptAtStageContext.BankruptAtStageDtos.MinAsync(x => x.DateOfRelevance);
+            webBankruptAtStageContext.BankruptAtStages.RemoveRange(webBankruptAtStageContext.BankruptAtStages.Where(x=>x.RelevanceDate<lastDate));
+            await webBankruptAtStageContext.SaveChangesAsync();
         }
 
         private async Task MigrateAsync(int threadNum)
@@ -46,16 +50,22 @@ namespace DataMigrationSystem.Services
             await using var parsedBankruptAtStageContext = new ParsedBankruptAtStageContext();
             var bankruptDtos = from dto in parsedBankruptAtStageContext.BankruptAtStageDtos
                 where dto.Id % NumOfThreads == threadNum
-                select dto;
-            foreach (var bankruptAtStageDto in bankruptDtos)
-            {
-                var bankrupt = DtoToEntity(bankruptAtStageDto);
-                await webBankruptAtStageContext.BankruptAtStages.Upsert(bankrupt).On(x => x.BiinCompanies).RunAsync();
-                lock (_forLock)
+                select new BankruptAtStage
                 {
-                    Logger.Trace(_total--);
-                }
-            }
+                    RelevanceDate = dto.DateOfRelevance,
+                    DateOfEntryIntoForce = dto.DateOfEntryIntoForce,
+                    DateOfCourtDecision = dto.DateOfCourtDecision,
+                    BiinCompanies = long.Parse(dto.Bin)
+                };
+            // foreach (var bankruptAtStageDto in bankruptDtos)
+            // {
+            // var bankrupt = DtoToEntity(bankruptAtStageDto);
+            await webBankruptAtStageContext.BankruptAtStages.UpsertRange(bankruptDtos).On(x => x.BiinCompanies).RunAsync();
+            // lock (_forLock)
+            // {
+                // Logger.Trace(_total--);
+            // }
+            // }
         }
 
         private async Task MigrateReferences()
@@ -66,9 +76,9 @@ namespace DataMigrationSystem.Services
             foreach (var address in addresses)
             {
                 await webBankruptAtStageContext.BankruptSAddresses.Upsert(new BankruptSAddress
-                    {
-                        Name = address
-                    }).On(x => x.Name).RunAsync();
+                {
+                    Name = address
+                }).On(x => x.Name).RunAsync();
             }
 
             var regions = parsedBankruptAtStageContext.BankruptAtStageDtos.Select(x => x.Region).Distinct();

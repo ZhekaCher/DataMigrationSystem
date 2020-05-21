@@ -34,7 +34,12 @@ namespace DataMigrationSystem.Services
             var tasks = new List<Task>();
             for (int i = 0; i < NumOfThreads; i++)
                 tasks.Add(MigrateAsync(i));
-            await Task.WhenAll(tasks);        
+            await Task.WhenAll(tasks);
+            await using var parsedBankruptCompletedContext = new ParsedBankruptCompletedContext();
+            await using var webBankruptCompletedContext = new WebBankruptCompletedContext();
+            var lastDate = await  parsedBankruptCompletedContext.BankruptCompletedDtos.MinAsync(x => x.DateOfRelevance);
+            webBankruptCompletedContext.BankruptCompleteds.RemoveRange(webBankruptCompletedContext.BankruptCompleteds.Where(x=>x.DateOfRelevance<lastDate));
+            await webBankruptCompletedContext.SaveChangesAsync();
         }
         private async Task MigrateAsync(int threadNum)
         {
@@ -42,16 +47,24 @@ namespace DataMigrationSystem.Services
             await using var parsedBankruptCompletedContext = new ParsedBankruptCompletedContext();
             var bankruptDtos = from dto in parsedBankruptCompletedContext.BankruptCompletedDtos
                 where dto.Id % NumOfThreads == threadNum
-                select dto;
-            foreach (var bankruptCompletedDto in bankruptDtos)
-            {
-                var bankrupt = DtoToEntity(bankruptCompletedDto);
-                await webBankruptCompletedContext.BankruptCompleteds.Upsert(bankrupt).On(x => x.BiinCompanies).RunAsync();
-                lock (_forLock)
+                select new BankruptCompleted
                 {
-                    Logger.Trace(_total--);
-                }
-            }
+                    DateDecision = dto.DateDecision,
+                    DateEntry = dto.DateEntry,
+                    DateDecisionEnd = dto.DateDecisionEnd,
+                    DateEntryEnd = dto.DateEntryEnd,
+                    DateOfRelevance = dto.DateOfRelevance,
+                    BiinCompanies = long.Parse(dto.Bin)
+                };;
+            // foreach (var bankruptCompletedDto in bankruptDtos)
+            // {
+            //     var bankrupt = DtoToEntity(bankruptCompletedDto);
+            await webBankruptCompletedContext.BankruptCompleteds.UpsertRange(bankruptDtos).On(x => x.BiinCompanies).RunAsync();
+            // lock (_forLock)
+            // {
+                // Logger.Trace(_total--);
+                // }
+            // }
         }
         private async Task MigrateReferences()
         {
