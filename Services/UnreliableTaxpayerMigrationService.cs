@@ -12,12 +12,10 @@ namespace DataMigrationSystem.Services
     public class UnreliableTaxpayerMigrationService : MigrationService
     {
         private readonly object _forLock;
-        private int _counter;
-        public UnreliableTaxpayerMigrationService(int numOfThreads = 10)
+        public UnreliableTaxpayerMigrationService(int numOfThreads = 1)
         {
             NumOfThreads = numOfThreads;
             _forLock = new object();
-            
         }
         
         protected override Logger InitializeLogger()
@@ -63,14 +61,7 @@ namespace DataMigrationSystem.Services
                     DocumentNumber = t.unreliableTaxpayerDto.DocumentNumber,
                     BinCompany = t.unreliableTaxpayerDto.BinCompany
                 });
-            foreach (var taxpayer in taxpayers)
-            {
-                await webUnreliableTaxpayerContext.UnreliableTaxpayers.Upsert(taxpayer).On(x => new {x.BinCompany, x.IdListType}).RunAsync();
-                lock (_forLock)
-                {
-                    Logger.Trace(_counter++);
-                }
-            }
+            await webUnreliableTaxpayerContext.UnreliableTaxpayers.UpsertRange(taxpayers).On(x => new {x.BinCompany, x.IdListType}).RunAsync();
         }
     }
 }
