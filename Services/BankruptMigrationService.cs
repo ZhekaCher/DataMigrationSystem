@@ -47,18 +47,18 @@ namespace DataMigrationSystem.Services
             await using var parsedBankruptContext = new ParsedBankruptContext();
             var atStages = from dto in parsedBankruptContext.BankruptAtStageDtos
                 where dto.Id % NumOfThreads == threadNum
-                join com in parsedBankruptContext.CompanyBinDtos on long.Parse(dto.Bin) equals com.Code
+                join com in parsedBankruptContext.CompanyBinDtos on dto.Bin equals com.Code
                 select new BankruptAtStage
                 {
                     RelevanceDate = dto.DateOfRelevance,
                     DateOfEntryIntoForce = dto.DateOfEntryIntoForce,
                     DateOfCourtDecision = dto.DateOfCourtDecision,
-                    BiinCompanies = long.Parse(dto.Bin)
+                    BiinCompanies = dto.Bin
                 };
             await webBankruptContext.BankruptAtStages.UpsertRange(atStages).On(x => x.BiinCompanies).RunAsync();
             var completeds = from dto in parsedBankruptContext.BankruptCompletedDtos
                 where dto.Id % NumOfThreads == threadNum
-                join com in parsedBankruptContext.CompanyBinDtos on long.Parse(dto.Bin) equals com.Code
+                join com in parsedBankruptContext.CompanyBinDtos on dto.Bin equals com.Code
                 select new BankruptCompleted
                 {
                     DateDecision = dto.DateDecision,
@@ -66,7 +66,7 @@ namespace DataMigrationSystem.Services
                     DateDecisionEnd = dto.DateDecisionEnd,
                     DateEntryEnd = dto.DateEntryEnd,
                     RelevanceDate = dto.DateOfRelevance,
-                    BiinCompanies = long.Parse(dto.Bin)
+                    BiinCompanies = dto.Bin
                 };
             await webBankruptContext.BankruptCompleteds.UpsertRange(completeds).On(x => x.BiinCompanies).RunAsync();
         }
