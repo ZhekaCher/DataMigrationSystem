@@ -10,9 +10,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Services
 {
-    public class Bankrupt : MigrationService
+    public class BankruptMigrationService : MigrationService
     {
-        public Bankrupt(int numOfThreads = 1)
+        public BankruptMigrationService(int numOfThreads = 1)
         {
             NumOfThreads = numOfThreads;
             using var parsedBankruptsAtStageContext = new ParsedBankruptContext();
