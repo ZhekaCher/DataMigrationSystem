@@ -104,7 +104,7 @@ namespace DataMigrationSystem.Services
             var addressesC = parsedBankruptContext.BankruptCompletedDtos.Select(x => x.Address).Distinct();
             foreach (var address in addressesC)
             {
-                await webBankruptContext.BankruptCAddresses.Upsert(new BankruptCAddress
+                await webBankruptContext.BankruptSAddresses.Upsert(new BankruptSAddress
                 {
                     Name = address
                 }).On(x => x.Name).RunAsync();
@@ -113,7 +113,7 @@ namespace DataMigrationSystem.Services
             var regionsC = parsedBankruptContext.BankruptCompletedDtos.Select(x => x.Region).Distinct();
             foreach (var region in regionsC)
             {
-                await webBankruptContext.RegionCs.Upsert(new RegionC
+                await webBankruptContext.RegionSes.Upsert(new RegionS
                 {
                     Name = region
                 }).On(x => x.Name).RunAsync();
@@ -122,7 +122,7 @@ namespace DataMigrationSystem.Services
             var servicesC = parsedBankruptContext.BankruptCompletedDtos.Select(x => x.TypeOfService).Distinct();
             foreach (var service in servicesC)
             {
-                await webBankruptContext.TypeOfServiceCs.Upsert(new TypeOfServiceC
+                await webBankruptContext.TypeOfServiceSes.Upsert(new TypeOfServiceS
                 {
                     Name = service
                 }).On(x => x.Name).RunAsync();

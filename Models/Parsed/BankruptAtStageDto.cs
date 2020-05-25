@@ -11,7 +11,7 @@ namespace DataMigrationSystem.Models.Parsed
         [Key] [Column("id")] public long? Id{get; set;}
         [Column("region")] public string Region{get; set;}
         [Column("name")] public string Name{get; set;}
-        [Column("bin")] public string Bin{get; set;}
+        [Column("bin")] public string? Bin{get; set;}
         [Column("rnn")] public string Rnn{get; set;}
         [Column("address")] public string Address{get; set;}
         [Column("director_fullname")] public string DirectorFullname{get; set;}

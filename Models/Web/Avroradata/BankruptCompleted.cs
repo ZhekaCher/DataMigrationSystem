@@ -17,26 +17,4 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("date_of_relevance")] public DateTime? RelevanceDate{get; set;}
         [Key] [Column("biin_companies")] public long? BiinCompanies{get; set;}
     }
-    
-    [Table("bankrupt_address")]
-    public class BankruptCAddress
-    {
-        [Key] [Column("i")] public long? I{get; set;}
-        [Column("name")] public string Name{get; set;}
-		
-    }
-    
-    [Table("region")]
-    public class RegionC
-    {
-        [Key] [Column("i")] public long? I{get; set;}
-        [Column("name")] public string Name{get; set;}
-    }
-
-    [Table("type_of_service")]
-    public class TypeOfServiceC
-    {
-        [Key] [Column("i")] public long? I { get; set; }
-        [Column("name")] public string Name { get; set; }
-    }
 }
