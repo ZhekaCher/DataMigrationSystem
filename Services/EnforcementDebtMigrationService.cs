@@ -51,7 +51,7 @@ namespace DataMigrationSystem.Services
                 webEnforcementDebtContext.EgovEnforcementDebts.RemoveRange(oldList);
                 await webEnforcementDebtContext.EgovEnforcementDebts.AddRangeAsync(newList);
                 await webEnforcementDebtContext.SaveChangesAsync();
-                if ((long) oldList.Sum(x => x.Amount) != (long) newList.Sum(x => x.Amount))
+                if (oldList.Sum(x => x.Amount) -  newList.Sum(x => x.Amount)>2)
                 {
                     await webEnforcementDebtContext.Database.ExecuteSqlInterpolatedAsync($"insert into avroradata.enforcement_debt_history (biin, count, amount) values ({binDto.Code}, {newList.Count}, {newList.Sum(x => x.Amount)} :: numeric)");
                 }
