@@ -16,7 +16,7 @@ namespace DataMigrationSystem.Models.Parsed
         [Key] [Column("id")] public int Id { get; set; }
         [Column("lot_number")] public string LotNumber { get; set; }
         [Column("ref_lot_status_id")] public int? RefLotStatusId { get; set; }
-        [Column("last_update_date")] public DateTime LastUpdateDate { get; set; }
+        [Column("last_update_date")] public DateTime? LastUpdateDate { get; set; }
         [Column("union_lots")] public bool? UnionLots { get; set; }
         [Column("count")] public double? Count { get; set; }
         [Column("amount")] public double? Amount { get; set; }
