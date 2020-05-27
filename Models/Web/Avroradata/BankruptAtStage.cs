@@ -13,6 +13,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("relevance_date")] public DateTime? RelevanceDate{get; set;}
         [Column("date_of_entry_into_force")] public DateTime? DateOfEntryIntoForce{get; set;}
         [Column("date_of_court_decision")] public DateTime? DateOfCourtDecision{get; set;}
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Key] [Column("biin_companies")] public long? BiinCompanies{get; set;}
     }
     

@@ -12,12 +12,10 @@ namespace DataMigrationSystem.Services
     public class UnreliableTaxpayerMigrationService : MigrationService
     {
         private readonly object _forLock;
-        private int _counter;
-        public UnreliableTaxpayerMigrationService(int numOfThreads = 10)
+        public UnreliableTaxpayerMigrationService(int numOfThreads = 1)
         {
             NumOfThreads = numOfThreads;
             _forLock = new object();
-            
         }
         
         protected override Logger InitializeLogger()
@@ -48,29 +46,20 @@ namespace DataMigrationSystem.Services
             await using var webUnreliableTaxpayerContext = new WebUnreliableTaxpayerContext();
             await using var parsedUnreliableTaxpayerContext = new ParsedUnreliableTaxpayerContext();
             
-            var taxpayers = parsedUnreliableTaxpayerContext.UnreliableTaxpayerDtos
-                .Join(parsedUnreliableTaxpayerContext.CompanyBinDtos,
-                    unreliableTaxpayerDto => unreliableTaxpayerDto.BinCompany, companyBinDto => companyBinDto.Code,
-                    (unreliableTaxpayerDto, companyBinDto) => new {unreliableTaxpayerDto, companyBinDto})
-                .Where(t => t.unreliableTaxpayerDto.Id % NumOfThreads == numThread)
-                .Select(t => new UnreliableTaxpayer
+            var taxpayers = from dto in parsedUnreliableTaxpayerContext.UnreliableTaxpayerDtos
+                where dto.Id % NumOfThreads == numThread
+                join com in parsedUnreliableTaxpayerContext.CompanyBinDtos on dto.BinCompany equals com.Code
+                select new UnreliableTaxpayer
                 {
-                    RelevanceDate = t.unreliableTaxpayerDto.RelevanceDate,
-                    DocumentDate = t.unreliableTaxpayerDto.DocumentDate,
-                    IdListType = t.unreliableTaxpayerDto.IdListType,
-                    IdTypeDocument = t.unreliableTaxpayerDto.IdTypeDocument,
-                    Note = t.unreliableTaxpayerDto.Note,
-                    DocumentNumber = t.unreliableTaxpayerDto.DocumentNumber,
-                    BinCompany = t.unreliableTaxpayerDto.BinCompany
-                });
-            foreach (var taxpayer in taxpayers)
-            {
-                await webUnreliableTaxpayerContext.UnreliableTaxpayers.Upsert(taxpayer).On(x => new {x.BinCompany, x.IdListType}).RunAsync();
-                lock (_forLock)
-                {
-                    Logger.Trace(_counter++);
-                }
-            }
+                    RelevanceDate = dto.RelevanceDate,
+                    DocumentDate = dto.DocumentDate,
+                    IdListType = dto.IdListType,
+                    IdTypeDocument = dto.IdTypeDocument,
+                    Note = dto.Note,
+                    DocumentNumber = dto.DocumentNumber,
+                    BinCompany = dto.BinCompany
+                };
+            await webUnreliableTaxpayerContext.UnreliableTaxpayers.UpsertRange(taxpayers).On(x => new {x.BinCompany, x.IdListType}).RunAsync();
         }
     }
 }

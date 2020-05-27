@@ -48,18 +48,18 @@ namespace DataMigrationSystem.Services
             await using var parsedBankruptContext = new ParsedBankruptContext();
             var atStages = from dto in parsedBankruptContext.BankruptAtStageDtos
                 where dto.Id % NumOfThreads == threadNum
-                join com in parsedBankruptContext.CompanyBinDtos on long.Parse(dto.Bin) equals com.Code
+                join com in parsedBankruptContext.CompanyBinDtos on dto.Bin equals com.Code
                 select new BankruptAtStage
                 {
                     RelevanceDate = dto.DateOfRelevance,
                     DateOfEntryIntoForce = dto.DateOfEntryIntoForce,
                     DateOfCourtDecision = dto.DateOfCourtDecision,
-                    BiinCompanies = long.Parse(dto.Bin)
+                    BiinCompanies = dto.Bin
                 };
             await webBankruptContext.BankruptAtStages.UpsertRange(atStages).On(x => x.BiinCompanies).RunAsync();
             var completeds = from dto in parsedBankruptContext.BankruptCompletedDtos
                 where dto.Id % NumOfThreads == threadNum
-                join com in parsedBankruptContext.CompanyBinDtos on long.Parse(dto.Bin) equals com.Code
+                join com in parsedBankruptContext.CompanyBinDtos on dto.Bin equals com.Code
                 select new BankruptCompleted
                 {
                     DateDecision = dto.DateDecision,
@@ -67,7 +67,7 @@ namespace DataMigrationSystem.Services
                     DateDecisionEnd = dto.DateDecisionEnd,
                     DateEntryEnd = dto.DateEntryEnd,
                     RelevanceDate = dto.DateOfRelevance,
-                    BiinCompanies = long.Parse(dto.Bin)
+                    BiinCompanies = dto.Bin
                 };
             await webBankruptContext.BankruptCompleteds.UpsertRange(completeds).On(x => x.BiinCompanies).RunAsync();
         }
@@ -105,7 +105,7 @@ namespace DataMigrationSystem.Services
             var addressesC = parsedBankruptContext.BankruptCompletedDtos.Select(x => x.Address).Distinct();
             foreach (var address in addressesC)
             {
-                await webBankruptContext.BankruptCAddresses.Upsert(new BankruptCAddress
+                await webBankruptContext.BankruptSAddresses.Upsert(new BankruptSAddress
                 {
                     Name = address
                 }).On(x => x.Name).RunAsync();
@@ -114,7 +114,7 @@ namespace DataMigrationSystem.Services
             var regionsC = parsedBankruptContext.BankruptCompletedDtos.Select(x => x.Region).Distinct();
             foreach (var region in regionsC)
             {
-                await webBankruptContext.RegionCs.Upsert(new RegionC
+                await webBankruptContext.RegionSes.Upsert(new RegionS
                 {
                     Name = region
                 }).On(x => x.Name).RunAsync();
@@ -123,7 +123,7 @@ namespace DataMigrationSystem.Services
             var servicesC = parsedBankruptContext.BankruptCompletedDtos.Select(x => x.TypeOfService).Distinct();
             foreach (var service in servicesC)
             {
-                await webBankruptContext.TypeOfServiceCs.Upsert(new TypeOfServiceC
+                await webBankruptContext.TypeOfServiceSes.Upsert(new TypeOfServiceS
                 {
                     Name = service
                 }).On(x => x.Name).RunAsync();
