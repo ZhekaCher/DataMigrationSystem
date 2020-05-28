@@ -52,7 +52,7 @@ namespace DataMigrationSystem.Services
             Logger.Info("End of migration");
             await using var parsedAnnouncementGoszakupContext = new ParsedAnnouncementGoszakupContext();
             await parsedAnnouncementGoszakupContext.Database.ExecuteSqlRawAsync(
-            "truncate table trading_floor.announcement_goszakup restart identity cascade;");
+            "truncate table avroradata.announcement_goszakup restart identity cascade;");
             Logger.Info("Truncated");
         }
 

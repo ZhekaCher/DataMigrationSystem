@@ -50,7 +50,7 @@ namespace DataMigrationSystem.Services
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
             await using var parsedLotGoszakupContext = new ParsedLotGoszakupContext();
-            await parsedLotGoszakupContext.Database.ExecuteSqlRawAsync("truncate table trading_floor.lot_goszakup restart identity cascade;");
+            // await parsedLotGoszakupContext.Database.ExecuteSqlRawAsync("truncate table avroradata.lot_goszakup restart identity cascade;");
             Logger.Info("Truncated");
         }
 
@@ -60,33 +60,35 @@ namespace DataMigrationSystem.Services
 
             await using var webLotContext = new WebLotContext();
             await using var parsedLotGoszakupContext = new ParsedLotGoszakupContext();
-            await using var parsedAnnouncementGoszakupContext = new ParsedAnnouncementGoszakupContext();
-            foreach (var dto in parsedLotGoszakupContext.LotGoszakupDtos.Where(x =>
-                x.Id % NumOfThreads == threadNum))
-            {
-                var dtoIns = DtoToWeb(dto);
-                dtoIns.IdTf = _sTradingFloorId;
-                try
+            
+                var parsedLotGoszakupDtos =
+                    parsedLotGoszakupContext.LotGoszakupDtos.Where(x => x.Id % NumOfThreads == threadNum);
+                foreach (var dto in parsedLotGoszakupDtos)
                 {
-                    await webLotContext.Lots.Upsert(dtoIns).On(x => new {x.IdLot, x.IdTf}).RunAsync();
-                }
-                catch (Exception e)
-                {
-                    if (e.Message.Contains("violates foreign key"))
+                    var dtoIns = DtoToWeb(dto);
+                    dtoIns.IdTf = _sTradingFloorId;
+                    try
                     {
-                        // Logger.Warn($"Message:|{e.Message}|; IdContract:|{temp.IdContract}|;");
+                        await webLotContext.Lots.Upsert(dtoIns).On(x => new {x.IdLot, x.IdTf}).RunAsync();
                     }
-                    else
+                    catch (Exception e)
                     {
-                        Logger.Error(
-                            $"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|; IdLot:|{dtoIns.IdLot}|; Id:|{dtoIns.Id}|");
-                        Program.NumOfErrors++;
+                        if (e.Message.Contains("violates foreign key"))
+                        {
+                            // Logger.Warn($"Message:|{e.Message}|; IdContract:|{temp.IdContract}|;");
+                        }
+                        else
+                        {
+                            Logger.Error(
+                                $"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|; IdLot:|{dtoIns.IdLot}|; Id:|{dtoIns.Id}|");
+                            Program.NumOfErrors++;
+                        }
                     }
-                }
 
-                lock (_lock)
-                    Logger.Trace($"Left {--_total}");
-            }
+                    lock (_lock)
+                        Logger.Trace($"Left {--_total}");
+                }
+            
 
             Logger.Info($"Completed thread at {_total}");
         }

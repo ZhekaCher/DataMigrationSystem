@@ -14,6 +14,7 @@ namespace DataMigrationSystem.Services
     {
         public BankruptMigrationService(int numOfThreads = 1)
         {
+            
             NumOfThreads = numOfThreads;
             using var parsedBankruptsAtStageContext = new ParsedBankruptContext();
         }
