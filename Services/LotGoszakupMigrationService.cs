@@ -60,9 +60,9 @@ namespace DataMigrationSystem.Services
 
             await using var webLotContext = new WebLotContext();
             await using var parsedLotGoszakupContext = new ParsedLotGoszakupContext();
-            try
-            {
-                var parsedLotGoszakupDtos = parsedLotGoszakupContext.LotGoszakupDtos.Where(x=>x.Id%NumOfThreads == threadNum);
+            
+                var parsedLotGoszakupDtos =
+                    parsedLotGoszakupContext.LotGoszakupDtos.Where(x => x.Id % NumOfThreads == threadNum);
                 foreach (var dto in parsedLotGoszakupDtos)
                 {
                     var dtoIns = DtoToWeb(dto);
@@ -84,15 +84,11 @@ namespace DataMigrationSystem.Services
                             Program.NumOfErrors++;
                         }
                     }
-                
+
                     lock (_lock)
                         Logger.Trace($"Left {--_total}");
                 }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+            
 
             Logger.Info($"Completed thread at {_total}");
         }
