@@ -20,7 +20,8 @@ namespace DataMigrationSystem.Models.Web.Avroradata
     [Table("hh_vacancies")]
     public class VacancyHh
     {
-        [Key][Column("id")] public long Id { get; set; }
+        [Key,DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("id")] public long Id { get; set; }
         [Column("vac_title")] public string VacTitle { get; set; }
         [Column("salary")] public string Salary { get; set; }
         [Column("region")] public string Region { get; set; }
