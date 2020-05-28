@@ -79,7 +79,6 @@ namespace DataMigrationSystem.Services
                     Id = distinct.KrpCode,
                     NameKz = distinct.KrpNameKz,
                     NameRu = distinct.KrpNameRu,
-                                    
                 }).On(x=>x.Id).RunAsync();
             }
             var secondOkeds = parsedCompanyContext.CompanyDtos.Select(x => new {x.SecondOkedCode}).Distinct();
@@ -111,6 +110,18 @@ namespace DataMigrationSystem.Services
                         NameKz = distinct.ActivityNameKz,
                         NameRu = distinct.ActivityNameRu,
                     }).On(x=>x.Id).RunAsync();
+            }
+            var katos = parsedCompanyContext.CompanyDtos
+                .Select(x => new {x.KatoCode, x.SettlementNameKz, x.SettlementNameRu}).Distinct();
+            foreach (var distinct in katos)
+            {
+                await webCompanyContext.Katos.Upsert(
+                    new Kato
+                    {
+                        Id = distinct.KatoCode,
+                        NameKz = distinct.SettlementNameKz,
+                        NameRu = distinct.SettlementNameRu,
+                    }).On(x=>x.Id).NoUpdate().RunAsync();
             }
         }
         private Company DtoToEntity(CompanyDto dto)
