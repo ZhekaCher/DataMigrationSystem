@@ -49,4 +49,36 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("name_ru")] public string NameRu { get; set; }
         [Column("comp_name")] public string CompName { get; set; }
     }
+    [Table("hh_resume")]
+    public class HhResume
+    {
+        [Key,DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("id")] public long Id { get; set; }
+        [Column("resume_id")] public long ResumeId { get; set; }
+        [Column("gender")] public string Gender { get; set; }
+        [Column("age")] public string Age { get; set; }
+        [Column("address")] public string Address { get; set; }
+        [Column("job")] public string Job { get; set; }
+        [Column("salary")] public string Salary { get; set; }
+        [Column("general_exp")] public string GeneralExp { get; set; }
+        [Column("work_for")] public string WorkFor { get; set; }
+        [Column("skills")] public string Skills { get; set; }
+        [Column("relevance_date")] public DateTime RelevanceDate { get; set; }
+        [Column("url")] public string Url { get; set; }
+        [Column("update_date")] public DateTime UpdateDate { get; set; }
+    }
+    [Table("hh_resume_bin")]
+    public class HhResumeBin
+    {
+        [Key,DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("id")] public long Id { get; set; }
+        [Column("resume_id")] public long ResumeId { get; set; }
+        [Column("bin")] public long Bin { get; set; }
+        [Column("work_place")] public string WorkPlace { get; set; }
+        [Column("work_interval")] public string WorkInterval { get; set; }
+        [Column("work_duration")] public string WorkDuration { get; set; }
+        [Column("work_pos")] public string WorkPos { get; set; }
+        [Column("relevance_date")] public DateTime RelevanceDate { get; set; }
+        [Column("update_date")] public DateTime UpdateDate { get; set; }
+    }
 }

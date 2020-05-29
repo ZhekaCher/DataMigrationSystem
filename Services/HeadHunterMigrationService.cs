@@ -17,6 +17,8 @@ namespace DataMigrationSystem.Services
         private int _total;
         private int _total2;
         private int _total3;
+        private int _total4;
+        private int _total5;
         private readonly object _lock = new object();
 
         public HeadHunterMigrationService(int numOfThreads = 10)
@@ -26,6 +28,8 @@ namespace DataMigrationSystem.Services
             _total = parsedHeadHunterContext.CompanyHhDtos.Count();
             _total2 = parsedHeadHunterContext.VacancyHhDtos.Count();
             _total3 = parsedHeadHunterContext.CompBinhhDtos.Count();
+            _total4 = parsedHeadHunterContext.HhResumeDtos.Count();
+            _total5 = parsedHeadHunterContext.HhResumeBinDtos.Count();
         }
 
         protected override Logger InitializeLogger()
@@ -103,6 +107,54 @@ namespace DataMigrationSystem.Services
                 lock (_lock)
                 {
                     Logger.Trace($"Left {--_total3}");
+                }
+            }
+
+            if (_total4 > 0 && _total5 > 0)
+            {
+                foreach (var dto in parsedHeadHunterContext.HhResumeDtos.Where(x => x.Id % NumOfThreads == threadNum))
+                {
+                    var hhResume = new HhResume
+                    {
+                        ResumeId = dto.ResumeId,
+                        Gender = dto.Gender,
+                        Age = dto.Age,
+                        Address = dto.Address,
+                        Job = dto.Job,
+                        Salary = dto.Salary,
+                        GeneralExp = dto.GeneralExp,
+                        WorkFor = dto.WorkFor,
+                        Skills = dto.Skills,
+                        RelevanceDate = dto.RelevanceDate,
+                        Url = dto.Url,
+                        UpdateDate = dto.UpdateDate
+                    };
+                    await webHeadHunterContext.HhResumes.Upsert(hhResume).On(x => x.ResumeId).RunAsync();
+                    lock (_lock)
+                    {
+                        Logger.Trace($"Left {--_total4}");
+                    }
+                }
+
+                foreach (var dto in parsedHeadHunterContext.HhResumeBinDtos.Where(x => x.Id % NumOfThreads == threadNum))
+                {
+                    var hhResumeBin = new HhResumeBin
+                    {
+                        ResumeId = dto.ResumeId,
+                        Bin =  dto.Bin,
+                        WorkPlace = dto.WorkPlace,
+                        WorkInterval = dto.WorkInterval,
+                        WorkDuration = dto.WorkDuration,
+                        WorkPos = dto.WorkPos,
+                        RelevanceDate = dto.RelevanceDate,
+                        UpdateDate = dto.UpdateDate
+                    };
+
+                    await webHeadHunterContext.HhResumeBins.Upsert(hhResumeBin).On(x => new {x.ResumeId, x.Bin}).RunAsync();
+                    lock (_lock)
+                    {
+                        Logger.Trace($"Left {--_total5}");
+                    }
                 }
             }
         }
