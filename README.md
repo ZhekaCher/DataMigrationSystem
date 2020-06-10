@@ -22,7 +22,6 @@
 * ParticipantNadloc
 * Pedophiles
 * ProducersSk
-* ReliableSk
 * SamrukParticipants
 * TaxDebt
 * TaxDetails
