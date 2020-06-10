@@ -49,7 +49,12 @@ namespace DataMigrationSystem.Services
                 select taxpayersDto;
             foreach (var taxpayersDto in taxpayersDtos)
             {
-                
+                var taxpayer = await DtoToEntity(taxpayersDto);
+                await webTaxpayerContext.Taxpayers.Upsert(taxpayer).On(x => new {taxpayer.Uin, taxpayer.TypeId}).RunAsync();
+                lock (_lock)
+                {
+                    Logger.Trace(_total--);
+                }
             }
         }
 
