@@ -51,10 +51,10 @@ namespace DataMigrationSystem.Services
             await using var webCompanyDirectorContext2 = new WebCompanyDirectorContext();
             var oldest = parsedDirectorGoszakupContext.DirectorGoszakupDtos.OrderBy(x => x.Relevance).First().Relevance;
             
-            Logger.Info("Removing old information");
-            webCompanyDirectorContext.RemoveRange(webCompanyDirectorContext.CompanyDirectors.Where(x => x.RelevanceDate < oldest && x.DataSource==2));
-            webCompanyDirectorContext.SaveChanges();
-            Logger.Info("Removing ended");
+            // Logger.Info("Removing old information");
+            // webCompanyDirectorContext.RemoveRange(webCompanyDirectorContext.CompanyDirectors.Where(x => x.RelevanceDate < oldest && x.DataSource==2));
+            // webCompanyDirectorContext.SaveChanges();
+            // Logger.Info("Removing ended");
 
             await parsedDirectorGoszakupContext.Database.ExecuteSqlRawAsync(
                 "truncate table avroradata.director_goszakup restart identity cascade;");
@@ -91,7 +91,7 @@ namespace DataMigrationSystem.Services
                 {
                     Logger.Trace($"Moving: {dto.Bin}");
                     await webCompanyDirectorContext.CompanyDirectors.Upsert(temp)
-                        .On(x => new {x.CompanyBin, x.DirectorIin}).RunAsync();
+                        .On(x => x.CompanyBin).RunAsync();
                 }
                 catch (Exception e)
                 {
