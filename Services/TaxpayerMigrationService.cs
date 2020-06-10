@@ -10,12 +10,12 @@ using NLog;
 
 namespace DataMigrationSystem.Services
 {
-    public class TaxpayerMigrationSystem : MigrationService
+    public class TaxpayerMigrationService : MigrationService
     { 
         private int _total;
         private readonly object _lock = new object();
 
-        public TaxpayerMigrationSystem(int numOfThreads = 10)
+        public TaxpayerMigrationService(int numOfThreads = 10)
         {
             NumOfThreads = numOfThreads;
             using var parsedTaxpayerContext = new ParsedTaxpayerContext();
@@ -66,7 +66,7 @@ namespace DataMigrationSystem.Services
                 .Select(x => x.Type).Distinct();
             foreach (var typeOfService in typeOfServices)
             {
-                await webTaxpayerContext.TypeOfServices.Upsert(new TypeOfService
+                await webTaxpayerContext.TypeOfServices.Upsert(new TaxpayerType
                 {
                     Name = typeOfService
                 }).On(x => x.Name).RunAsync();

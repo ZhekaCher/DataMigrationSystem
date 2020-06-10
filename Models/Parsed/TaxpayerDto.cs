@@ -9,6 +9,7 @@ namespace DataMigrationSystem.Models.Parsed
     {
         [Column("rnn")] public long? Rnn{get; set;}
         [Column("full_name")] public string FullName{get; set;}
+        [Key]
         [Column("uin")] public long? Uin{get; set;}
         [Column("date_reg")] public DateTime? DateReg{get; set;}
         [Column("date_unreg")] public DateTime? DateUnreg{get; set;}

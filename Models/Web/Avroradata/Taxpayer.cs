@@ -19,10 +19,10 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("type_id")] public int? TypeId{get; set;}
     }
     
-    [Table("type_of_service")]
-    public class TypeOfService
+    [Table("taxpayer_type")]
+    public class TaxpayerType
     {
-        [Key] [Column("i")] public long? I{get; set;}
+        [Key] [Column("id")] public long? I{get; set;}
         [Column("name")] public string Name{get; set;}
     }
 }
