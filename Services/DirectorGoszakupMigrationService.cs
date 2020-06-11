@@ -112,7 +112,7 @@ namespace DataMigrationSystem.Services
             }
 
 
-            Logger.Info($"Completed thread at {_total}");
+            // Logger.Info($"Completed thread at {_total}");
         }
 
 
