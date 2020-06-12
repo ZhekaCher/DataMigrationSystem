@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -8,6 +10,7 @@ using System.Threading.Tasks;
 using DataMigrationSystem.Services;
 using NLog;
 using NLog.Config;
+using NLog.Targets;
 using Npgsql;
 
 
@@ -69,6 +72,7 @@ namespace DataMigrationSystem
                               " \n");
             Console.Title = "Data Migration System";
             LogManager.Configuration = new XmlLoggingConfiguration("NLog.config");
+            LogManager.Configuration.Variables["sourceAddress"] = GetLocalIpAddress();
             _logger = LogManager.GetCurrentClassLogger();
             try
             {
@@ -81,6 +85,18 @@ namespace DataMigrationSystem
                 _logger.Fatal(e);
                 throw;
             }
+        }
+        private static string GetLocalIpAddress()
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+            throw new Exception("No network adapters with an IPv4 address in the system!");
         }
     }
 }
