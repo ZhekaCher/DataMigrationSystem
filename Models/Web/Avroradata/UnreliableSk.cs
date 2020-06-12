@@ -10,9 +10,9 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("reason")]
         public string Reason { get; set; }
         [Column("adding_date")]
-        public DateTime AddingDate { get; set; }
+        public DateTime? AddingDate { get; set; }
         [Column("unreliable_date")]
-        public DateTime UnreliableDate { get; set; }
+        public DateTime? UnreliableDate { get; set; }
         [Column("relevance_date")]
         public DateTime RelevanceDate { get; set; }
         

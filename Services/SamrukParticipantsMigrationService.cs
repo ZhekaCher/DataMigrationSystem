@@ -86,8 +86,7 @@ namespace DataMigrationSystem.Services
             await webDisabilitiesOrgSkContext.SaveChangesAsync();
             await webProducerSkContext.SaveChangesAsync();
             
-            //await parsedSamrukParticipantsContext.Database.ExecuteSqlRawAsync(
-           //  "truncate avroradata.samruk_all_participants restart identity");
+            await parsedSamrukParticipantsContext.Database.ExecuteSqlRawAsync("truncate avroradata.samruk_all_participants restart identity");
         }
 
         private SamrukParticipants DtoToWeb(SamrukParticipantsDto samrukParticipantsDto)
