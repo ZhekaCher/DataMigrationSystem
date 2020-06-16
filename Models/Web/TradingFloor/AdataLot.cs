@@ -15,9 +15,9 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         [Column("announcement_id")]
         public long AnnouncementId { get; set; }
         [Column("status_id")]
-        public long StatusId { get; set; }
+        public long? StatusId { get; set; }
         [Column("method_id")]
-        public long MethodId { get; set; }
+        public long? MethodId { get; set; }
         [Column("source_id")]
         public long SourceId { get; set; }
         [Column("application_start_date")]

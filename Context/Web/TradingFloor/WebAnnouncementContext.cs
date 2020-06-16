@@ -21,11 +21,5 @@ namespace DataMigrationSystem.Context.Web.TradingFloor
         {
             modelBuilder.HasDefaultSchema("trading_floor");
         }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql(
-                "Server = 192.168.1.25; Database = avroradata; Port=5432; User ID = administrator; Password = Z4P6PjEHnJ5nPT; Search Path = adata_tender; Integrated Security=true; Pooling=true;");
-        }
     }
 }

@@ -15,9 +15,9 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         [Column("title")]
         public string Title { get; set; }
         [Column("status_id")]
-        public long StatusId { get; set; }
+        public long? StatusId { get; set; }
         [Column("method_id")]
-        public long MethodId { get; set; }
+        public long? MethodId { get; set; }
         [Column("source_id")]
         public long SourceId { get; set; }
         [Column("application_start_date")]
@@ -36,6 +36,9 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         public double LotsAmount { get; set; }
         [NotMapped]
         public List<AdataLot> Lots = new List<AdataLot>();
+        [NotMapped] 
+        public AnnouncementContact AnnouncementContact;
+
     }
     [Table("announcement_documentations")]
     public class AnnouncementDocumentation
