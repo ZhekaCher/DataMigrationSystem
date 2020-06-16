@@ -50,37 +50,37 @@ namespace DataMigrationSystem.Services
             Logger.Info("Started Thread");
             await using var webLotContext = new WebLotContext();
             await using var parsedLotNadlocContext = new ParsedLotNadlocContext();
-            var lotDtos =  parsedLotNadlocContext.NadlocLotsDtos.Where(x => x.TenderId % NumOfThreads == threadNum).OrderBy(x=>x.TenderId)
-                .Select(x => new Lot
-                {
-                    IdTf = _sTradingFloorId,
-                    IdLot = x.Id,
-                    IdAnno = x.TenderId,
-                    NumberLot = x.LotNumber.ToString(),
-                    NameRu = x.ScpDescription,
-                    Quantity = x.Quantity == 0 ? 1 : x.Quantity,
-                    Price = x.FullPrice/(x.Quantity == 0 ? 1 : x.Quantity),
-                    Total = x.FullPrice,
-                    RelevanceDate = x.RelevanceDate,
-                    DeliveryAddress = x.DeliveryPlace
-                });
+            // var lotDtos =  parsedLotNadlocContext.NadlocLotsDtos.Where(x => x.TenderId % NumOfThreads == threadNum).OrderBy(x=>x.TenderId)
+                // .Select(x => new Lot
+                // {
+                    // IdTf = _sTradingFloorId,
+                    // IdLot = x.Id,
+                    // IdAnno = x.TenderId,
+                    // NumberLot = x.LotNumber.ToString(),
+                    // NameRu = x.ScpDescription,
+                    // Quantity = x.Quantity == 0 ? 1 : x.Quantity,
+                    // Price = x.FullPrice/(x.Quantity == 0 ? 1 : x.Quantity),
+                    // Total = x.FullPrice,
+                    // RelevanceDate = x.RelevanceDate,
+                    // DeliveryAddress = x.DeliveryPlace
+                // });
             long tenderId = 0;
             
-            foreach (var dto in lotDtos)
-            {
-                if (tenderId != dto.IdAnno)
-                {
-                    tenderId = dto.IdAnno;
-                    webLotContext.Lots.RemoveRange(webLotContext.Lots.Where(x=>x.IdAnno==dto.IdAnno));
-                    await webLotContext.SaveChangesAsync();
+            // foreach (var dto in lotDtos)
+            // {
+                // if (tenderId != dto.IdAnno)
+                // {
+                    // tenderId = dto.IdAnno;
+                    // webLotContext.Lots.RemoveRange(webLotContext.Lots.Where(x=>x.IdAnno==dto.IdAnno));
+                    // await webLotContext.SaveChangesAsync();
 
-                }
+                // }
 
-                await webLotContext.Lots.AddAsync(dto);
-                await webLotContext.SaveChangesAsync();
-                lock (_lock)
-                    Logger.Trace($"Left {--_total}");
-            }
+                // await webLotContext.Lots.AddAsync(dto);
+                // await webLotContext.SaveChangesAsync();
+                // lock (_lock)
+                    // Logger.Trace($"Left {--_total}");
+            // }
         }
     }
 }

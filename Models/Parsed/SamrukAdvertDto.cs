@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataMigrationSystem.Models.Parsed
@@ -43,5 +44,6 @@ namespace DataMigrationSystem.Models.Parsed
 		[Column("participation_id")] public string ParticipationId{get; set;}
 		[Column("time_history_begin_date")] public DateTime? TimeHistoryBeginDate{get; set;}
 		[Column("time_history_end_date")] public DateTime? TimeHistoryEndDate{get; set;}
+		public List<SamrukLotsDto> Lots { get; set; }
     }
 }

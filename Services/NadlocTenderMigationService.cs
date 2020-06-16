@@ -12,12 +12,12 @@ using NLog;
 
 namespace DataMigrationSystem.Services
 {
-    public class NadlocMigrationService : MigrationService
+    public class NadlocTenderMigationService : MigrationService
     {
         private int _total;
         private readonly object _lock = new object();
 
-        public NadlocMigrationService(int numOfThreads = 10)
+        public NadlocTenderMigationService(int numOfThreads = 10)
         {
             NumOfThreads = numOfThreads;
         }
@@ -68,6 +68,7 @@ namespace DataMigrationSystem.Services
                     else
                     {
                         await webTenderContext.AdataAnnouncements.AddAsync(announcement);
+                        announcement.Lots.ForEach(x=>x.AnnouncementId = announcement.Id);
                         await webTenderContext.AdataLots.AddRangeAsync(announcement.Lots);
                         await webTenderContext.AnnouncementContacts.AddAsync(
                             new AnnouncementContact {
@@ -127,7 +128,7 @@ namespace DataMigrationSystem.Services
             }
             if (dto.PurchaseMethod != null)
             {
-                var method = await  webTenderContext.Methods.FirstOrDefaultAsync(x => x.Name == dto.Status);
+                var method = await  webTenderContext.Methods.FirstOrDefaultAsync(x => x.Name == dto.PurchaseMethod);
                 if (method != null) 
                     announcement.MethodId = method.Id;
             }
@@ -136,7 +137,7 @@ namespace DataMigrationSystem.Services
             {
                 var lot = new AdataLot
                 {
-                    AnnouncementId = announcement.Id,
+                    // AnnouncementId = announcement.Id,
                     Title = dtoLot.ScpDescription,
                     StatusId = announcement.StatusId,
                     MethodId = announcement.MethodId,
