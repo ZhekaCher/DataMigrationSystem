@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -32,6 +33,6 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("konkurs_doc_name")] public string KonkursDocName{get; set;}
         [Column("konkurs_doc_link")] public string KonkursDocLink{get; set;}
         [Column("id")] public long Id{get; set;}
-		
+        public List<LotNadlocDto> Lots { get; set; }
     }
 }
