@@ -12,12 +12,12 @@ using NLog;
 
 namespace DataMigrationSystem.Services
 {
-    public class NadlocMigrationService : MigrationService
+    public class GoszakupTenderMigrationService : MigrationService
     {
         private int _total;
         private readonly object _lock = new object();
 
-        public NadlocMigrationService(int numOfThreads = 10)
+        public GoszakupTenderMigrationService(int numOfThreads = 10)
         {
             NumOfThreads = numOfThreads;
         }
