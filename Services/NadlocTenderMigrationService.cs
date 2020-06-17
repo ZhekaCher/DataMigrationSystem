@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Web;
-using DataMigrationSystem.Context.Web.TradingFloor;
 using DataMigrationSystem.Models.Parsed;
 using DataMigrationSystem.Models.Web.TradingFloor;
 using Microsoft.EntityFrameworkCore;
@@ -12,12 +11,12 @@ using NLog;
 
 namespace DataMigrationSystem.Services
 {
-    public class NadlocTenderMigationService : MigrationService
+    public class NadlocTenderMigrationService : MigrationService
     {
-        private int _total;
+        private int _total = 0;
         private readonly object _lock = new object();
 
-        public NadlocTenderMigationService(int numOfThreads = 10)
+        public NadlocTenderMigrationService(int numOfThreads = 20)
         {
             NumOfThreads = numOfThreads;
         }
@@ -49,7 +48,6 @@ namespace DataMigrationSystem.Services
             var nadlocDtos = parsedAnnouncementNadlocContext.AnnouncementNadlocDtos
                 .Where(t => t.Id % NumOfThreads == threadNum)
                 .Include(x=>x.Lots);
-            _total = nadlocDtos.Count();
             foreach (var dto in nadlocDtos)
             {
                 var announcement = await DtoToWebAnnouncement(dto);
@@ -61,22 +59,16 @@ namespace DataMigrationSystem.Services
                     if (found != null)
                     {
                         webTenderContext.AdataLots.RemoveRange(found.Lots);
+                        await webTenderContext.SaveChangesAsync();
                         await webTenderContext.AdataLots.AddRangeAsync(announcement.Lots);
+                        await webTenderContext.SaveChangesAsync();
                         await webTenderContext.AdataAnnouncements.Upsert(announcement).On(x => new {x.SourceNumber, x.SourceId})
                             .RunAsync();
                     }
                     else
                     {
                         await webTenderContext.AdataAnnouncements.AddAsync(announcement);
-                        announcement.Lots.ForEach(x=>x.AnnouncementId = announcement.Id);
-                        await webTenderContext.AdataLots.AddRangeAsync(announcement.Lots);
-                        await webTenderContext.AnnouncementContacts.AddAsync(
-                            new AnnouncementContact {
-                                PhoneNumber = dto.ContactPhone,
-                                EmailAddress = dto.ContactEmail,
-                                AnnouncementId = announcement.Id
-                            }
-                        );
+                        await webTenderContext.SaveChangesAsync();
                     }
                 }
                 catch (Exception e)
@@ -85,9 +77,8 @@ namespace DataMigrationSystem.Services
                 }
 
                 lock (_lock)
-                    Logger.Trace($"Left {--_total}");
+                    Logger.Trace($"Left {++_total}");
             }
-
             Logger.Info("Completed thread");
             
         }
@@ -96,13 +87,13 @@ namespace DataMigrationSystem.Services
         {
             await using var webTenderContext = new AdataTenderContext();
             await using var parsedAnnouncementNadlocContext = new ParsedNadlocContext();
-            var units = parsedAnnouncementNadlocContext.LotNadlocDtos
-                .Select(x=>x.Unit)
-                .Distinct()
-                .Select(x=> new Measure {
-                    Name = x
-                });
+            var units = parsedAnnouncementNadlocContext.LotNadlocDtos.Select(x=> new Measure {Name = x.Unit}).Distinct();
             await webTenderContext.Measures.UpsertRange(units).On(x => x.Name).RunAsync();
+            var truCodes = parsedAnnouncementNadlocContext.LotNadlocDtos.Select(x=> new TruCode {Code = x.ScpCode, Name = x.ScpDescription}).Distinct();
+            foreach (var truCode in truCodes)
+            {
+                await webTenderContext.TruCodes.UpsertRange(truCode).On(x => x.Code).RunAsync();
+            }
         }
         private async Task<AdataAnnouncement> DtoToWebAnnouncement(AnnouncementNadlocDto dto)
         {
@@ -118,8 +109,11 @@ namespace DataMigrationSystem.Services
                 SourceLink =  dto.DetailsLink,
                 LotsAmount =  dto.FullPrice ?? 0,
                 LotsQuantity = dto.LotAmount ?? 0,
-                SourceId = 3
+                SourceId = 3,
+                EmailAddress = dto.ContactEmail,
+                PhoneNumber = dto.ContactPhone
             };
+            announcement.SourceLink = $"http://reestr.nadloc.kz/ru/protocol/announce/{dto.FullId}";
             if (dto.Status != null)
             {
                 var status = await webTenderContext.Statuses.FirstOrDefaultAsync(x => x.Name == dto.Status);
@@ -128,11 +122,18 @@ namespace DataMigrationSystem.Services
             }
             if (dto.PurchaseMethod != null)
             {
-                var method = await  webTenderContext.Methods.FirstOrDefaultAsync(x => x.Name == dto.PurchaseMethod);
-                if (method != null) 
+                var method = await webTenderContext.Methods.FirstOrDefaultAsync(x => x.Name == dto.PurchaseMethod);
+                if (method != null)
                     announcement.MethodId = method.Id;
             }
-            
+            announcement.Documentations = new List<AnnouncementDocumentation>
+            {
+                new AnnouncementDocumentation
+                {
+                    Name = dto.KonkursDocName, SourceLink = dto.KonkursDocLink, DocumentationTypeId = 3
+                }
+            };
+            announcement.Lots = new List<AdataLot>();
             foreach (var dtoLot in dto.Lots)
             {
                 var lot = new AdataLot
@@ -147,12 +148,10 @@ namespace DataMigrationSystem.Services
                     CustomerBin = announcement.CustomerBin ,
                     SupplyLocation = dtoLot.DeliveryPlace,
                     TenderLocation = null, 
-                    TruCode = null,
                     Characteristics = dtoLot.TruDescription,
                     Quantity = dtoLot.Quantity ?? 0,
                     TotalAmount = dtoLot.FullPrice ?? 0,
                     Terms = dtoLot.RequiredContractTerm,
-                    SourceLink = dtoLot.ContractDocLink
                 };
                 if (lot.Quantity > 0 && lot.TotalAmount > 0)
                 {
@@ -164,6 +163,23 @@ namespace DataMigrationSystem.Services
                     if (measure != null) 
                         lot.MeasureId = measure.Id;
                 }
+                if (dtoLot.ScpCode != null)
+                {
+                    var tru = await webTenderContext.TruCodes.FirstOrDefaultAsync(x => x.Code == dtoLot.ScpCode);
+                    if (tru != null)
+                        lot.TruId = tru.Id;
+                }
+                lot.Documentations = new List<LotDocumentation>
+                {
+                    new LotDocumentation
+                    {
+                        Name = dtoLot.TechDocName, SourceLink = dtoLot.TechDocLink, DocumentationTypeId = 1
+                    },
+                    new LotDocumentation
+                    {
+                        Name = dtoLot.ContractDocName, SourceLink = dtoLot.ContractDocLink, DocumentationTypeId = 2
+                    }
+                };
                 announcement.Lots.Add(lot);
             }
             return announcement;

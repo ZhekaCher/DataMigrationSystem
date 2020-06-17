@@ -45,5 +45,6 @@ namespace DataMigrationSystem.Models.Parsed
 		[Column("time_history_begin_date")] public DateTime? TimeHistoryBeginDate{get; set;}
 		[Column("time_history_end_date")] public DateTime? TimeHistoryEndDate{get; set;}
 		public List<SamrukLotsDto> Lots { get; set; }
+		public List<SamrukFilesDto> Documentations { get; set; }
     }
 }

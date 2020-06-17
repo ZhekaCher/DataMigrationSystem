@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataMigrationSystem.Models.Parsed
@@ -16,6 +17,7 @@ namespace DataMigrationSystem.Models.Parsed
 		[Column("tru_detail_russian")] public string TruDetailRussian{get; set;}
 		[Column("tru_detail_kazakh")] public string TruDetailKazakh{get; set;}
 		[Column("tru_detail_english")] public string TruDetailEnglish{get; set;}
+		[Column("additional_characteristics")] public string AdditionalCharacteristics{get; set;}
 		[Column("acceptance_begin_datetime")] public DateTime? AcceptanceBeginDatetime{get; set;}
 		[Column("acceptance_end_datetime")] public DateTime? AcceptanceEndDatetime{get; set;}
 		[Column("customer_bin")] public string CustomerBin{get; set;}
@@ -64,5 +66,6 @@ namespace DataMigrationSystem.Models.Parsed
 		[Column("additional_price_acceptance_stage")] public string AdditionalPriceAcceptanceStage{get; set;}
 		[Column("can_submit_commercial_offer")] public string CanSubmitCommercialOffer{get; set;}
 		[Column("count")] public string Count{get; set;}
+		public List<SamrukFilesDto> Documentations { get; set; }
     }
 }

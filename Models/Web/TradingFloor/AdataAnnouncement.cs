@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataMigrationSystem.Models.Web.TradingFloor
@@ -7,7 +8,8 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
     [Table("announcements")]
     public class AdataAnnouncement
     {
-
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id")]
         public long Id { get; set; }
         [Column("source_number")]
@@ -34,37 +36,32 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         public long LotsQuantity { get; set; }
         [Column("lots_amount")]
         public double LotsAmount { get; set; }
-        [NotMapped]
-        public List<AdataLot> Lots = new List<AdataLot>();
-        [NotMapped] 
-        public AnnouncementContact AnnouncementContact;
+        [Column("email_address")]
+        public string EmailAddress { get; set; }
+        [Column("phone_number")]
+        public string PhoneNumber { get; set; }
+        public List<AdataLot> Lots { get; set; }
+        public List<AnnouncementDocumentation> Documentations { get; set; }
 
     }
     [Table("announcement_documentations")]
     public class AnnouncementDocumentation
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id")]
         public long Id { get; set; }
         [Column("documentation_type_id")]
-        public long DocumentationTypeId { get; set; }
+        public long? DocumentationTypeId { get; set; }
         [Column("location")]
         public string Location { get; set; }
         [Column("relevance_date")]
-        public DateTime? RelevanceDate { get; set; } = DateTime.Now;
+        public DateTime RelevanceDate { get; set; } = DateTime.Now;
         [Column("announcement_id")]
         public long AnnouncementId { get; set; }
-    }
-
-    [Table("announcement_contacts")]
-    public class AnnouncementContact
-    {
-        [Column("id")]
-        public long Id { get; set; }
-        [Column("email_address")]
-        public string EmailAddress { get; set; }
-        [Column("phone_number")]
-        public string PhoneNumber { get; set; }
-        [Column("announcement_id")]
-        public long AnnouncementId { get; set; }
+        [Column("source_link")]
+        public string SourceLink { get; set; }
+        [Column("name")]
+        public string Name { get; set; }
     }
 }
