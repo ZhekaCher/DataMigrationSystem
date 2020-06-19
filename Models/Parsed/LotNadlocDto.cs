@@ -19,9 +19,11 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("local_requirements")] public string LocalRequirements{get; set;}
         [Column("required_contract_term")] public string RequiredContractTerm{get; set;}
         [Column("tech_doc_link")] public string TechDocLink{get; set;}
+        [Column("tech_doc_name")] public string TechDocName{get; set;}
         [Column("contract_doc_link")] public string ContractDocLink{get; set;}
+        [Column("contract_doc_name")] public string ContractDocName{get; set;}
         [Column("lot_number")] public long? LotNumber{get; set;}
-        [Column("tender_id")] public long TenderId{get; set;}
+        [Column("tender_id")] public string TenderId{get; set;}
         [Column("relevance_date")] public DateTime? RelevanceDate{get; set;}
 		
     }

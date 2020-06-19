@@ -111,7 +111,7 @@ namespace DataMigrationSystem.Services
                     Logger.Trace($"Left {--_total}");
             }
 
-            Logger.Info($"Completed thread at {_total}");
+            // Logger.Info($"Completed thread at {_total}");
         }
 
         private UnscrupulousGoszakup DtoToWeb(UnscrupulousGoszakupDto unscrupulousGoszakupDto)

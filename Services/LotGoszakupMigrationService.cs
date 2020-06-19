@@ -90,7 +90,7 @@ namespace DataMigrationSystem.Services
                 }
             
 
-            Logger.Info($"Completed thread at {_total}");
+            // Logger.Info($"Completed thread at {_total}");
         }
 
         private static Lot DtoToWeb(LotGoszakupDto lotGoszakupDto)

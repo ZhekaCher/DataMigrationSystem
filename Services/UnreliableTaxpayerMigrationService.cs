@@ -59,7 +59,10 @@ namespace DataMigrationSystem.Services
                     DocumentNumber = dto.DocumentNumber,
                     BinCompany = dto.BinCompany
                 };
-            await webUnreliableTaxpayerContext.UnreliableTaxpayers.UpsertRange(taxpayers).On(x => new {x.BinCompany, x.IdListType}).RunAsync();
+            foreach (var taxpayer in taxpayers)
+            {
+                await webUnreliableTaxpayerContext.UnreliableTaxpayers.Upsert(taxpayer).On(x => new {x.BinCompany, x.IdListType}).RunAsync();
+            }
         }
     }
 }

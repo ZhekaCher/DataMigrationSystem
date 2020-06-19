@@ -15,7 +15,6 @@ using Npgsql;
 
 namespace DataMigrationSystem
 {
-    
     //
     //                       _oo0oo_
     //                      o8888888o
@@ -25,25 +24,24 @@ namespace DataMigrationSystem
     //                    ___/`---'\___
     //                  .' \\|     |// '.
     //                 / \\|||  :  |||// \
-       //             / _||||| -:- |||||- \
-       //            |   | \\\  -  /// |   |
-       //            | \_|  ''\---/''  |_/ |
-       //            \  .-\__  '-'  ___/-. /
-       //          ___'. .'  /--.--\  `. .'___
-       //       ."" '<  `.___\_<|>_/___.' >' "".
-       //      | | :  `- \`.;`\ _ /`;.`/ - ` : | |
-       //      \  \ `_.   \_ __\ /__ _/   .-` /  /
-       //  =====`-.____`.___ \_____/___.-`___.-'=====
-       //                       `=---='
-       //
-       //
-       //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      //
-      //            God Bless         No Bugs
-      //
-    
-    
-    
+    //             / _||||| -:- |||||- \
+    //            |   | \\\  -  /// |   |
+    //            | \_|  ''\---/''  |_/ |
+    //            \  .-\__  '-'  ___/-. /
+    //          ___'. .'  /--.--\  `. .'___
+    //       ."" '<  `.___\_<|>_/___.' >' "".
+    //      | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+    //      \  \ `_.   \_ __\ /__ _/   .-` /  /
+    //  =====`-.____`.___ \_____/___.-`___.-'=====
+    //                       `=---='
+    //
+    //
+    //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //
+    //            God Bless         No Bugs
+    //
+
+
     /// @author Yevgeniy Cherdantsev
     /// @date 24.02.2020 13:34:45
     /// @version 1.0
@@ -61,6 +59,12 @@ namespace DataMigrationSystem
         internal MigrationSystem(string[] args)
         {
             _logger = LogManager.GetCurrentClassLogger();
+            
+            var argsString = "";
+            foreach (var s in args)
+                argsString += s + " ";
+            argsString = argsString.Trim();
+            _logger.Info($"Running using '{argsString}' arguments");
 
             _args = ParseArguments(args);
             ProceedArguments();
@@ -85,10 +89,11 @@ namespace DataMigrationSystem
                     }
                     else
                     {
-                        temp = parserMonitoringContext.ParserMonitorings.FirstOrDefault(x => x.Active == true  && x.Name.Equals(migration));
+                        temp = parserMonitoringContext.ParserMonitorings.FirstOrDefault(x =>
+                            x.Active == true && x.Name.Equals(migration));
                     }
 
-                    
+
                     if (temp == null)
                     {
                         _logger.Warn($"This parser is unactive or hasn't been parsed yet: {migration}");
@@ -168,7 +173,7 @@ namespace DataMigrationSystem
 
             var conf = new Dictionary<ConfigurationElements, object>();
             conf.Add(ConfigurationElements.Threads, null);
-            
+
 
             return conf;
         }
@@ -258,6 +263,7 @@ namespace DataMigrationSystem
                     migrations.Add(parserMonitoring.Name);
                 _configurations.Add(ConfigurationElements.Migrations, migrations);
             }
+
             foreach (var keyValuePair in _args)
             {
                 if (_args.ContainsKey(ConfigurationElements.Help))
@@ -265,6 +271,7 @@ namespace DataMigrationSystem
                     Console.Write(_helpString);
                     Environment.Exit(0);
                 }
+
                 if (_args.ContainsKey(ConfigurationElements.List))
                 {
                     var migrations = ((List<string>) _configurations[ConfigurationElements.Migrations]).ToList();
