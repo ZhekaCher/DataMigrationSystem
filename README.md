@@ -48,12 +48,6 @@
 * Npgsql.EntityFrameworkCore.PostgreSQL 3.1.1.2
 * NLog.Telegram.Format.Core 1.0.3
 
-## Versioning
-#### Last version:
-1.3 - Release
-
-###### Older versions:
-
 ## Authors
 
 * **Кенжетаев Галымжан** - *Initial work* - [capomafiosoken](https://github.com/capomafiosoken)
