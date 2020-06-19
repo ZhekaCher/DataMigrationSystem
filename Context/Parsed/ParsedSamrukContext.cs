@@ -17,6 +17,16 @@ namespace DataMigrationSystem.Context.Parsed
                 .WithOne()
                 .HasForeignKey(x => x.AdvertId)
                 .HasPrincipalKey(x => x.AdvertId);
+            modelBuilder.Entity<SamrukAdvertDto>()
+                .HasMany(x => x.Documentations)
+                .WithOne()
+                .HasForeignKey(x => x.AdvertId)
+                .HasPrincipalKey(x => x.AdvertId);
+            modelBuilder.Entity<SamrukLotsDto>()
+                .HasMany(x => x.Documentations)
+                .WithOne()
+                .HasForeignKey(x => x.LotId)
+                .HasPrincipalKey(x => x.LotId);
         }
     }
 }

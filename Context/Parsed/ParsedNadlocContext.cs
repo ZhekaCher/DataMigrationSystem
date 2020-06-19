@@ -9,7 +9,7 @@ namespace DataMigrationSystem.Context.Parsed
     {
         public DbSet<AnnouncementNadlocDto> AnnouncementNadlocDtos { get; set; }
         public DbSet<LotNadlocDto> LotNadlocDtos { get; set; }
-        public DbSet<CompanyBinDto> Companies { get; set; }
+        // public DbSet<CompanyBinDto> Companies { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<AnnouncementNadlocDto>()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -48,5 +49,6 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("system_id")] public int? SystemId { get; set; }
         [Column("index_date")] public DateTime? IndexDate { get; set; }
         [Column("relevance")] public DateTime? Relevance { get; set; }
+        public List<LotGoszakupDto> Lots { get; set; }
     }
 }

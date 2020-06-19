@@ -42,28 +42,16 @@ namespace DataMigrationSystem.Services
             await using var webHeadHunterContext = new WebHeadHunterContext();
             await using var parsedHeadHunterContext = new ParsedHeadHunterContext();
             string starDate = await parsedHeadHunterContext.VacancyHhDtos.MinAsync(x => x.RelevanceDate.ToString());
-            /*DateTime startDate;
-            try
-            {
-                 startDate = DateTime.ParseExact(starDate.ToString(), "dd.MM.yyyy HH:mm:ss",
-                    CultureInfo.InvariantCulture);
-            }
-            catch (Exception)
-            {
-                startDate = DateTime.ParseExact(starDate.ToString(), "dd.MM.yyyy h:mm:ss",
-                    CultureInfo.InvariantCulture);
-            }
-            var date = startDate.ToString("yyyy-MM-dd HH:mm:ss");*/
             Logger.Info($"Starting migration with '{NumOfThreads}' threads");
             var tasks = new List<Task>();
-            
+
             for (int i = 0; i < NumOfThreads; i++)
             {
                 tasks.Add(Migrate(i));
             }
 
             await Task.WhenAll(tasks);
-            
+
             await webHeadHunterContext.Database.ExecuteSqlRawAsync(
                 $"update avroradata.hh_vacancies set active = false where relevance_date <'{starDate}';");
             
@@ -73,7 +61,10 @@ namespace DataMigrationSystem.Services
                 "truncate avroradata.hh_companies restart identity cascade;");
             await parsedHeadHunterContext.Database.ExecuteSqlRawAsync(
                 "truncate avroradata.hhcompbins restart identity cascade;");
-
+            await parsedHeadHunterContext.Database.ExecuteSqlRawAsync(
+                "truncate avroradata.hh_resume restart identity cascade;");
+            await parsedHeadHunterContext.Database.ExecuteSqlRawAsync(
+                "truncate avroradata.hh_resume_bin restart identity cascade;");
         }
 
         private async Task Migrate(int threadNum)
@@ -82,7 +73,7 @@ namespace DataMigrationSystem.Services
             await using var webHeadHunterContext = new WebHeadHunterContext();
             await using var parsedHeadHunterContext = new ParsedHeadHunterContext();
 
-            foreach (var dto in parsedHeadHunterContext.VacancyHhDtos.Where(x=>x.Id% NumOfThreads == threadNum))
+            foreach (var dto in parsedHeadHunterContext.VacancyHhDtos.Where(x => x.Id % NumOfThreads == threadNum))
             {
                 var vac = VacDtoToWeb(dto);
                 await webHeadHunterContext.VacancyHhs.Upsert(vac).On(x => x.VacId).RunAsync();
@@ -91,7 +82,8 @@ namespace DataMigrationSystem.Services
                     Logger.Trace($"Left {--_total2}");
                 }
             }
-            foreach (var dto in parsedHeadHunterContext.CompanyHhDtos.Where(x=>x.Id% NumOfThreads == threadNum))
+
+            foreach (var dto in parsedHeadHunterContext.CompanyHhDtos.Where(x => x.Id % NumOfThreads == threadNum))
             {
                 var vac = CompdtoToWeb(dto);
                 await webHeadHunterContext.CompanyHhs.Upsert(vac).On(x => x.CompId).RunAsync();
@@ -100,7 +92,8 @@ namespace DataMigrationSystem.Services
                     Logger.Trace($"Left {--_total}");
                 }
             }
-            foreach (var dto in parsedHeadHunterContext.CompBinhhDtos.Where(x=>x.Id% NumOfThreads==threadNum))
+
+            foreach (var dto in parsedHeadHunterContext.CompBinhhDtos.Where(x => x.Id % NumOfThreads == threadNum))
             {
                 var compBinhh = CompBinhhDtoToWeb(dto);
                 await webHeadHunterContext.CompBinhhs.Upsert(compBinhh).On(x => x.CompId).RunAsync();
@@ -110,7 +103,7 @@ namespace DataMigrationSystem.Services
                 }
             }
 
-            if (_total4 > 0 && _total5 > 0)
+            if (_total4 > 0)
             {
                 foreach (var dto in parsedHeadHunterContext.HhResumeDtos.Where(x => x.Id % NumOfThreads == threadNum))
                 {
@@ -135,13 +128,17 @@ namespace DataMigrationSystem.Services
                         Logger.Trace($"Left {--_total4}");
                     }
                 }
+            }
 
-                foreach (var dto in parsedHeadHunterContext.HhResumeBinDtos.Where(x => x.Id % NumOfThreads == threadNum))
+            if (_total5 > 0)
+            {
+                foreach (var dto in parsedHeadHunterContext.HhResumeBinDtos.Where(x => x.Id % NumOfThreads == threadNum)
+                )
                 {
                     var hhResumeBin = new HhResumeBin
                     {
                         ResumeId = dto.ResumeId,
-                        Bin =  dto.Bin,
+                        Bin = dto.Bin,
                         WorkPlace = dto.WorkPlace,
                         WorkInterval = dto.WorkInterval,
                         WorkDuration = dto.WorkDuration,
@@ -150,7 +147,8 @@ namespace DataMigrationSystem.Services
                         UpdateDate = dto.UpdateDate
                     };
 
-                    await webHeadHunterContext.HhResumeBins.Upsert(hhResumeBin).On(x => new {x.ResumeId, x.Bin}).RunAsync();
+                    await webHeadHunterContext.HhResumeBins.Upsert(hhResumeBin).On(x => new {x.ResumeId, x.Bin})
+                        .RunAsync();
                     lock (_lock)
                     {
                         Logger.Trace($"Left {--_total5}");
@@ -158,11 +156,11 @@ namespace DataMigrationSystem.Services
                 }
             }
         }
-        
+
 
         private CompanyHh CompdtoToWeb(CompanyHhDto companyHhDto)
         {
-            var companyHh= new CompanyHh();
+            var companyHh = new CompanyHh();
             companyHh.Name = companyHhDto.Name;
             companyHh.CompId = companyHhDto.CompId;
             companyHh.Activities = companyHhDto.Activities;
