@@ -89,7 +89,6 @@ namespace DataMigrationSystem.Services
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
             }
-
             // Logger.Info($"Completed thread at {_total}");
         }
 
