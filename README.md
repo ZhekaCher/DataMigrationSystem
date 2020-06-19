@@ -7,24 +7,31 @@
 ### List of Avaliable Migrations:
 
 * AnnouncementGoszakup
-* AnnouncementNadloc
+* Bankrupt
 * Company
+* Contacts
 * ContractGoszakup
 * CourtCase
 * DirectorGoszakup
 * DisabilitiesOrgSk
 * EnforcementDebt
+* GoszakupTender
+* HeadHunter
 * LeavingRestriction
 * LotGoszakup
 * LotNadloc
+* NadlocTender
 * NdsDetails
 * ParticipantGoszakup
 * ParticipantNadloc
 * Pedophiles
 * ProducersSk
+* ReliableSk
 * SamrukParticipants
+* SamrukTender
 * TaxDebt
 * TaxDetails
+* Taxpayer
 * TaxpayersRiskDegree
 * Terrorist
 * Top100Goszakup
