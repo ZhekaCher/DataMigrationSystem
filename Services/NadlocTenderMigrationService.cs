@@ -87,7 +87,7 @@ namespace DataMigrationSystem.Services
         {
             await using var webTenderContext = new AdataTenderContext();
             await using var parsedAnnouncementNadlocContext = new ParsedNadlocContext();
-            var units = parsedAnnouncementNadlocContext.LotNadlocDtos.Select(x=> new Measure {Name = x.Unit}).Distinct();
+            var units = parsedAnnouncementNadlocContext.LotNadlocDtos.Select(x=> x.Unit).Distinct().Select(x=>new Measure {Name = x});
             await webTenderContext.Measures.UpsertRange(units).On(x => x.Name).RunAsync();
             var truCodes = parsedAnnouncementNadlocContext.LotNadlocDtos.Select(x=> new TruCode {Code = x.ScpCode, Name = x.ScpDescription}).Distinct();
             foreach (var truCode in truCodes)
@@ -113,7 +113,7 @@ namespace DataMigrationSystem.Services
                 EmailAddress = dto.ContactEmail,
                 PhoneNumber = dto.ContactPhone
             };
-            announcement.SourceLink = $"http://reestr.nadloc.kz/ru/protocol/announce/{dto.FullId}";
+            // announcement.SourceLink = $"http://reestr.nadloc.kz/ru/protocol/announce/{dto.FullId}";
             if (dto.Status != null)
             {
                 var status = await webTenderContext.Statuses.FirstOrDefaultAsync(x => x.Name == dto.Status);
