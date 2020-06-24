@@ -7,24 +7,31 @@
 ### List of Avaliable Migrations:
 
 * AnnouncementGoszakup
-* AnnouncementNadloc
+* Bankrupt
 * Company
+* Contacts
 * ContractGoszakup
 * CourtCase
 * DirectorGoszakup
 * DisabilitiesOrgSk
 * EnforcementDebt
+* GoszakupTender
+* HeadHunter
 * LeavingRestriction
 * LotGoszakup
 * LotNadloc
+* NadlocTender
 * NdsDetails
 * ParticipantGoszakup
 * ParticipantNadloc
 * Pedophiles
 * ProducersSk
+* ReliableSk
 * SamrukParticipants
+* SamrukTender
 * TaxDebt
 * TaxDetails
+* Taxpayer
 * TaxpayersRiskDegree
 * Terrorist
 * Top100Goszakup
@@ -40,12 +47,6 @@
 * NLog 4.6.8
 * Npgsql.EntityFrameworkCore.PostgreSQL 3.1.1.2
 * NLog.Telegram.Format.Core 1.0.3
-
-## Versioning
-#### Last version:
-1.3 - Release
-
-###### Older versions:
 
 ## Authors
 
