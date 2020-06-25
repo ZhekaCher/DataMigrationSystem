@@ -21,7 +21,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         public bool Result { get; set; }
         
         [Column("relevance_date")]
-        public DateTime? RelevanceDate { get; set; }
+        public DateTime? RelevanceDate { get; set; } = DateTime.Now;
     }
     
     [Table("aisoip_list")]

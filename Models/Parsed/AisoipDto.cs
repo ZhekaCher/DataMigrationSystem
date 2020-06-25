@@ -22,7 +22,7 @@ namespace DataMigrationSystem.Models.Parsed
        public bool Result { get; set; }
        
        [Column("relevance_date")]
-       public DateTime? RelevanceDate { get; set; }
+       public DateTime? RelevanceDate { get; set; } = DateTime.Now;
        
     }
     [Table("aisoip_list")]
