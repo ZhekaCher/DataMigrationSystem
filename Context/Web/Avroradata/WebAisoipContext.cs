@@ -1,6 +1,5 @@
 ﻿using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
-using AisoipList = DataMigrationSystem.Models.Parsed.AisoipList;
 
 namespace DataMigrationSystem.Context.Web.Avroradata
 {

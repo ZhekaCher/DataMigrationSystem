@@ -6,7 +6,6 @@ using DataMigrationSystem.Context.Web.Avroradata;
 using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
 using NLog;
-using AisoipList = DataMigrationSystem.Models.Parsed.AisoipList;
 
 namespace DataMigrationSystem.Services
 {
@@ -38,7 +37,7 @@ namespace DataMigrationSystem.Services
             await using var parsedAisoipContext = new ParsedAisoipContext();
             await using var webAisoipContext = new WebAisoipContext();
         }
-
+        
         public async Task Migrate(int numThread)
         {
             await using var parsedAisoipContext = new ParsedAisoipContext();
@@ -54,10 +53,13 @@ namespace DataMigrationSystem.Services
                     Result = aisoip.Result,
                     RelevanceDate = aisoip.RelevanceDate
                 };
-
+            await using var parsedAisoipContext2 = new ParsedAisoipContext();
             foreach (var aisoip in aisoips)
             {
-                await webAisoipContext.Aisoip.Upsert(aisoip).On(x => x.Biin).RunAsync();
+                var aisoipPoint = await parsedAisoipContext2.AisoipLists.FirstOrDefaultAsync(x => x.Id == aisoip.AresId);
+                var newPoint = webAisoipContext.AisoipLists.FirstOrDefault(x => x.Name ==aisoipPoint.Name);
+                aisoip.AresId = newPoint.Id;
+                await webAisoipContext.Aisoip.Upsert(aisoip).On(x => new {x.Biin, x.AresId}).RunAsync();
                 lock (_forLock)
                 {
                     Logger.Trace(_counter++);
@@ -69,16 +71,8 @@ namespace DataMigrationSystem.Services
         {
             await using var parsedAisoipContext = new ParsedAisoipContext();
             await using var webAisoipContext = new WebAisoipContext();
-
-            var aisoipLists = parsedAisoipContext.AisoipLists.Select(x =>new {x.Id,x.Name});
-            foreach (var aisoipList in aisoipLists)
-            {
-                var aisoipL = new AisoipList
-                {
-                    Name = aisoipList.Name
-                };
-                await webAisoipContext.AisoipLists.Upsert(aisoipL).On(x => x.Name).RunAsync();
-            }
+            var aisoipLists = parsedAisoipContext.AisoipLists.ToList();
+            await webAisoipContext.AisoipLists.UpsertRange(aisoipLists).On(x => x.Name).RunAsync();
         }
     }
 }
