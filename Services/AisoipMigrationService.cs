@@ -43,7 +43,7 @@ namespace DataMigrationSystem.Services
         {
             await using var parsedAisoipContext = new ParsedAisoipContext();
             await using var webAisoipContext = new WebAisoipContext();
-            var aisoips = from aisoip in ParsedAisoipContext.AisoipDtos 
+            var aisoips = from aisoip in parsedAisoipContext.Aisoip
                 orderby aisoip.Id
                 where aisoip.Id % NumOfThreads == numThread
                 select new Aisoip
@@ -75,7 +75,6 @@ namespace DataMigrationSystem.Services
             {
                 var aisoipL = new AisoipList
                 {
-                    Id = aisoipList.Id,
                     Name = aisoipList.Name
                 };
                 await webAisoipContext.AisoipLists.Upsert(aisoipL).On(x => x.Name).RunAsync();
