@@ -19,6 +19,7 @@ namespace DataMigrationSystem.Services
         public NadlocTenderMigrationService(int numOfThreads = 20)
         {
             NumOfThreads = numOfThreads;
+            _total = new ParsedNadlocContext().AnnouncementNadlocDtos.Count();
         }
         protected override Logger InitializeLogger()
         {
@@ -60,6 +61,7 @@ namespace DataMigrationSystem.Services
                     {
                         webTenderContext.AdataLots.RemoveRange(found.Lots);
                         await webTenderContext.SaveChangesAsync();
+                        announcement.Lots.ForEach(x=>x.AnnouncementId = found.Id);
                         await webTenderContext.AdataLots.AddRangeAsync(announcement.Lots);
                         await webTenderContext.SaveChangesAsync();
                         await webTenderContext.AdataAnnouncements.Upsert(announcement).On(x => new {x.SourceNumber, x.SourceId})
@@ -73,11 +75,11 @@ namespace DataMigrationSystem.Services
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e.StackTrace);
+                    Logger.Error(e);
                 }
 
                 lock (_lock)
-                    Logger.Trace($"Left {++_total}");
+                    Logger.Trace($"Left {_total--}");
             }
             Logger.Info("Completed thread");
             
@@ -113,7 +115,6 @@ namespace DataMigrationSystem.Services
                 EmailAddress = dto.ContactEmail,
                 PhoneNumber = dto.ContactPhone
             };
-            announcement.SourceLink = $"http://reestr.nadloc.kz/ru/protocol/announce/{dto.FullId}";
             if (dto.Status != null)
             {
                 var status = await webTenderContext.Statuses.FirstOrDefaultAsync(x => x.Name == dto.Status);
