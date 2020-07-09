@@ -115,7 +115,8 @@ namespace DataMigrationSystem.Services
                 LotsQuantity = dto.Lots.Count,
                 SourceId = 1,
                 EmailAddress = dto.Email,
-                PhoneNumber = dto.Phone
+                PhoneNumber = dto.Phone,
+                FlagPrequalification = dto.FlagPrequalification
             };
             announcement.SourceLink = $"https://zakup.sk.kz/#/ext(popup:item/{announcement.SourceNumber}/lot)";
             if (dto.AdvertStatus != null)
@@ -158,6 +159,7 @@ namespace DataMigrationSystem.Services
                     Characteristics = dtoLot.AdditionalCharacteristics,
                     TotalAmount = dtoLot.SumTruNoNds ?? 0,
                     UnitPrice = dtoLot.Price ?? 0,
+                    FlagPrequalification = dtoLot.FlagPrequalification,
                     Terms = null,
                 };
                 try

@@ -50,7 +50,7 @@ namespace DataMigrationSystem.Models.Parsed
 		[Column("advert_name_kazakh")] public string AdvertNameKazakh{get; set;}
 		[Column("advert_name_english")] public string AdvertNameEnglish{get; set;}
 		[Column("advert_status")] public string AdvertStatus{get; set;}
-		[Column("flag_prequalification")] public bool? FlagPrequalification{get; set;}
+		[Column("flag_prequalification")] public bool FlagPrequalification{get; set;}
 		[Column("is_disabled")] public string IsDisabled{get; set;}
 		[Column("pko_supplier_status")] public string PkoSupplierStatus{get; set;}
 		[Column("pko_level")] public string PkoLevel{get; set;}

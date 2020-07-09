@@ -40,6 +40,8 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         public string EmailAddress { get; set; }
         [Column("phone_number")]
         public string PhoneNumber { get; set; }
+        [Column("flag_prequalification")]
+        public bool FlagPrequalification { get; set; }
         public List<AdataLot> Lots { get; set; }
         public List<AnnouncementDocumentation> Documentations { get; set; }
 
