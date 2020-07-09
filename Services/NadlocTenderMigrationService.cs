@@ -152,6 +152,7 @@ namespace DataMigrationSystem.Services
                     Quantity = dtoLot.Quantity ?? 0,
                     TotalAmount = dtoLot.FullPrice ?? 0,
                     Terms = dtoLot.RequiredContractTerm,
+                    SourceNumber = dto.FullId
                 };
                 if (lot.Quantity > 0 && lot.TotalAmount > 0)
                 {
