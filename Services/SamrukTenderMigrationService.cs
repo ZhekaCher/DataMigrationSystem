@@ -35,6 +35,8 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
+            await using var parsedSamrukContext = new ParsedSamrukContext();
+            await parsedSamrukContext.Database.ExecuteSqlRawAsync("truncate table avroradata.samruk_advert, avroradata.samruk_lots, avroradata.samruk_files restart identity");
         }
 
         private async Task Migrate(int threadNum)
