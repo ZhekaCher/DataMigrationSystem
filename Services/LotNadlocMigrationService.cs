@@ -64,7 +64,7 @@ namespace DataMigrationSystem.Services
                     // RelevanceDate = x.RelevanceDate,
                     // DeliveryAddress = x.DeliveryPlace
                 // });
-            long tenderId = 0;
+            // long tenderId = 0;
             
             // foreach (var dto in lotDtos)
             // {

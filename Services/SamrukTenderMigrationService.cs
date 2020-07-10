@@ -16,7 +16,7 @@ namespace DataMigrationSystem.Services
         private int _total = 0;
         private readonly object _lock = new object();
 
-        public SamrukTenderMigrationService(int numOfThreads = 1)
+        public SamrukTenderMigrationService(int numOfThreads = 20)
         {
             NumOfThreads = numOfThreads;
         }
@@ -35,9 +35,8 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
-            // await using var parsedAnnouncementNadlocContext = new ParsedNadlocContext();
-            // await parsedAnnouncementNadlocContext.Database.ExecuteSqlRawAsync(
-            // "truncate table avroradata.nadloc_tenders");
+            await using var parsedSamrukContext = new ParsedSamrukContext();
+            await parsedSamrukContext.Database.ExecuteSqlRawAsync("truncate table avroradata.samruk_advert, avroradata.samruk_lots, avroradata.samruk_files restart identity");
         }
 
         private async Task Migrate(int threadNum)
@@ -115,7 +114,8 @@ namespace DataMigrationSystem.Services
                 LotsQuantity = dto.Lots.Count,
                 SourceId = 1,
                 EmailAddress = dto.Email,
-                PhoneNumber = dto.Phone
+                PhoneNumber = dto.Phone,
+                FlagPrequalification = dto.FlagPrequalification
             };
             announcement.SourceLink = $"https://zakup.sk.kz/#/ext(popup:item/{announcement.SourceNumber}/lot)";
             if (dto.AdvertStatus != null)
@@ -136,7 +136,8 @@ namespace DataMigrationSystem.Services
                 foreach (var document in dto.Documentations.Select(fileDto => new AnnouncementDocumentation
                 {
                     Name = fileDto.Name,
-                    Location = fileDto.FilePath
+                    Location = fileDto.FilePath,
+                    DocumentationTypeId = webTenderContext.DocumentationTypes.FirstOrDefault(x=>x.Name == fileDto.Category)?.Id
                 }))
                 {
                     announcement.Documentations.Add(document);
@@ -158,6 +159,7 @@ namespace DataMigrationSystem.Services
                     Characteristics = dtoLot.AdditionalCharacteristics,
                     TotalAmount = dtoLot.SumTruNoNds ?? 0,
                     UnitPrice = dtoLot.Price ?? 0,
+                    FlagPrequalification = dtoLot.FlagPrequalification,
                     Terms = null,
                 };
                 try
@@ -197,7 +199,8 @@ namespace DataMigrationSystem.Services
                 foreach (var document in dtoLot.Documentations.Select(fileDto => new LotDocumentation
                 {
                     Name = fileDto.Name,
-                    Location = fileDto.FilePath
+                    Location = fileDto.FilePath,
+                    DocumentationTypeId = webTenderContext.DocumentationTypes.FirstOrDefault(x=>x.Name == fileDto.Category)?.Id
                 }))
                 {
                     lot.Documentations.Add(document);

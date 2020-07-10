@@ -35,9 +35,8 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
-            // await using var parsedAnnouncementNadlocContext = new ParsedNadlocContext();
-            // await parsedAnnouncementNadlocContext.Database.ExecuteSqlRawAsync(
-            // "truncate table avroradata.nadloc_tenders");
+            await using var parsedAnnouncementNadlocContext = new ParsedNadlocContext();
+            await parsedAnnouncementNadlocContext.Database.ExecuteSqlRawAsync("truncate table avroradata.nadloc_tenders, avroradata.nadloc_lots");
         }
 
         private async Task Migrate(int threadNum)
@@ -60,6 +59,7 @@ namespace DataMigrationSystem.Services
                     {
                         webTenderContext.AdataLots.RemoveRange(found.Lots);
                         await webTenderContext.SaveChangesAsync();
+                        announcement.Lots.ForEach(x=>x.AnnouncementId = found.Id);
                         await webTenderContext.AdataLots.AddRangeAsync(announcement.Lots);
                         await webTenderContext.SaveChangesAsync();
                         await webTenderContext.AdataAnnouncements.Upsert(announcement).On(x => new {x.SourceNumber, x.SourceId})
