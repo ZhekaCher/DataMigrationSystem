@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Web.Avroradata;
+using DataMigrationSystem.Models.Parsed;
 using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
 using NLog;
@@ -13,8 +15,8 @@ namespace DataMigrationSystem.Services
     {
         private readonly object _forLock;
         private int _counter = 0;
-        
-        public AisoipMigrationService(int numOfThreads = 30)
+        private readonly Dictionary<string, long> _dictionary = new Dictionary<string, long>();
+        public AisoipMigrationService(int numOfThreads = 1)
         {
             NumOfThreads = numOfThreads;
             _forLock = new object();
@@ -35,31 +37,45 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             await using var parsedAisoipContext = new ParsedAisoipContext();
-            await using var webAisoipContext = new WebAisoipContext();
+            await parsedAisoipContext.Database.ExecuteSqlRawAsync(
+                "truncate avroradata.aisoip_companies, avroradata.aisoip_details restart identity;");
+
         }
-        
-        public async Task Migrate(int numThread)
+
+        private async Task Migrate(int numThread)
         {
             await using var parsedAisoipContext = new ParsedAisoipContext();
             await using var webAisoipContext = new WebAisoipContext();
-            var aisoips = from aisoip in parsedAisoipContext.AisoipDtos
-                orderby aisoip.Id
-                where aisoip.Id % NumOfThreads == numThread
-                select new Aisoip
-                {
-                    Id = aisoip.Id,
-                    Biin = aisoip.Biin,
-                    AresId = aisoip.AresId,
-                    Result = aisoip.Result,
-                    RelevanceDate = aisoip.RelevanceDate
-                };
-            await using var parsedAisoipContext2 = new ParsedAisoipContext();
+            var aisoips = parsedAisoipContext
+                .AisoipDtos
+                .Where(x => x.Id % NumOfThreads == numThread)
+                .Include(x => x.AisoipDetailsDtos); 
             foreach (var aisoip in aisoips)
             {
-                var aisoipPoint = await parsedAisoipContext2.AisoipLists.FirstOrDefaultAsync(x => x.Id == aisoip.AresId);
-                var newPoint = webAisoipContext.AisoipLists.FirstOrDefault(x => x.Name ==aisoipPoint.Name);
-                aisoip.AresId = newPoint.Id;
-                await webAisoipContext.Aisoip.Upsert(aisoip).On(x => new {x.Biin, x.AresId}).RunAsync();
+                await webAisoipContext.Aisoip.Upsert(new Aisoip
+                {
+                    Result = aisoip.Result,
+                    Biin = aisoip.Biin,
+                    RelevanceDate = aisoip.RelevanceDate,
+                    AresId = _dictionary[aisoip.Title]
+                }).On(x => new {x.Biin, x.AresId}).RunAsync();
+                webAisoipContext.AisoipDetails.RemoveRange(webAisoipContext.AisoipDetails.Where(x => x.Biin == aisoip.Biin && x.AresId == _dictionary[aisoip.Title]));
+                await webAisoipContext.SaveChangesAsync();
+                if(aisoip.Result)
+                    Console.WriteLine();
+                await webAisoipContext.AisoipDetails.AddRangeAsync(aisoip.AisoipDetailsDtos.Select(x=> new AisoipDetails
+                {
+                    Id =x.Id,
+                    Biin = aisoip.Biin,
+                    AresId =_dictionary[aisoip.Title], 
+                    Date = x.Date,
+                    Address = x.Address,
+                    Name = x.Name,
+                    Tel = x.Tel,
+                    RelevanceDate = x.RelevanceDate
+
+                }));
+                await webAisoipContext.SaveChangesAsync();
                 lock (_forLock)
                 {
                     Logger.Trace(_counter++);
@@ -71,8 +87,16 @@ namespace DataMigrationSystem.Services
         {
             await using var parsedAisoipContext = new ParsedAisoipContext();
             await using var webAisoipContext = new WebAisoipContext();
-            var aisoipLists = parsedAisoipContext.AisoipLists.ToList();
+            var aisoipLists = parsedAisoipContext.AisoipDtos.Select(x=>new AisoipList
+            {
+                Name = x.Title
+            }).Distinct();
             await webAisoipContext.AisoipLists.UpsertRange(aisoipLists).On(x => x.Name).RunAsync();
+            foreach (var aisoipList in webAisoipContext.AisoipLists)
+            {
+                _dictionary[aisoipList.Name] = aisoipList.Id;
+            }
         }
+        
     }
 }
