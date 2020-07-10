@@ -82,6 +82,7 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("work_pos")] public string WorkPos { get; set; }
         [Column("relevance_date")] public DateTime RelevanceDate { get; set; }
         [Column("update_date")] public DateTime UpdateDate { get; set; }
+        [Column("start_work")] public DateTime StartWork { get; set; }
     }
     
     

@@ -19,6 +19,7 @@ namespace DataMigrationSystem.Services
         public NadlocTenderMigrationService(int numOfThreads = 20)
         {
             NumOfThreads = numOfThreads;
+            _total = new ParsedNadlocContext().AnnouncementNadlocDtos.Count();
         }
         protected override Logger InitializeLogger()
         {
@@ -73,11 +74,11 @@ namespace DataMigrationSystem.Services
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e.StackTrace);
+                    Logger.Error(e);
                 }
 
                 lock (_lock)
-                    Logger.Trace($"Left {++_total}");
+                    Logger.Trace($"Left {_total--}");
             }
             Logger.Info("Completed thread");
             
