@@ -170,9 +170,9 @@ namespace DataMigrationSystem.Services
 
                 //TODO(ApplicationStartDate)
                 //TODO(ApplicationFinishDate)
-                CustomerBin = announcementGoszakupDto.CustomerBin,
+                CustomerBin = announcementGoszakupDto.OrgBin,
                 LotsQuantity = announcementGoszakupDto.Lots.Count,
-                LotsAmount = (double) announcementGoszakupDto.Lots.Sum(dto => dto.Amount),
+                LotsAmount =  (double) announcementGoszakupDto.TotalSum,
                 SourceLink = $"https://www.goszakup.gov.kz/ru/announce/index/{announcementGoszakupDto.Id}",
                 RelevanceDate = announcementGoszakupDto.Relevance,
                 SourceId = _sourceId

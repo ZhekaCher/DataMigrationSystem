@@ -102,7 +102,7 @@ namespace DataMigrationSystem.Services
                         Program.NumOfErrors++;
                     }
                 }
-                await webParticipantGoszakupContext.Contacts.Upsert(contacts).On(x=>new {x.Bin, x.Source}).NoUpdate().RunAsync();
+                await webParticipantGoszakupContext.Contacts.Upsert(contacts).On(x=>new {x.Bin, x.Source}).RunAsync();
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
             }
