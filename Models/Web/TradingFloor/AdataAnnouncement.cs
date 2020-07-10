@@ -31,7 +31,7 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         [Column("source_link")]
         public string SourceLink { get; set; }
         [Column("relevance_date")]
-        public DateTime RelevanceDate { get; set; } = DateTime.Now;
+        public DateTime? RelevanceDate { get; set; } = DateTime.Now;
         [Column("lots_quantity")]
         public long LotsQuantity { get; set; }
         [Column("lots_amount")]

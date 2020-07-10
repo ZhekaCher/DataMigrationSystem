@@ -15,7 +15,7 @@ namespace DataMigrationSystem.Models.Parsed
     public class AnnouncementGoszakupDto
     {
         [Key] [Column("id")] public int Id { get; set; }
-        [Column("number_anno")] public string NumberAnno { get; set; }
+        [Column("number_anno")] public string NumberAnno {get; set;}
         [Column("name_ru")] public string NameRu { get; set; }
         [Column("name_kz")] public string NameKz { get; set; }
         [Column("total_sum")] public double? TotalSum { get; set; }

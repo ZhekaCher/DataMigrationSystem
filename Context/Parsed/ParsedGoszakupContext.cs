@@ -7,16 +7,15 @@ namespace DataMigrationSystem.Context.Parsed
 {
     public class ParsedGoszakupContext : ParsedContext
     {
-        public DbSet<AnnouncementGoszakupDto> Announcements { get; set; }
-        public DbSet<LotGoszakupDto> Lots { get; set; }
+        public DbSet<AnnouncementGoszakupDto> AnnouncementGoszakupDtos { get; set; }
+        public DbSet<LotGoszakupDto> LotGoszakupDtos { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<AnnouncementGoszakupDto>()
                 .HasMany(x => x.Lots)
                 .WithOne()
-                // .HasForeignKey(x => x.TenderId)
-                // .HasPrincipalKey(x => x.FullId);
-                ;
+                .HasForeignKey(x => x.TrdBuyNumberAnno)
+                .HasPrincipalKey(x => x.NumberAnno);
         }
     }
 }
