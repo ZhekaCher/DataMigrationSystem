@@ -19,13 +19,13 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("name_ru")] public string NameRu { get; set; }
         [Column("name_kz")] public string NameKz { get; set; }
         [Column("total_sum")] public double? TotalSum { get; set; }
-        [Column("ref_trade_methods_id")] public int? RefTradeMethodsId { get; set; }
+        [Column("ref_trade_methods_id")] public long? RefTradeMethodsId { get; set; }
         [Column("ref_subject_type_id")] public int? RefSubjectTypeId { get; set; }
         [Column("customer_bin")] public long? CustomerBin { get; set; }
         [Column("customer_pid")] public int? CustomerPid { get; set; }
         [Column("org_bin")] public long? OrgBin { get; set; }
         [Column("org_pid")] public int? OrgPid { get; set; }
-        [Column("ref_buy_status_id")] public int? RefBuyStatusId { get; set; }
+        [Column("ref_buy_status_id")] public long? RefBuyStatusId { get; set; }
         [Column("start_date")] public DateTime? StartDate { get; set; }
         [Column("repeat_start_date")] public DateTime? RepeatStartDate { get; set; }
         [Column("repeat_end_date")] public DateTime? RepeatEndDate { get; set; }
@@ -50,5 +50,7 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("index_date")] public DateTime? IndexDate { get; set; }
         [Column("relevance")] public DateTime? Relevance { get; set; }
         public List<LotGoszakupDto> Lots { get; set; }
+        public RefTradeMethodGoszakupDto RefTradeMethod { get; set; }
+        public RefBuyStatusGoszakupDto RefBuyStatus { get; set; }
     }
 }

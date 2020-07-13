@@ -21,7 +21,7 @@ namespace DataMigrationSystem.Services
         {
             using var parsingContext = new ParsedGoszakupContext();
             _total = parsingContext.AnnouncementGoszakupDtos.Count();
-            
+
             NumOfThreads = numOfThreads;
 
             _statusesDictionary.Add(110, 51);
@@ -107,8 +107,20 @@ namespace DataMigrationSystem.Services
             await using var webTenderContext = new AdataTenderContext();
             await using var parsedAnnouncementGoszakupContext = new ParsedGoszakupContext();
             Console.WriteLine(DateTime.Now);
+            var a = parsedAnnouncementGoszakupContext.LotGoszakupDtos.Where(x =>
+                    x.Id % NumOfThreads == threadNum).Take(5)
+                .Include(x => x.RefTradeMethod)
+                .Include(x => x.RefLotStatus);
             foreach (var dto in parsedAnnouncementGoszakupContext.AnnouncementGoszakupDtos.Where(x =>
-                x.Id % NumOfThreads == threadNum).Include(x => x.Lots))
+                    x.Id % NumOfThreads == threadNum)
+                .Take(50)
+                .Include(x => x.Lots)                
+                .ThenInclude(x => x.RefTradeMethod)
+                .Include(x => x.Lots)                
+                .ThenInclude(x => x.RefLotStatus)
+                .Include(x => x.RefTradeMethod)
+                .Include(x => x.RefBuyStatus)
+            )
             {
                 var announcement = DtoToWebAnnouncement(dto);
                 try
@@ -157,22 +169,29 @@ namespace DataMigrationSystem.Services
         private AdataAnnouncement DtoToWebAnnouncement(AnnouncementGoszakupDto announcementGoszakupDto)
         {
             using var webTenderContext = new AdataTenderContext();
-            _statusesDictionary.TryGetValue(announcementGoszakupDto.RefBuyStatusId, out var statusId);
-            _methodsDictionary.TryGetValue(announcementGoszakupDto.RefTradeMethodsId, out var methodId);
+
+
+            var status =
+                webTenderContext.Statuses.FirstOrDefault(
+                    x => x.Name == announcementGoszakupDto.RefBuyStatus.NameRu);
+            var method =
+                webTenderContext.Methods.FirstOrDefault(
+                    x => x.Name == announcementGoszakupDto.RefTradeMethod.NameRu);
+
             var announcement = new AdataAnnouncement
             {
                 SourceNumber = announcementGoszakupDto.NumberAnno,
                 Title = announcementGoszakupDto.NameRu,
 
                 //Refactor
-                StatusId = statusId != 0 ? statusId : (long?) null,
-                MethodId = methodId != 0 ? methodId : (long?) null,
+                StatusId = status?.Id,
+                MethodId = method?.Id,
 
                 //TODO(ApplicationStartDate)
                 //TODO(ApplicationFinishDate)
                 CustomerBin = announcementGoszakupDto.OrgBin,
                 LotsQuantity = announcementGoszakupDto.Lots.Count,
-                LotsAmount =  (double) announcementGoszakupDto.TotalSum,
+                LotsAmount = (double) announcementGoszakupDto.TotalSum,
                 SourceLink = $"https://www.goszakup.gov.kz/ru/announce/index/{announcementGoszakupDto.Id}",
                 RelevanceDate = announcementGoszakupDto.Relevance,
                 SourceId = _sourceId
@@ -187,12 +206,16 @@ namespace DataMigrationSystem.Services
 
         private AdataLot DtoToWebLot(LotGoszakupDto lotGoszakupDto, AdataTenderContext webTenderContext)
         {
-            _statusesDictionary.TryGetValue(lotGoszakupDto.RefLotStatusId, out var statusId);
-            _statusesDictionary.TryGetValue(lotGoszakupDto.RefTradeMethodsId, out var refTradeMethodsId);
+            var status =
+                webTenderContext.Statuses.FirstOrDefault(
+                    x => x.Name == lotGoszakupDto.RefLotStatus.NameRu);
+            var method =
+                webTenderContext.Methods.FirstOrDefault(
+                    x => x.Name == lotGoszakupDto.RefTradeMethod.NameRu);
             var lot = new AdataLot
             {
-                StatusId = statusId != 0 ? statusId : (long?) null,
-                MethodId = refTradeMethodsId != 0 ? refTradeMethodsId : (long?) null,
+                StatusId = status?.Id,
+                MethodId = method?.Id,
                 SourceId = _sourceId,
                 // Application start date
                 // Application finish date
