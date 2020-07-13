@@ -113,7 +113,6 @@ namespace DataMigrationSystem.Services
                 .Include(x => x.RefLotStatus);
             foreach (var dto in parsedAnnouncementGoszakupContext.AnnouncementGoszakupDtos.Where(x =>
                     x.Id % NumOfThreads == threadNum)
-                .Take(50)
                 .Include(x => x.Lots)                
                 .ThenInclude(x => x.RefTradeMethod)
                 .Include(x => x.Lots)                
