@@ -119,7 +119,7 @@ namespace DataMigrationSystem
                                 threads);
                     }
 
-                    await migrationService.StartMigratingAsync();
+                    migrationService.StartMigratingAsync().GetAwaiter().GetResult();
                     await using var parserMonitoringContext = new ParserMonitoringContext();
                     var parserMonitoring =
                         parserMonitoringContext.ParserMonitorings.FirstOrDefault(x => x.Name.Equals(migration));
@@ -145,7 +145,7 @@ namespace DataMigrationSystem
                 }
                 catch (NullReferenceException e)
                 {
-                    _logger.Error(e, $"It seems that '{migration}' doesn't exist, but it also can be inner error of migration");
+                    _logger.Error(e);
                     Program.NumOfErrors++;
                 }
                 catch (Exception e)

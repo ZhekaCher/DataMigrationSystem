@@ -16,7 +16,14 @@ namespace DataMigrationSystem.Services
         private int _total = 0;
         private readonly object _lock = new object();
         private readonly int _sourceId = 2;
+        private Status[] webStatuses;
 
+        private Method[] webMethods;
+
+        // private List<RefLotStatusGoszakupDto> refLotStatuses;
+        // private List<RefBuyStatusGoszakupDto> refBuyStatuses;
+        // private List<RefTradeMethodGoszakupDto> refTradeMethods;
+        //TODO(PRELOAD REFERENCES)
         public GoszakupTenderMigrationService(int numOfThreads = 20)
         {
             using var parsingContext = new ParsedGoszakupContext();
@@ -24,71 +31,21 @@ namespace DataMigrationSystem.Services
 
             NumOfThreads = numOfThreads;
 
-            _statusesDictionary.Add(110, 51);
-            _statusesDictionary.Add(120, 52);
-            _statusesDictionary.Add(130, 53);
-            _statusesDictionary.Add(160, 54);
-            _statusesDictionary.Add(190, 20);
-            _statusesDictionary.Add(210, 1);
-            _statusesDictionary.Add(220, 3);
-            _statusesDictionary.Add(230, 6);
-            _statusesDictionary.Add(240, 4);
-            _statusesDictionary.Add(250, 8);
-            _statusesDictionary.Add(260, 9);
-            _statusesDictionary.Add(270, 10);
-            _statusesDictionary.Add(280, 7);
-            _statusesDictionary.Add(285, 55);
-            _statusesDictionary.Add(290, 56);
-            _statusesDictionary.Add(310, 32);
-            _statusesDictionary.Add(320, 33);
-            _statusesDictionary.Add(330, 34);
-            _statusesDictionary.Add(350, 38);
-            _statusesDictionary.Add(360, 35);
-            _statusesDictionary.Add(370, 39);
-            _statusesDictionary.Add(410, 40);
-            _statusesDictionary.Add(420, 43);
-            _statusesDictionary.Add(430, 41);
-            _statusesDictionary.Add(440, 44);
-            _statusesDictionary.Add(510, 45);
-            _statusesDictionary.Add(520, 57);
-            _statusesDictionary.Add(530, 46);
-            _statusesDictionary.Add(540, 47);
-            _methodsDictionary.Add(1, 22);
-            _methodsDictionary.Add(2, 4);
-            _methodsDictionary.Add(3, 1);
-            _methodsDictionary.Add(6, 12);
-            _methodsDictionary.Add(7, 9);
-            _methodsDictionary.Add(8, 23);
-            _methodsDictionary.Add(9, 24);
-            _methodsDictionary.Add(10, 25);
-            _methodsDictionary.Add(11, 26);
-            _methodsDictionary.Add(12, 27);
-            _methodsDictionary.Add(13, 28);
-            _methodsDictionary.Add(14, 29);
-            _methodsDictionary.Add(16, 30);
-            _methodsDictionary.Add(22, 16);
-            _methodsDictionary.Add(23, 31);
-            _methodsDictionary.Add(31, 32);
-            _methodsDictionary.Add(32, 18);
-            _methodsDictionary.Add(40, 33);
-            _methodsDictionary.Add(50, 7);
-            _methodsDictionary.Add(51, 34);
-            _methodsDictionary.Add(52, 8);
-            _methodsDictionary.Add(105, 35);
-            _methodsDictionary.Add(107, 36);
-            _methodsDictionary.Add(116, 3);
-            _methodsDictionary.Add(117, 37);
-            _methodsDictionary.Add(118, 38);
-            _methodsDictionary.Add(119, 39);
+            using var webTenderContext = new AdataTenderContext();
+
+
+            webStatuses = webTenderContext.Statuses.ToArray();
+            webMethods = webTenderContext.Methods.ToArray();
+            // refLotStatuses = parsingContext.RefLotStatusGoszakupDtos.ToList();
+            // refBuyStatuses = parsingContext.RefBuyStatusGoszakupDtos.ToList();
+            // refTradeMethods = parsingContext.RefTradeMethodGoszakupDtos.ToList();
+            //FirstOrDefault(x => x.Name == announcementGoszakupDto.RefTradeMethod.NameRu);
         }
 
         protected override Logger InitializeLogger()
         {
             return LogManager.GetCurrentClassLogger();
         }
-
-        private readonly IDictionary<int?, int> _statusesDictionary = new Dictionary<int?, int>();
-        private readonly IDictionary<int?, int> _methodsDictionary = new Dictionary<int?, int>();
 
         public override async Task StartMigratingAsync()
         {
@@ -106,24 +63,19 @@ namespace DataMigrationSystem.Services
             Logger.Info("Started thread");
             await using var webTenderContext = new AdataTenderContext();
             await using var parsedAnnouncementGoszakupContext = new ParsedGoszakupContext();
-            Console.WriteLine(DateTime.Now);
-            var a = parsedAnnouncementGoszakupContext.LotGoszakupDtos.Where(x =>
-                    x.Id % NumOfThreads == threadNum).Take(5)
-                .Include(x => x.RefTradeMethod)
-                .Include(x => x.RefLotStatus);
             foreach (var dto in parsedAnnouncementGoszakupContext.AnnouncementGoszakupDtos.Where(x =>
                     x.Id % NumOfThreads == threadNum)
-                .Include(x => x.Lots)                
-                .ThenInclude(x => x.RefTradeMethod)
-                .Include(x => x.Lots)                
+                .Include(x => x.Lots)
                 .ThenInclude(x => x.RefLotStatus)
+                .Include(x => x.Lots)
+                .ThenInclude(x => x.RefTradeMethod)
                 .Include(x => x.RefTradeMethod)
                 .Include(x => x.RefBuyStatus)
             )
             {
-                var announcement = DtoToWebAnnouncement(dto);
                 try
                 {
+                    var announcement = DtoToWebAnnouncement(dto);
                     var found = webTenderContext.AdataAnnouncements
                         .FirstOrDefault(x =>
                             x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
@@ -147,7 +99,7 @@ namespace DataMigrationSystem.Services
                 }
                 catch (Exception e)
                 {
-                    if (e.Message.Contains("violates foreign key"))
+                    if (e.Message.Contains("violates foreign key") || e.Message.Contains("updating the entries"))
                     {
                         // Logger.Warn($"Message:|{e.Message}|; Biin:|{temp.BiinCompanies}|;");
                     }
@@ -171,11 +123,11 @@ namespace DataMigrationSystem.Services
 
 
             var status =
-                webTenderContext.Statuses.FirstOrDefault(
-                    x => x.Name == announcementGoszakupDto.RefBuyStatus.NameRu);
+                webStatuses?.FirstOrDefault(
+                    x => x.Name == announcementGoszakupDto.RefBuyStatus?.NameRu);
             var method =
-                webTenderContext.Methods.FirstOrDefault(
-                    x => x.Name == announcementGoszakupDto.RefTradeMethod.NameRu);
+                webMethods?.FirstOrDefault(
+                    x => x.Name == announcementGoszakupDto.RefTradeMethod?.NameRu);
 
             var announcement = new AdataAnnouncement
             {
@@ -206,13 +158,14 @@ namespace DataMigrationSystem.Services
         private AdataLot DtoToWebLot(LotGoszakupDto lotGoszakupDto, AdataTenderContext webTenderContext)
         {
             var status =
-                webTenderContext.Statuses.FirstOrDefault(
-                    x => x.Name == lotGoszakupDto.RefLotStatus.NameRu);
+                webStatuses?.FirstOrDefault(
+                    x => x.Name == lotGoszakupDto.RefLotStatus?.NameRu);
             var method =
-                webTenderContext.Methods.FirstOrDefault(
-                    x => x.Name == lotGoszakupDto.RefTradeMethod.NameRu);
+                webMethods?.FirstOrDefault(
+                    x => x.Name == lotGoszakupDto.RefTradeMethod?.NameRu);
             var lot = new AdataLot
             {
+                SourceNumber = lotGoszakupDto.LotNumber,
                 StatusId = status?.Id,
                 MethodId = method?.Id,
                 SourceId = _sourceId,
