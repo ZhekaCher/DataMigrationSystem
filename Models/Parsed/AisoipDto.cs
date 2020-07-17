@@ -10,7 +10,7 @@ namespace DataMigrationSystem.Models.Parsed
     {
         [Key]
         [Column("id")]
-        public long? Id { get; set; }
+        public long Id { get; set; }
         
         [Column("biin")]
         public long? Biin { get; set; }

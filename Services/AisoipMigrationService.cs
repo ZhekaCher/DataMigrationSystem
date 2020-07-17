@@ -52,33 +52,40 @@ namespace DataMigrationSystem.Services
                 .Include(x => x.AisoipDetailsDtos); 
             foreach (var aisoip in aisoips)
             {
-                await webAisoipContext.Aisoip.Upsert(new Aisoip
+                try
+                {await webAisoipContext.Aisoip.Upsert(new Aisoip
+                    {
+                        Result = aisoip.Result,
+                        Biin = aisoip.Biin,
+                        RelevanceDate = aisoip.RelevanceDate,
+                        AresId = _dictionary[aisoip.Title]
+                    }).On(x => new {x.Biin, x.AresId}).RunAsync();
+                    webAisoipContext.AisoipDetails.RemoveRange(webAisoipContext.AisoipDetails.Where(x => x.Biin == aisoip.Biin && x.AresId == _dictionary[aisoip.Title]));
+                    await webAisoipContext.SaveChangesAsync();
+                    if (aisoip.Result)
+                    {
+                        await webAisoipContext.AisoipDetails.AddRangeAsync(aisoip.AisoipDetailsDtos.Select(x=> new AisoipDetails
+                        {
+                            Biin = aisoip.Biin,
+                            AresId =_dictionary[aisoip.Title], 
+                            Date = x.Date,
+                            Address = x.Address,
+                            Name = x.Name,
+                            Tel = x.Tel,
+                            RelevanceDate = x.RelevanceDate
+                        }));
+                        Console.WriteLine();
+                        await parsedAisoipContext.SaveChangesAsync();
+                    }
+                    await webAisoipContext.SaveChangesAsync();
+                    lock (_forLock)
+                    {
+                        Logger.Trace(_counter++);
+                    }
+                }
+                catch (Exception e)
                 {
-                    Result = aisoip.Result,
-                    Biin = aisoip.Biin,
-                    RelevanceDate = aisoip.RelevanceDate,
-                    AresId = _dictionary[aisoip.Title]
-                }).On(x => new {x.Biin, x.AresId}).RunAsync();
-                webAisoipContext.AisoipDetails.RemoveRange(webAisoipContext.AisoipDetails.Where(x => x.Biin == aisoip.Biin && x.AresId == _dictionary[aisoip.Title]));
-                await webAisoipContext.SaveChangesAsync();
-                if(aisoip.Result)
-                    Console.WriteLine();
-                await webAisoipContext.AisoipDetails.AddRangeAsync(aisoip.AisoipDetailsDtos.Select(x=> new AisoipDetails
-                {
-                    Id =x.Id,
-                    Biin = aisoip.Biin,
-                    AresId =_dictionary[aisoip.Title], 
-                    Date = x.Date,
-                    Address = x.Address,
-                    Name = x.Name,
-                    Tel = x.Tel,
-                    RelevanceDate = x.RelevanceDate
-
-                }));
-                await webAisoipContext.SaveChangesAsync();
-                lock (_forLock)
-                {
-                    Logger.Trace(_counter++);
+                    Console.WriteLine(e);
                 }
             }
         }
