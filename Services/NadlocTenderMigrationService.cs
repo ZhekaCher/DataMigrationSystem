@@ -131,7 +131,7 @@ namespace DataMigrationSystem.Services
             {
                 new AnnouncementDocumentation
                 {
-                    Name = dto.KonkursDocName, SourceLink = dto.KonkursDocLink, DocumentationTypeId = 3
+                    Name = dto.KonkursDocName, SourceLink = dto.KonkursDocLink, DocumentationTypeId = 3,Location = dto.KonkursDocPath
                 }
             };
             announcement.Lots = new List<AdataLot>();
@@ -174,11 +174,11 @@ namespace DataMigrationSystem.Services
                 {
                     new LotDocumentation
                     {
-                        Name = dtoLot.TechDocName, SourceLink = dtoLot.TechDocLink, DocumentationTypeId = 1
+                        Name = dtoLot.TechDocName, SourceLink = dtoLot.TechDocLink, DocumentationTypeId = 1,Location = dtoLot.TechDocPath
                     },
                     new LotDocumentation
                     {
-                        Name = dtoLot.ContractDocName, SourceLink = dtoLot.ContractDocLink, DocumentationTypeId = 2
+                        Name = dtoLot.ContractDocName, SourceLink = dtoLot.ContractDocLink, DocumentationTypeId = 2,Location = dtoLot.ContractDocPath
                     }
                 };
                 announcement.Lots.Add(lot);
