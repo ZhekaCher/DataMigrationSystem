@@ -13,7 +13,7 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         [Column("name")]
         public string Name { get; set; }
         [Column("combined_id")]
-        public long CombinedId { get; set; }
+        public long? CombinedId { get; set; }
     }
     [Table("combined_statuses")]
     public class CombinedStatus
@@ -35,7 +35,7 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         [Column("name")]
         public string Name { get; set; }
         [Column("combined_id")]
-        public long CombinedId { get; set; }
+        public long? CombinedId { get; set; }
     }
     [Table("combined_methods")]
     public class CombinedMethod

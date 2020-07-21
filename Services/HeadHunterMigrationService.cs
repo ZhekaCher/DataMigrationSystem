@@ -144,7 +144,8 @@ namespace DataMigrationSystem.Services
                         WorkDuration = dto.WorkDuration,
                         WorkPos = dto.WorkPos,
                         RelevanceDate = dto.RelevanceDate,
-                        UpdateDate = dto.UpdateDate
+                        UpdateDate = dto.UpdateDate,
+                        StartWork = dto.StartWork
                     };
 
                     await webHeadHunterContext.HhResumeBins.Upsert(hhResumeBin).On(x => new {x.ResumeId, x.Bin})

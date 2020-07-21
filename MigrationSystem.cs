@@ -119,7 +119,7 @@ namespace DataMigrationSystem
                                 threads);
                     }
 
-                    await migrationService.StartMigratingAsync();
+                    migrationService.StartMigratingAsync().GetAwaiter().GetResult();
                     await using var parserMonitoringContext = new ParserMonitoringContext();
                     var parserMonitoring =
                         parserMonitoringContext.ParserMonitorings.FirstOrDefault(x => x.Name.Equals(migration));
@@ -143,9 +143,9 @@ namespace DataMigrationSystem
                         $"Try to implement Constructor: |MigrationService(int numOfThreads = 1)| in {migration} class");
                     Program.NumOfErrors++;
                 }
-                catch (NullReferenceException)
+                catch (NullReferenceException e)
                 {
-                    _logger.Error($"It seems that '{migration}' doesn't exist");
+                    _logger.Error(e);
                     Program.NumOfErrors++;
                 }
                 catch (Exception e)

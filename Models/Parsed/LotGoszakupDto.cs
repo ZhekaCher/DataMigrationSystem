@@ -15,7 +15,7 @@ namespace DataMigrationSystem.Models.Parsed
     {
         [Key] [Column("id")] public int Id { get; set; }
         [Column("lot_number")] public string LotNumber { get; set; }
-        [Column("ref_lot_status_id")] public int? RefLotStatusId { get; set; }
+        [Column("ref_lot_status_id")] public long? RefLotStatusId { get; set; }
         [Column("last_update_date")] public DateTime? LastUpdateDate { get; set; }
         [Column("union_lots")] public bool? UnionLots { get; set; }
         [Column("count")] public double? Count { get; set; }
@@ -38,9 +38,11 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("disable_person_id")] public bool? DisablePersonId { get; set; }
         [Column("customer_name_kz")] public string CustomerNameKz { get; set; }
         [Column("customer_name_ru")] public string CustomerNameRu { get; set; }
-        [Column("ref_trade_methods_id")] public int? RefTradeMethodsId { get; set; }
+        [Column("ref_trade_methods_id")] public long? RefTradeMethodsId { get; set; }
         [Column("index_date")] public DateTime? IndexDate { get; set; }
         [Column("system_id")] public int? SystemId { get; set; }
         [Column("relevance")] public DateTime Relevance { get; set; }
+        public RefTradeMethodGoszakupDto RefTradeMethod { get; set; }
+        public RefLotStatusGoszakupDto RefLotStatus { get; set; }
     }
 }

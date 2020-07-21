@@ -31,7 +31,7 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         [Column("source_link")]
         public string SourceLink { get; set; }
         [Column("relevance_date")]
-        public DateTime RelevanceDate { get; set; } = DateTime.Now;
+        public DateTime? RelevanceDate { get; set; } = DateTime.Now;
         [Column("lots_quantity")]
         public long LotsQuantity { get; set; }
         [Column("lots_amount")]
@@ -40,6 +40,8 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         public string EmailAddress { get; set; }
         [Column("phone_number")]
         public string PhoneNumber { get; set; }
+        [Column("flag_prequalification")]
+        public bool FlagPrequalification { get; set; }
         public List<AdataLot> Lots { get; set; }
         public List<AnnouncementDocumentation> Documentations { get; set; }
 

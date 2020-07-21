@@ -19,6 +19,7 @@ namespace DataMigrationSystem.Services
         public NadlocTenderMigrationService(int numOfThreads = 20)
         {
             NumOfThreads = numOfThreads;
+            _total = new ParsedNadlocContext().AnnouncementNadlocDtos.Count();
         }
         protected override Logger InitializeLogger()
         {
@@ -35,9 +36,8 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
-            // await using var parsedAnnouncementNadlocContext = new ParsedNadlocContext();
-            // await parsedAnnouncementNadlocContext.Database.ExecuteSqlRawAsync(
-            // "truncate table avroradata.nadloc_tenders");
+            await using var parsedAnnouncementNadlocContext = new ParsedNadlocContext();
+            await parsedAnnouncementNadlocContext.Database.ExecuteSqlRawAsync("truncate table avroradata.nadloc_tenders, avroradata.nadloc_lots");
         }
 
         private async Task Migrate(int threadNum)
@@ -60,6 +60,7 @@ namespace DataMigrationSystem.Services
                     {
                         webTenderContext.AdataLots.RemoveRange(found.Lots);
                         await webTenderContext.SaveChangesAsync();
+                        announcement.Lots.ForEach(x=>x.AnnouncementId = found.Id);
                         await webTenderContext.AdataLots.AddRangeAsync(announcement.Lots);
                         await webTenderContext.SaveChangesAsync();
                         await webTenderContext.AdataAnnouncements.Upsert(announcement).On(x => new {x.SourceNumber, x.SourceId})
@@ -73,11 +74,11 @@ namespace DataMigrationSystem.Services
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e.StackTrace);
+                    Logger.Error(e);
                 }
 
                 lock (_lock)
-                    Logger.Trace($"Left {++_total}");
+                    Logger.Trace($"Left {_total--}");
             }
             Logger.Info("Completed thread");
             
@@ -130,7 +131,7 @@ namespace DataMigrationSystem.Services
             {
                 new AnnouncementDocumentation
                 {
-                    Name = dto.KonkursDocName, SourceLink = dto.KonkursDocLink, DocumentationTypeId = 3
+                    Name = dto.KonkursDocName, SourceLink = dto.KonkursDocLink, DocumentationTypeId = 3,Location = dto.KonkursDocPath
                 }
             };
             announcement.Lots = new List<AdataLot>();
@@ -152,6 +153,7 @@ namespace DataMigrationSystem.Services
                     Quantity = dtoLot.Quantity ?? 0,
                     TotalAmount = dtoLot.FullPrice ?? 0,
                     Terms = dtoLot.RequiredContractTerm,
+                    SourceNumber = announcement.SourceNumber + "-" + dtoLot.LotNumber
                 };
                 if (lot.Quantity > 0 && lot.TotalAmount > 0)
                 {
@@ -173,11 +175,11 @@ namespace DataMigrationSystem.Services
                 {
                     new LotDocumentation
                     {
-                        Name = dtoLot.TechDocName, SourceLink = dtoLot.TechDocLink, DocumentationTypeId = 1
+                        Name = dtoLot.TechDocName, SourceLink = dtoLot.TechDocLink, DocumentationTypeId = 1,Location = dtoLot.TechDocPath
                     },
                     new LotDocumentation
                     {
-                        Name = dtoLot.ContractDocName, SourceLink = dtoLot.ContractDocLink, DocumentationTypeId = 2
+                        Name = dtoLot.ContractDocName, SourceLink = dtoLot.ContractDocLink, DocumentationTypeId = 2,Location = dtoLot.ContractDocPath
                     }
                 };
                 announcement.Lots.Add(lot);

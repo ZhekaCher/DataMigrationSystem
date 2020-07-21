@@ -35,7 +35,7 @@ namespace DataMigrationSystem.Models.Parsed
 		[Column("tender_location")] public string TenderLocation{get; set;}
 		[Column("sum_tru_no_nds")] public double? SumTruNoNds{get; set;}
 		[Column("flag_complex_tender")] public bool? FlagComplexTender{get; set;}
-		[Column("flag_prequalification")] public bool? FlagPrequalification{get; set;}
+		[Column("flag_prequalification")] public bool FlagPrequalification{get; set;}
 		[Column("flag_consulting")] public bool? FlagConsulting{get; set;}
 		[Column("flag_transferred")] public bool? FlagTransferred{get; set;}
 		[Column("flag_centralized_tender")] public bool? FlagCentralizedTender{get; set;}

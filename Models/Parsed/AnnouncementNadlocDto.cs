@@ -32,6 +32,7 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("customer_bin")] public long? CustomerBin{get; set;}
         [Column("konkurs_doc_name")] public string KonkursDocName{get; set;}
         [Column("konkurs_doc_link")] public string KonkursDocLink{get; set;}
+        [Column("konkurs_doc_path")] public string KonkursDocPath{get; set;}
         [Column("id")] public long Id{get; set;}
         public List<LotNadlocDto> Lots { get; set; }
     }
