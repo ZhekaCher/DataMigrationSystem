@@ -16,7 +16,7 @@ namespace DataMigrationSystem.Services
         private readonly object _forLock;
         private int _counter = 0;
         private readonly Dictionary<string, long> _dictionary = new Dictionary<string, long>();
-        public AisoipMigrationService(int numOfThreads = 1)
+        public AisoipMigrationService(int numOfThreads = 30)
         {
             NumOfThreads = numOfThreads;
             _forLock = new object();
