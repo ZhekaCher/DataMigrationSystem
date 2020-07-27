@@ -135,6 +135,7 @@ namespace DataMigrationSystem.Services
                 }
             };
             announcement.Lots = new List<AdataLot>();
+            int lotIndex = 0;
             foreach (var dtoLot in dto.Lots)
             {
                 var lot = new AdataLot
@@ -153,7 +154,7 @@ namespace DataMigrationSystem.Services
                     Quantity = dtoLot.Quantity ?? 0,
                     TotalAmount = dtoLot.FullPrice ?? 0,
                     Terms = dtoLot.RequiredContractTerm,
-                    SourceNumber = announcement.SourceNumber + "-" + dtoLot.LotNumber
+                    SourceNumber = announcement.SourceNumber + "-" + (++lotIndex)
                 };
                 if (lot.Quantity > 0 && lot.TotalAmount > 0)
                 {
