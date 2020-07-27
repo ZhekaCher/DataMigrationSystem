@@ -143,8 +143,8 @@ namespace DataMigrationSystem.Services
                 StatusId = status?.Id,
                 MethodId = method?.Id,
 
-                //TODO(ApplicationStartDate)
-                //TODO(ApplicationFinishDate)
+                ApplicationStartDate = announcementGoszakupDto.StartDate,
+                ApplicationFinishDate = announcementGoszakupDto.EndDate,
                 CustomerBin = announcementGoszakupDto.OrgBin,
                 LotsQuantity = announcementGoszakupDto.Lots.Count,
                 LotsAmount = (double) announcementGoszakupDto.TotalSum,
@@ -154,13 +154,17 @@ namespace DataMigrationSystem.Services
             };
             announcement.Lots = new List<AdataLot>();
 
-            foreach (var lotGoszakupDto in announcementGoszakupDto.Lots)
-                announcement.Lots.Add(DtoToWebLot(lotGoszakupDto, webTenderContext));
+            foreach (var lot in announcementGoszakupDto.Lots.Select(lotGoszakupDto => DtoToWebLot(lotGoszakupDto)))
+            {
+                lot.ApplicationStartDate = announcementGoszakupDto.StartDate;
+                lot.ApplicationFinishDate = announcementGoszakupDto.EndDate;
+                announcement.Lots.Add(lot);
+            }
 
             return announcement;
         }
 
-        private AdataLot DtoToWebLot(LotGoszakupDto lotGoszakupDto, AdataTenderContext webTenderContext)
+        private AdataLot DtoToWebLot(LotGoszakupDto lotGoszakupDto)
         {
             var status =
                 webStatuses?.FirstOrDefault(
@@ -174,8 +178,6 @@ namespace DataMigrationSystem.Services
                 StatusId = status?.Id,
                 MethodId = method?.Id,
                 SourceId = _sourceId,
-                // Application start date
-                // Application finish date
                 CustomerBin = lotGoszakupDto.CustomerBin,
                 // Supply location
                 // Tender location

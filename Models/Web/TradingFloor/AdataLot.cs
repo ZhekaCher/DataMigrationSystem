@@ -42,6 +42,8 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         public double Quantity { get; set; }
         [Column("measure_id")]
         public long? MeasureId { get; set; }
+        [Column("tru_code")]
+        public string TruCode { get; set; }
         [Column("unit_price")]
         public double UnitPrice { get; set; }
         [Column("total_amount")]
