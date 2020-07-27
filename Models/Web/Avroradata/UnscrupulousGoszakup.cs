@@ -18,5 +18,6 @@ namespace DataMigrationSystem.Models.Web.Avroradata
 		[Key][DatabaseGenerated(DatabaseGeneratedOption.None)][Column("biin_companies")] public long? BiinCompanies{get; set;}
 		[Column("status")] public bool? Status{get; set;}
 		[Column("relevance_date")] public DateTime? RelevanceDate{get; set;}
+		[Column("start_date")] public DateTime? StartDate{get; set;}
 	}
 }

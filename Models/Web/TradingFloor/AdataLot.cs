@@ -34,14 +34,16 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         public string SupplyLocation { get; set; }
         [Column("tender_location")]
         public string TenderLocation { get; set; }
-        [Column("tru_id")]
-        public long? TruId { get; set; }
+        // [Column("tru_id")]
+        // public long? TruId { get; set; }
         [Column("characteristics")]
         public string Characteristics { get; set; }
         [Column("quantity")]
         public double Quantity { get; set; }
         [Column("measure_id")]
         public long? MeasureId { get; set; }
+        [Column("tru_code")]
+        public string TruCode { get; set; }
         [Column("unit_price")]
         public double UnitPrice { get; set; }
         [Column("total_amount")]

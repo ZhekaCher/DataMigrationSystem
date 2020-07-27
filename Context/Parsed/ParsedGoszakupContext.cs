@@ -9,6 +9,7 @@ namespace DataMigrationSystem.Context.Parsed
     {
         public DbSet<AnnouncementGoszakupDto> AnnouncementGoszakupDtos { get; set; }
         public DbSet<LotGoszakupDto> LotGoszakupDtos { get; set; }
+        public DbSet<PlanGoszakupDto> PlanGoszakupDtos { get; set; }
         public DbSet<RefTradeMethodGoszakupDto> RefTradeMethodGoszakupDtos { get; set; }
         public DbSet<RefLotStatusGoszakupDto> RefLotStatusGoszakupDtos { get; set; }
         public DbSet<RefBuyStatusGoszakupDto> RefBuyStatusGoszakupDtos { get; set; }
@@ -16,6 +17,7 @@ namespace DataMigrationSystem.Context.Parsed
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
             modelBuilder.Entity<AnnouncementGoszakupDto>()
                 .HasMany(x => x.Lots)
                 .WithOne()

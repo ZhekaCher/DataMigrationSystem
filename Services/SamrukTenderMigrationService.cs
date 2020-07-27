@@ -161,6 +161,7 @@ namespace DataMigrationSystem.Services
                     UnitPrice = dtoLot.Price ?? 0,
                     FlagPrequalification = dtoLot.FlagPrequalification,
                     Terms = null,
+                    TruCode = dtoLot.TruCode
                 };
                 try
                 {
@@ -189,12 +190,12 @@ namespace DataMigrationSystem.Services
                     if (measure != null) 
                         lot.MeasureId = measure.Id;
                 }
-                if (dtoLot.TruCode != null)
-                {
-                    var tru = await webTenderContext.TruCodes.FirstOrDefaultAsync(x => x.Code == dtoLot.TruCode);
-                    if (tru != null)
-                        lot.TruId = tru.Id;
-                }
+                // if (dtoLot.TruCode != null)
+                // {
+                    // var tru = await webTenderContext.TruCodes.FirstOrDefaultAsync(x => x.Code == dtoLot.TruCode);
+                    // if (tru != null)
+                        // lot.TruId = tru.Id;
+                // }
                 lot.Documentations = new List<LotDocumentation>();
                 foreach (var document in dtoLot.Documentations.Select(fileDto => new LotDocumentation
                 {
