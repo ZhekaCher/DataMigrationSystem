@@ -57,8 +57,6 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         [Column("flag_prequalification")]
         public bool FlagPrequalification { get; set; }  
         public List<LotDocumentation> Documentations { get; set; } =  new List<LotDocumentation>();
-        [Column("tru_code")]
-        public string TruCode { get; set; }
     }
 
     [Table("lot_documentations")]
