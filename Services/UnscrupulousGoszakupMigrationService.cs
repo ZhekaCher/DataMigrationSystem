@@ -49,7 +49,8 @@ namespace DataMigrationSystem.Services
             await using var webUnscrupulousGoszakupContext = new WebUnscrupulousGoszakupContext();
             await using var webUnscrupulousGoszakupContext2 = new WebUnscrupulousGoszakupContext();
             await using var parsedUnscrupulousGoszakupContext = new ParsedUnscrupulousGoszakupContext();
-            var firstParsedTime = await parsedUnscrupulousGoszakupContext.UnscrupulousGoszakupDtos.MinAsync(x => x.Relevance);
+            var firstParsedTime =
+                await parsedUnscrupulousGoszakupContext.UnscrupulousGoszakupDtos.MinAsync(x => x.Relevance);
             var old = webUnscrupulousGoszakupContext.UnscrupulousGoszakup.Where(x =>
                 x.RelevanceDate < firstParsedTime).Where(x => x.Status == true);
             var left = old.Count();
@@ -85,7 +86,8 @@ namespace DataMigrationSystem.Services
             await using var parsedUnscrupulousGoszakupContext = new ParsedUnscrupulousGoszakupContext();
 
             foreach (var dto in parsedUnscrupulousGoszakupContext.UnscrupulousGoszakupDtos.Where(x =>
-                x.Pid % NumOfThreads == threadNum).Where(x => x.SupplierInnunp == null))
+                    x.Pid % NumOfThreads == threadNum).Where(x => x.SupplierInnunp == null)
+                .Include(x => x.RnuReferenceGoszakupDtos))
             {
                 var temp = DtoToWeb(dto);
                 try
@@ -120,6 +122,11 @@ namespace DataMigrationSystem.Services
             unscrupulousGoszakup.BiinCompanies = unscrupulousGoszakupDto.SupplierBiin;
             unscrupulousGoszakup.RelevanceDate = unscrupulousGoszakupDto.Relevance;
             unscrupulousGoszakup.Status = true;
+            if (unscrupulousGoszakupDto.RnuReferenceGoszakupDtos.Count > 0)
+                unscrupulousGoszakup.StartDate =
+                    unscrupulousGoszakupDto.RnuReferenceGoszakupDtos.OrderBy(x => x.StartDate).ToList()[0].StartDate;
+            else
+                unscrupulousGoszakup.StartDate = unscrupulousGoszakupDto.Relevance;
             return unscrupulousGoszakup;
         }
     }

@@ -12,5 +12,12 @@ namespace DataMigrationSystem.Context.Parsed
     public class ParsedUnscrupulousGoszakupContext : ParsedContext
     {
         public DbSet<UnscrupulousGoszakupDto> UnscrupulousGoszakupDtos { get; set; }
+        public DbSet<RnuReferenceGoszakupDto> RnuReferenceGoszakupDtos { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<UnscrupulousGoszakupDto>().HasMany(x => x.RnuReferenceGoszakupDtos).WithOne()
+                .HasForeignKey(x => x.SupplierBiin).HasPrincipalKey(x => x.SupplierBiin);
+        }
     }
 }

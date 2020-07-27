@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Web;
@@ -61,9 +62,9 @@ namespace DataMigrationSystem.Services
         private async Task Migrate(int threadNum)
         {
             Logger.Info("Started thread");
-            await using var webTenderContext = new AdataTenderContext();
             await using var parsedAnnouncementGoszakupContext = new ParsedGoszakupContext();
-            foreach (var dto in parsedAnnouncementGoszakupContext.AnnouncementGoszakupDtos.Where(x =>
+            parsedAnnouncementGoszakupContext.ChangeTracker.AutoDetectChangesEnabled = false;
+            foreach (var dto in parsedAnnouncementGoszakupContext.AnnouncementGoszakupDtos.AsNoTracking().Where(x =>
                     x.Id % NumOfThreads == threadNum)
                 .Include(x => x.Lots)
                 .ThenInclude(x => x.RefLotStatus)
@@ -75,7 +76,11 @@ namespace DataMigrationSystem.Services
             {
                 try
                 {
+                    
+                    await using var webTenderContext = new AdataTenderContext();
+                    webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
                     var announcement = DtoToWebAnnouncement(dto);
+                    
                     var found = webTenderContext.AdataAnnouncements
                         .FirstOrDefault(x =>
                             x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
@@ -111,7 +116,7 @@ namespace DataMigrationSystem.Services
                 }
 
                 lock (_lock)
-                    Logger.Trace($"Left {--_total}");
+                    Logger.Trace($"Left {--_total} {Thread.CurrentThread.Name}");
             }
 
             Logger.Info($"Completed thread at {_total}");
@@ -165,7 +170,7 @@ namespace DataMigrationSystem.Services
                     x => x.Name == lotGoszakupDto.RefTradeMethod?.NameRu);
             var lot = new AdataLot
             {
-                SourceNumber = lotGoszakupDto.LotNumber,
+                SourceNumber = lotGoszakupDto.TrdBuyNumberAnno + "-" + lotGoszakupDto.LotNumber,
                 StatusId = status?.Id,
                 MethodId = method?.Id,
                 SourceId = _sourceId,
