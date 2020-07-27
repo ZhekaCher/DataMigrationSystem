@@ -153,7 +153,8 @@ namespace DataMigrationSystem.Services
                     Quantity = dtoLot.Quantity ?? 0,
                     TotalAmount = dtoLot.FullPrice ?? 0,
                     Terms = dtoLot.RequiredContractTerm,
-                    SourceNumber = announcement.SourceNumber + "-" + dtoLot.LotNumber
+                    SourceNumber = announcement.SourceNumber + "-" + dtoLot.LotNumber,
+                    TruCode = dtoLot.ScpCode
                 };
                 if (lot.Quantity > 0 && lot.TotalAmount > 0)
                 {
@@ -165,12 +166,12 @@ namespace DataMigrationSystem.Services
                     if (measure != null) 
                         lot.MeasureId = measure.Id;
                 }
-                if (dtoLot.ScpCode != null)
-                {
-                    var tru = await webTenderContext.TruCodes.FirstOrDefaultAsync(x => x.Code == dtoLot.ScpCode);
-                    if (tru != null)
-                        lot.TruId = tru.Id;
-                }
+                // if (dtoLot.ScpCode != null)
+                // {
+                    // var tru = await webTenderContext.TruCodes.FirstOrDefaultAsync(x => x.Code == dtoLot.ScpCode);
+                    // if (tru != null)
+                    //     lot.TruId = tru.Id;
+                // }
                 lot.Documentations = new List<LotDocumentation>
                 {
                     new LotDocumentation
