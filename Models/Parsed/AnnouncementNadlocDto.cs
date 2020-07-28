@@ -34,6 +34,7 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("konkurs_doc_link")] public string KonkursDocLink{get; set;}
         [Column("konkurs_doc_path")] public string KonkursDocPath{get; set;}
         [Column("id")] public long Id{get; set;}
+        [Column("relevance_date")] public DateTime RelevanceDate{get; set;}
         public List<LotNadlocDto> Lots { get; set; }
     }
 }

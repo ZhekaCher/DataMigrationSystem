@@ -26,7 +26,7 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("contract_doc_path")] public string ContractDocPath{get; set;}
         [Column("lot_number")] public long? LotNumber{get; set;}
         [Column("tender_id")] public string TenderId{get; set;}
-        [Column("relevance_date")] public DateTime? RelevanceDate{get; set;}
+        [Column("relevance_date")] public DateTime RelevanceDate{get; set;}
 		
     }
 }
