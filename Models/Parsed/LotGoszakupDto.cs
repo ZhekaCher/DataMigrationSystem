@@ -42,6 +42,7 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("index_date")] public DateTime? IndexDate { get; set; }
         [Column("system_id")] public int? SystemId { get; set; }
         [Column("relevance")] public DateTime Relevance { get; set; }
+        [Column("plan_point")] public int? PlanPoint { get; set; }
         public RefTradeMethodGoszakupDto RefTradeMethod { get; set; }
         public RefLotStatusGoszakupDto RefLotStatus { get; set; }
     }
