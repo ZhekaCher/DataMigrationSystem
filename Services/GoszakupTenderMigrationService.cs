@@ -174,7 +174,7 @@ namespace DataMigrationSystem.Services
                     x => x.Name == lotGoszakupDto.RefTradeMethod?.NameRu);
             var lot = new AdataLot
             {
-                SourceNumber = lotGoszakupDto.TrdBuyNumberAnno + "-" + lotGoszakupDto.LotNumber,
+                SourceNumber = lotGoszakupDto.LotNumber,
                 StatusId = status?.Id,
                 MethodId = method?.Id,
                 SourceId = _sourceId,
