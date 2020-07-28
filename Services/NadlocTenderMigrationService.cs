@@ -129,13 +129,19 @@ namespace DataMigrationSystem.Services
                 if (method != null)
                     announcement.MethodId = method.Id;
             }
-            announcement.Documentations = new List<AnnouncementDocumentation>
+
+            if (dto.KonkursDocLink != null)
             {
-                new AnnouncementDocumentation
+                announcement.Documentations = new List<AnnouncementDocumentation>
                 {
-                    Name = dto.KonkursDocName, SourceLink = dto.KonkursDocLink, DocumentationTypeId = 3, Location = dto.KonkursDocPath, RelevanceDate = dto.RelevanceDate
-                }
-            };
+                    new AnnouncementDocumentation
+                    {
+                        Name = dto.KonkursDocName, SourceLink = dto.KonkursDocLink, DocumentationTypeId = 3,
+                        Location = dto.KonkursDocPath, RelevanceDate = dto.RelevanceDate
+                    }
+                };
+            }
+
             announcement.Lots = new List<AdataLot>();
             int lotIndex = 0;
             foreach (var dtoLot in dto.Lots)
@@ -176,19 +182,23 @@ namespace DataMigrationSystem.Services
                     if (tru != null)
                         lot.TruId = tru.Id;
                 }*/
-                lot.Documentations = new List<LotDocumentation>
+                lot.Documentations = new List<LotDocumentation>();
+                if (dtoLot.TechDocLink != null)
+                    lot.Documentations.Add(new LotDocumentation
+                    {
+                        Name = dtoLot.TechDocName, SourceLink = dtoLot.TechDocLink, DocumentationTypeId = 1,
+                        Location = dtoLot.TechDocPath,
+                        RelevanceDate = dtoLot.RelevanceDate
+                    });
+                if (dtoLot.ContractDocLink != null)
                 {
-                    new LotDocumentation
+                    lot.Documentations.Add(new LotDocumentation
                     {
-                        Name = dtoLot.TechDocName, SourceLink = dtoLot.TechDocLink, DocumentationTypeId = 1,Location = dtoLot.TechDocPath,
+                        Name = dtoLot.ContractDocName, SourceLink = dtoLot.ContractDocLink, DocumentationTypeId = 2,
+                        Location = dtoLot.ContractDocPath,
                         RelevanceDate = dtoLot.RelevanceDate
-                    },
-                    new LotDocumentation
-                    {
-                        Name = dtoLot.ContractDocName, SourceLink = dtoLot.ContractDocLink, DocumentationTypeId = 2,Location = dtoLot.ContractDocPath,
-                        RelevanceDate = dtoLot.RelevanceDate
-                    }
-                };
+                    });
+                }
                 announcement.Lots.Add(lot);
             }
             return announcement;
