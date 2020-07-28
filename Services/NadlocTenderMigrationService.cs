@@ -19,7 +19,6 @@ namespace DataMigrationSystem.Services
         public NadlocTenderMigrationService(int numOfThreads = 20)
         {
             NumOfThreads = numOfThreads;
-            _total = new ParsedNadlocContext().AnnouncementNadlocDtos.Count();
         }
         protected override Logger InitializeLogger()
         {
@@ -43,13 +42,15 @@ namespace DataMigrationSystem.Services
         private async Task Migrate(int threadNum)
         {
             Logger.Info("Started Thread");
-            await using var webTenderContext = new AdataTenderContext();
             await using var parsedAnnouncementNadlocContext = new ParsedNadlocContext();
             var nadlocDtos = parsedAnnouncementNadlocContext.AnnouncementNadlocDtos
+                .AsNoTracking()
                 .Where(t => t.Id % NumOfThreads == threadNum)
                 .Include(x=>x.Lots);
             foreach (var dto in nadlocDtos)
             {
+                await using var webTenderContext = new AdataTenderContext();
+                webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
                 var announcement = await DtoToWebAnnouncement(dto);
                 try
                 {
@@ -78,7 +79,7 @@ namespace DataMigrationSystem.Services
                 }
 
                 lock (_lock)
-                    Logger.Trace($"Left {_total--}");
+                    Logger.Trace($"Left {--_total}");
             }
             Logger.Info("Completed thread");
             
@@ -88,6 +89,7 @@ namespace DataMigrationSystem.Services
         {
             await using var webTenderContext = new AdataTenderContext();
             await using var parsedAnnouncementNadlocContext = new ParsedNadlocContext();
+            _total = await parsedAnnouncementNadlocContext.AnnouncementNadlocDtos.CountAsync();
             var units = parsedAnnouncementNadlocContext.LotNadlocDtos.Select(x=> x.Unit).Distinct().Select(x=>new Measure {Name = x});
             await webTenderContext.Measures.UpsertRange(units).On(x => x.Name).RunAsync();
             var truCodes = parsedAnnouncementNadlocContext.LotNadlocDtos.Select(x=> new TruCode {Code = x.ScpCode, Name = x.ScpDescription}).Distinct();
@@ -112,7 +114,8 @@ namespace DataMigrationSystem.Services
                 LotsQuantity = dto.LotAmount ?? 0,
                 SourceId = 3,
                 EmailAddress = dto.ContactEmail,
-                PhoneNumber = dto.ContactPhone
+                PhoneNumber = dto.ContactPhone,
+                RelevanceDate = dto.RelevanceDate
             };
             // announcement.SourceLink = $"http://reestr.nadloc.kz/ru/protocol/announce/{dto.FullId}";
             if (dto.Status != null)
@@ -131,7 +134,7 @@ namespace DataMigrationSystem.Services
             {
                 new AnnouncementDocumentation
                 {
-                    Name = dto.KonkursDocName, SourceLink = dto.KonkursDocLink, DocumentationTypeId = 3,Location = dto.KonkursDocPath
+                    Name = dto.KonkursDocName, SourceLink = dto.KonkursDocLink, DocumentationTypeId = 3, Location = dto.KonkursDocPath, RelevanceDate = dto.RelevanceDate
                 }
             };
             announcement.Lots = new List<AdataLot>();
@@ -155,7 +158,8 @@ namespace DataMigrationSystem.Services
                     TotalAmount = dtoLot.FullPrice ?? 0,
                     Terms = dtoLot.RequiredContractTerm,
                     SourceNumber = announcement.SourceNumber + "-" + (++lotIndex),
-                    TruCode = dtoLot.ScpCode
+                    TruCode = dtoLot.ScpCode,
+                    RelevanceDate = dtoLot.RelevanceDate
                 };
                 if (lot.Quantity > 0 && lot.TotalAmount > 0)
                 {
@@ -177,11 +181,13 @@ namespace DataMigrationSystem.Services
                 {
                     new LotDocumentation
                     {
-                        Name = dtoLot.TechDocName, SourceLink = dtoLot.TechDocLink, DocumentationTypeId = 1,Location = dtoLot.TechDocPath
+                        Name = dtoLot.TechDocName, SourceLink = dtoLot.TechDocLink, DocumentationTypeId = 1,Location = dtoLot.TechDocPath,
+                        RelevanceDate = dtoLot.RelevanceDate
                     },
                     new LotDocumentation
                     {
-                        Name = dtoLot.ContractDocName, SourceLink = dtoLot.ContractDocLink, DocumentationTypeId = 2,Location = dtoLot.ContractDocPath
+                        Name = dtoLot.ContractDocName, SourceLink = dtoLot.ContractDocLink, DocumentationTypeId = 2,Location = dtoLot.ContractDocPath,
+                        RelevanceDate = dtoLot.RelevanceDate
                     }
                 };
                 announcement.Lots.Add(lot);

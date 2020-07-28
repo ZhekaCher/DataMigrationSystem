@@ -42,15 +42,17 @@ namespace DataMigrationSystem.Services
         private async Task Migrate(int threadNum)
         {
             Logger.Info("Started Thread");
-            await using var webTenderContext = new AdataTenderContext();
             await using var parsedSamrukContext = new ParsedSamrukContext();
             var samrukAdvertDtos = parsedSamrukContext.SamrukAdverts
+                .AsNoTracking()
                 .Where(t => t.Id % NumOfThreads == threadNum)
                 .Include(x=>x.Lots)
                 .ThenInclude(x=> x.Documentations)
                 .Include(x=>x.Documentations);
             foreach (var dto in samrukAdvertDtos)
             {
+                await using var webTenderContext = new AdataTenderContext();
+                webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
                 var announcement = await DtoToWebAnnouncement(dto);
                 try
                 {
@@ -78,7 +80,7 @@ namespace DataMigrationSystem.Services
                 }
 
                 lock (_lock)
-                    Logger.Trace($"Left {++_total}");
+                    Logger.Trace($"Left {--_total}");
             }
 
             Logger.Info("Completed thread");
@@ -89,6 +91,7 @@ namespace DataMigrationSystem.Services
         {
             await using var webTenderContext = new AdataTenderContext();
             await using var parsedSamrukContext = new ParsedSamrukContext();
+            _total = await parsedSamrukContext.SamrukAdverts.CountAsync();
             var units = parsedSamrukContext.Lots.Select(x=> new Measure {Name = x.MkeiRussian}).Distinct();
             await webTenderContext.Measures.UpsertRange(units).On(x => x.Name).RunAsync();
             var truCodes = parsedSamrukContext.Lots.Select(x=> new TruCode {Code = x.TruCode, Name = x.TruDetailRussian}).Distinct();
