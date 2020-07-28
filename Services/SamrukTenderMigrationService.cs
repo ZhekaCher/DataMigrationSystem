@@ -53,7 +53,7 @@ namespace DataMigrationSystem.Services
             {
                 await using var webTenderContext = new AdataTenderContext();
                 webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
-                var announcement = await DtoToWebAnnouncement(dto);
+                var announcement = await DtoToWebAnnouncement(webTenderContext, dto);
                 try
                 {
                     var found = webTenderContext.AdataAnnouncements
@@ -102,10 +102,8 @@ namespace DataMigrationSystem.Services
             var documentationTypes = parsedSamrukContext.SamrukFiles.Select(x => new DocumentationType {Name = x.Category}).Distinct();
             await webTenderContext.DocumentationTypes.UpsertRange(documentationTypes).On(x => x.Name).RunAsync();
         }
-        private async Task<AdataAnnouncement> DtoToWebAnnouncement(SamrukAdvertDto dto)
+        private async Task<AdataAnnouncement> DtoToWebAnnouncement(AdataTenderContext webTenderContext, SamrukAdvertDto dto)
         {
-            await using var webTenderContext = new AdataTenderContext();
-
             var announcement = new AdataAnnouncement
             {
                 SourceNumber =  dto.AdvertId.ToString(),

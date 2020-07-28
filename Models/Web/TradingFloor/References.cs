@@ -63,13 +63,11 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
     public class TruCode
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("id")]
-        public long Id { get; set; }
-        [Column("name")]
-        public string Name { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Column("code")]
         public string Code { get; set; }
+        [Column("name")]
+        public string Name { get; set; }
     }
     [Table("documentation_types")]
     public class DocumentationType

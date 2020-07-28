@@ -51,7 +51,7 @@ namespace DataMigrationSystem.Services
             {
                 await using var webTenderContext = new AdataTenderContext();
                 webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
-                var announcement = await DtoToWebAnnouncement(dto);
+                var announcement = await DtoToWebAnnouncement(webTenderContext, dto);
                 try
                 {
                     var found = webTenderContext.AdataAnnouncements
@@ -98,10 +98,9 @@ namespace DataMigrationSystem.Services
                 await webTenderContext.TruCodes.UpsertRange(truCode).On(x => x.Code).RunAsync();
             }
         }
-        private async Task<AdataAnnouncement> DtoToWebAnnouncement(AnnouncementNadlocDto dto)
+        private static async Task<AdataAnnouncement> DtoToWebAnnouncement(AdataTenderContext webTenderContext, AnnouncementNadlocDto dto)
         {
-            await using var webTenderContext = new AdataTenderContext();
-
+            // await using var webTenderContext = new AdataTenderContext();
             var announcement = new AdataAnnouncement
             {
                 SourceNumber =  dto.FullId,
