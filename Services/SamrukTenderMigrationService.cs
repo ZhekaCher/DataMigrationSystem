@@ -129,7 +129,7 @@ namespace DataMigrationSystem.Services
                 PhoneNumber = dto.Phone,
                 FlagPrequalification = dto.FlagPrequalification
             };
-            announcement.SourceLink = $"https://zakup.sk.kz/#/ext(popup:item/{announcement.SourceNumber}/lot)";
+            announcement.SourceLink = $"https://zakup.sk.kz/#/ext(popup:item/{announcement.SourceNumber}/advert)";
             if (dto.AdvertStatus != null)
             {
                 var status = await webTenderContext.Statuses.FirstOrDefaultAsync(x => x.Name == dto.AdvertStatus);
@@ -176,7 +176,7 @@ namespace DataMigrationSystem.Services
                     TruCode = dtoLot.TruCode
                 };
                 try
-                {
+                {    
                     lot.Quantity = double.Parse(dtoLot.Count, System.Globalization.CultureInfo.InvariantCulture);
                 }
                 catch (Exception)
