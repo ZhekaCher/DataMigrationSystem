@@ -55,11 +55,11 @@ namespace DataMigrationSystem.Services
                 try
                 {
                     var found = webTenderContext.AdataAnnouncements
-                        .Include(x=>x.Lots)
+                        .Select(x=> new {x.Id, x.SourceNumber, x.SourceId})
                         .FirstOrDefault(x => x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
                     if (found != null)
                     {
-                        webTenderContext.AdataLots.RemoveRange(found.Lots);
+                        webTenderContext.AdataLots.RemoveRange(webTenderContext.AdataLots.Where(x=>x.AnnouncementId == found.Id));
                         await webTenderContext.SaveChangesAsync();
                         announcement.Lots.ForEach(x=>x.AnnouncementId = found.Id);
                         await webTenderContext.AdataLots.AddRangeAsync(announcement.Lots);

@@ -56,8 +56,8 @@ namespace DataMigrationSystem.Services
                 var announcement = await DtoToWebAnnouncement(webTenderContext, dto);
                 try
                 {
-                    var found = await webTenderContext.AdataAnnouncements
-                        .FirstOrDefaultAsync(x => x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
+                    var found = webTenderContext.AdataAnnouncements.Select(x => new{x.Id, x.SourceNumber, x.SourceId})
+                        .FirstOrDefault(x => x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
                     if (found != null)
                     {
                         await webTenderContext.AdataAnnouncements.Upsert(announcement).On(x => new {x.SourceNumber, x.SourceId})
@@ -65,8 +65,8 @@ namespace DataMigrationSystem.Services
                         foreach (var lot in announcement.Lots)
                         {
                             lot.AnnouncementId = found.Id;
-                            var foundLot = webTenderContext.AdataLots.FirstOrDefaultAsync(x =>
-                                x.SourceNumber == lot.SourceNumber && x.SourceId == lot.SourceId);
+                            var foundLot = webTenderContext.AdataLots.Select(x => new{x.Id, x.SourceNumber, x.SourceId})
+                                .FirstOrDefault(x => x.SourceNumber == lot.SourceNumber && x.SourceId == lot.SourceId);
                             if (foundLot != null)
                             {
                                 await webTenderContext.AdataLots.Upsert(lot).On(x => new {x.SourceNumber, x.SourceId})
@@ -141,6 +141,12 @@ namespace DataMigrationSystem.Services
                 var method = await  webTenderContext.Methods.FirstOrDefaultAsync(x => x.Name == dto.TenderType);
                 if (method != null) 
                     announcement.MethodId = method.Id;
+            }
+            if (dto.TenderPriority != null)
+            {
+                var method = await  webTenderContext.TenderPriorities.FirstOrDefaultAsync(x => x.Name == dto.TenderPriority);
+                if (method != null) 
+                    announcement.TenderPriorityId = method.Id;
             }
             announcement.Documentations = new List<AnnouncementDocumentation>();
             if (dto.Documentations != null && dto.Documentations.Count>0)

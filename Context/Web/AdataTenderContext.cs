@@ -17,7 +17,8 @@ namespace DataMigrationSystem.Context.Web
         public DbSet<Measure> Measures { get; set; }    
         public DbSet<TruCode> TruCodes { get; set; }    
         public DbSet<DocumentationType> DocumentationTypes { get; set; }  
-        
+        public DbSet<TenderPriority> TenderPriorities { get; set; }    
+
         public AdataTenderContext(DbContextOptions<WebContext> options)
             : base(options)
         {

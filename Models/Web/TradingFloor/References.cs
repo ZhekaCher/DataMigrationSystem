@@ -37,6 +37,16 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         [Column("combined_id")]
         public long? CombinedId { get; set; }
     }
+    [Table("tender_priorities")]
+    public class TenderPriority
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("id")]
+        public long Id { get; set; }
+        [Column("name")]
+        public string Name { get; set; }
+    }
     [Table("combined_methods")]
     public class CombinedMethod
     {

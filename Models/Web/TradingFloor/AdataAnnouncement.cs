@@ -42,6 +42,8 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         public string PhoneNumber { get; set; }
         [Column("flag_prequalification")]
         public bool FlagPrequalification { get; set; }
+        [Column("tender_priority_id")]
+        public long? TenderPriorityId { get; set; }
         public List<AdataLot> Lots { get; set; }
         public List<AnnouncementDocumentation> Documentations { get; set; }
 
