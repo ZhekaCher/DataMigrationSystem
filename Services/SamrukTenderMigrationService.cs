@@ -71,6 +71,9 @@ namespace DataMigrationSystem.Services
                             {
                                 await webTenderContext.AdataLots.Upsert(lot).On(x => new {x.SourceNumber, x.SourceId})
                                     .RunAsync();
+                                lot.PaymentCondition.LotId = foundLot.Id;
+                                await webTenderContext.PaymentConditions.Upsert(lot.PaymentCondition).On(x => x.LotId)
+                                    .RunAsync();
                             }
                             else
                             {
@@ -178,7 +181,7 @@ namespace DataMigrationSystem.Services
                     TotalAmount = dtoLot.SumTruNoNds ?? 0,
                     UnitPrice = dtoLot.Price ?? 0,
                     FlagPrequalification = dtoLot.FlagPrequalification,
-                    Terms = null,
+                    Terms = dtoLot.DeliveryTime,
                     TruCode = dtoLot.TruCode
                 };
                 try
@@ -224,6 +227,12 @@ namespace DataMigrationSystem.Services
                 {
                     lot.Documentations.Add(document);
                 }
+                lot.PaymentCondition = new PaymentCondition
+                {
+                    PrepayPayment = dtoLot.PrepayPayment,
+                    FinalPayment = dtoLot.FinalPayment,
+                    InterimPayment = dtoLot.InterimPayment
+                };
                 announcement.Lots.Add(lot);
             }
             return announcement;

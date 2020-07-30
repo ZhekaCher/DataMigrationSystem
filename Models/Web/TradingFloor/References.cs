@@ -47,6 +47,22 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         [Column("name")]
         public string Name { get; set; }
     }
+    [Table("payment_conditions")]
+    public class PaymentCondition
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("id")]
+        public long Id { get; set; }
+        [Column("lot_id")]
+        public long LotId { get; set; }
+        [Column("final_payment")]
+        public int FinalPayment { get; set; }
+        [Column("interim_payment")]
+        public int InterimPayment { get; set; }
+        [Column("prepay_payment")]
+        public int PrepayPayment { get; set; }
+    }
     [Table("combined_methods")]
     public class CombinedMethod
     {

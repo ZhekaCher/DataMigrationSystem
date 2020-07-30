@@ -66,6 +66,10 @@ namespace DataMigrationSystem.Models.Parsed
 		[Column("additional_price_acceptance_stage")] public string AdditionalPriceAcceptanceStage{get; set;}
 		[Column("can_submit_commercial_offer")] public string CanSubmitCommercialOffer{get; set;}
 		[Column("count")] public string Count{get; set;}
+		[Column("delivery_time")] public string DeliveryTime{get; set;}
+		[Column("final_payment")] public int FinalPayment { get; set; }
+		[Column("interim_payment")] public int InterimPayment { get; set; }
+		[Column("prepay_payment")] public int PrepayPayment { get; set; }
 		public List<SamrukFilesDto> Documentations { get; set; }
     }
 }
