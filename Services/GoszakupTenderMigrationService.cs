@@ -81,7 +81,7 @@ namespace DataMigrationSystem.Services
                     webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
                     var announcement = DtoToWebAnnouncement(dto);
                     
-                    var found = webTenderContext.AdataAnnouncements
+                    var found = webTenderContext.AdataAnnouncements.Select(x => new{x.Id, x.SourceNumber, x.SourceId})
                         .FirstOrDefault(x =>
                             x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
                     if (found != null)
@@ -100,6 +100,7 @@ namespace DataMigrationSystem.Services
                     {
                         await webTenderContext.AdataAnnouncements.AddAsync(announcement);
                         await webTenderContext.SaveChangesAsync();
+                        await webTenderContext.DisposeAsync();
                     }
                 }
                 catch (Exception e)
@@ -154,10 +155,12 @@ namespace DataMigrationSystem.Services
             };
             announcement.Lots = new List<AdataLot>();
 
+            
             foreach (var lot in announcementGoszakupDto.Lots.Select(lotGoszakupDto => DtoToWebLot(lotGoszakupDto)))
             {
                 lot.ApplicationStartDate = announcementGoszakupDto.StartDate;
                 lot.ApplicationFinishDate = announcementGoszakupDto.EndDate;
+                lot.SourceLink = announcement.SourceLink;
                 announcement.Lots.Add(lot);
             }
 
@@ -179,6 +182,7 @@ namespace DataMigrationSystem.Services
                 MethodId = method?.Id,
                 SourceId = _sourceId,
                 CustomerBin = lotGoszakupDto.CustomerBin,
+                Title = lotGoszakupDto.NameRu,
                 // Supply location
                 // Tender location
                 // TruId

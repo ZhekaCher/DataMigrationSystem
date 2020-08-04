@@ -78,6 +78,7 @@ namespace DataMigrationSystem
 
             foreach (var migration in listOfMigrations)
             {
+                Console.Title = $"Data Migration System - {migration}"; 
                 if (!_configurations.ContainsKey(ConfigurationElements.Force))
                 {
                     await using var parserMonitoringContext = new ParserMonitoringContext();

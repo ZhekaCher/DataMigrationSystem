@@ -124,7 +124,7 @@ namespace DataMigrationSystem.Services
             unscrupulousGoszakup.Status = true;
             if (unscrupulousGoszakupDto.RnuReferenceGoszakupDtos.Count > 0)
                 unscrupulousGoszakup.StartDate =
-                    unscrupulousGoszakupDto.RnuReferenceGoszakupDtos.OrderBy(x => x.StartDate).ToList()[0].StartDate;
+                    unscrupulousGoszakupDto.RnuReferenceGoszakupDtos.OrderByDescending(x => x.StartDate).ToList()[0].StartDate;
             else
                 unscrupulousGoszakup.StartDate = unscrupulousGoszakupDto.Relevance;
             return unscrupulousGoszakup;

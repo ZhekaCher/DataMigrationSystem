@@ -16,7 +16,7 @@ namespace DataMigrationSystem.Services
         private int _total;
         private readonly object _lock = new object();
         
-        public PlanGoszakupMigrationService(int numOfThreads = 1)
+        public PlanGoszakupMigrationService(int numOfThreads = 20)
         {
             using var parsedGoszakupContext = new ParsedGoszakupContext();
             _total = parsedGoszakupContext.PlanGoszakupDtos.Count();
@@ -41,28 +41,29 @@ namespace DataMigrationSystem.Services
 
         private async Task Migrate(int threadNum)
         {
+            await Task.Delay(1);
             await using var parsedGoszakupContext = new ParsedGoszakupContext();
-         
+            await parsedGoszakupContext.Database.ExecuteSqlRawAsync(
+                "delete from avroradata.plan_goszakup p where p.id not in (select plan_point from avroradata.lot_goszakup)");
             foreach (var dto in parsedGoszakupContext.PlanGoszakupDtos.Where(x =>
                     x.Id % NumOfThreads == threadNum))
             {
                 try
                 {
+                    if (dto.Id==35959475)
+                    {
+                        Console.WriteLine(2); 
+                    }
                     await using var innerParsedGoszakupContext = new ParsedGoszakupContext();
                     await using var adataTenderContext = new AdataTenderContext();
                     var lot = innerParsedGoszakupContext.LotGoszakupDtos.FirstOrDefault(x => x.PlanPoint == dto.Id);
+                    if (lot.LotNumber.Contains("35332956-ОК1"))
+                    {
+                        Console.WriteLine(1);
+                    }
                     if (lot != null)
                     {
-                        var webLot = adataTenderContext.AdataLots.FirstOrDefault(x => x.SourceNumber == lot.LotNumber);
-                        if (webLot != null)
-                        {
-                            webLot.TruCode = dto.RefEnstruCode;
-                            // if (webLot != null) webLot.Title = dto.NameRu;
-                            webLot.Terms = dto.SupplyDateRu;
-                            adataTenderContext.Update(webLot);
-                        }
-
-                        await adataTenderContext.SaveChangesAsync();
+                        adataTenderContext.Database.ExecuteSqlRawAsync($"UPDATE lots SET tru_code = '{dto.RefEnstruCode}', terms= '{dto.SupplyDateRu}' WHERE source_number = '{lot.LotNumber}'").GetAwaiter().GetResult();
                     }
                 }
                 catch (Exception e)

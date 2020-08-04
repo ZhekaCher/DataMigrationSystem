@@ -57,10 +57,10 @@ namespace DataMigrationSystem.Services
         private async Task Migrate(int threadNum)
         {
             // Logger.Info("Started thread");
-            
-            await using var webContractContext = new WebContractContext();
+
+
             await using var parsedContractGoszakupContext = new ParsedContractGoszakupContext();
-            foreach (var dto in parsedContractGoszakupContext.ContractGoszakupDtos.Where(x =>
+            foreach (var dto in parsedContractGoszakupContext.ContractGoszakupDtos.AsNoTracking().Where(x =>
                 x.Id % NumOfThreads == threadNum))
             {
                 Contract temp;
@@ -69,6 +69,8 @@ namespace DataMigrationSystem.Services
                 temp.IdTf = _sTradingFloorId;
                 try
                 {
+                    await using var webContractContext = new WebContractContext();
+                    webContractContext.ChangeTracker.AutoDetectChangesEnabled = false;
                     await webContractContext.Contracts.Upsert(temp)
                         .On(x => new {x.IdContract, x.IdTf}).RunAsync();
                     await webContractContext.ContractsGoszakup.Upsert(tempGoszakup)
