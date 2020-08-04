@@ -51,15 +51,15 @@ namespace DataMigrationSystem.Services
             {
                 await using var webTenderContext = new AdataTenderContext();
                 webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
-                var announcement = await DtoToWebAnnouncement(dto);
+                var announcement = await DtoToWebAnnouncement(webTenderContext, dto);
                 try
                 {
                     var found = webTenderContext.AdataAnnouncements
-                        .Include(x=>x.Lots)
+                        .Select(x=> new {x.Id, x.SourceNumber, x.SourceId})
                         .FirstOrDefault(x => x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
                     if (found != null)
                     {
-                        webTenderContext.AdataLots.RemoveRange(found.Lots);
+                        webTenderContext.AdataLots.RemoveRange(webTenderContext.AdataLots.Where(x=>x.AnnouncementId == found.Id));
                         await webTenderContext.SaveChangesAsync();
                         announcement.Lots.ForEach(x=>x.AnnouncementId = found.Id);
                         await webTenderContext.AdataLots.AddRangeAsync(announcement.Lots);
@@ -98,10 +98,9 @@ namespace DataMigrationSystem.Services
                 await webTenderContext.TruCodes.UpsertRange(truCode).On(x => x.Code).RunAsync();
             }
         }
-        private async Task<AdataAnnouncement> DtoToWebAnnouncement(AnnouncementNadlocDto dto)
+        private static async Task<AdataAnnouncement> DtoToWebAnnouncement(AdataTenderContext webTenderContext, AnnouncementNadlocDto dto)
         {
-            await using var webTenderContext = new AdataTenderContext();
-
+            // await using var webTenderContext = new AdataTenderContext();
             var announcement = new AdataAnnouncement
             {
                 SourceNumber =  dto.FullId,
@@ -130,13 +129,19 @@ namespace DataMigrationSystem.Services
                 if (method != null)
                     announcement.MethodId = method.Id;
             }
-            announcement.Documentations = new List<AnnouncementDocumentation>
+
+            if (dto.KonkursDocLink != null)
             {
-                new AnnouncementDocumentation
+                announcement.Documentations = new List<AnnouncementDocumentation>
                 {
-                    Name = dto.KonkursDocName, SourceLink = dto.KonkursDocLink, DocumentationTypeId = 3, Location = dto.KonkursDocPath, RelevanceDate = dto.RelevanceDate
-                }
-            };
+                    new AnnouncementDocumentation
+                    {
+                        Name = dto.KonkursDocName, SourceLink = dto.KonkursDocLink, DocumentationTypeId = 3,
+                        Location = dto.KonkursDocPath, RelevanceDate = dto.RelevanceDate
+                    }
+                };
+            }
+
             announcement.Lots = new List<AdataLot>();
             int lotIndex = 0;
             foreach (var dtoLot in dto.Lots)
@@ -177,19 +182,23 @@ namespace DataMigrationSystem.Services
                     if (tru != null)
                         lot.TruId = tru.Id;
                 }*/
-                lot.Documentations = new List<LotDocumentation>
+                lot.Documentations = new List<LotDocumentation>();
+                if (dtoLot.TechDocLink != null)
+                    lot.Documentations.Add(new LotDocumentation
+                    {
+                        Name = dtoLot.TechDocName, SourceLink = dtoLot.TechDocLink, DocumentationTypeId = 1,
+                        Location = dtoLot.TechDocPath,
+                        RelevanceDate = dtoLot.RelevanceDate
+                    });
+                if (dtoLot.ContractDocLink != null)
                 {
-                    new LotDocumentation
+                    lot.Documentations.Add(new LotDocumentation
                     {
-                        Name = dtoLot.TechDocName, SourceLink = dtoLot.TechDocLink, DocumentationTypeId = 1,Location = dtoLot.TechDocPath,
+                        Name = dtoLot.ContractDocName, SourceLink = dtoLot.ContractDocLink, DocumentationTypeId = 2,
+                        Location = dtoLot.ContractDocPath,
                         RelevanceDate = dtoLot.RelevanceDate
-                    },
-                    new LotDocumentation
-                    {
-                        Name = dtoLot.ContractDocName, SourceLink = dtoLot.ContractDocLink, DocumentationTypeId = 2,Location = dtoLot.ContractDocPath,
-                        RelevanceDate = dtoLot.RelevanceDate
-                    }
-                };
+                    });
+                }
                 announcement.Lots.Add(lot);
             }
             return announcement;

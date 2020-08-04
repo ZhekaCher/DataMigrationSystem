@@ -53,10 +53,10 @@ namespace DataMigrationSystem.Services
             {
                 await using var webTenderContext = new AdataTenderContext();
                 webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
-                var announcement = await DtoToWebAnnouncement(dto);
+                var announcement = await DtoToWebAnnouncement(webTenderContext, dto);
                 try
                 {
-                    var found = webTenderContext.AdataAnnouncements
+                    var found = webTenderContext.AdataAnnouncements.Select(x => new{x.Id, x.SourceNumber, x.SourceId})
                         .FirstOrDefault(x => x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
                     if (found != null)
                     {
@@ -65,7 +65,21 @@ namespace DataMigrationSystem.Services
                         foreach (var lot in announcement.Lots)
                         {
                             lot.AnnouncementId = found.Id;
-                            await webTenderContext.AdataLots.Upsert(lot).On(x=> new {x.SourceNumber, x.SourceId}).RunAsync();
+                            var foundLot = webTenderContext.AdataLots.Select(x => new{x.Id, x.SourceNumber, x.SourceId})
+                                .FirstOrDefault(x => x.SourceNumber == lot.SourceNumber && x.SourceId == lot.SourceId);
+                            if (foundLot != null)
+                            {
+                                await webTenderContext.AdataLots.Upsert(lot).On(x => new {x.SourceNumber, x.SourceId})
+                                    .RunAsync();
+                                lot.PaymentCondition.LotId = foundLot.Id;
+                                await webTenderContext.PaymentConditions.Upsert(lot.PaymentCondition).On(x => x.LotId)
+                                    .RunAsync();
+                            }
+                            else
+                            {
+                                await webTenderContext.AdataLots.AddAsync(lot);
+                                await webTenderContext.SaveChangesAsync();
+                            }
                         }
                     }
                     else
@@ -102,10 +116,8 @@ namespace DataMigrationSystem.Services
             var documentationTypes = parsedSamrukContext.SamrukFiles.Select(x => new DocumentationType {Name = x.Category}).Distinct();
             await webTenderContext.DocumentationTypes.UpsertRange(documentationTypes).On(x => x.Name).RunAsync();
         }
-        private async Task<AdataAnnouncement> DtoToWebAnnouncement(SamrukAdvertDto dto)
+        private async Task<AdataAnnouncement> DtoToWebAnnouncement(AdataTenderContext webTenderContext, SamrukAdvertDto dto)
         {
-            await using var webTenderContext = new AdataTenderContext();
-
             var announcement = new AdataAnnouncement
             {
                 SourceNumber =  dto.AdvertId.ToString(),
@@ -120,7 +132,7 @@ namespace DataMigrationSystem.Services
                 PhoneNumber = dto.Phone,
                 FlagPrequalification = dto.FlagPrequalification
             };
-            announcement.SourceLink = $"https://zakup.sk.kz/#/ext(popup:item/{announcement.SourceNumber}/lot)";
+            announcement.SourceLink = $"https://zakup.sk.kz/#/ext(popup:item/{announcement.SourceNumber}/advert)";
             if (dto.AdvertStatus != null)
             {
                 var status = await webTenderContext.Statuses.FirstOrDefaultAsync(x => x.Name == dto.AdvertStatus);
@@ -132,6 +144,12 @@ namespace DataMigrationSystem.Services
                 var method = await  webTenderContext.Methods.FirstOrDefaultAsync(x => x.Name == dto.TenderType);
                 if (method != null) 
                     announcement.MethodId = method.Id;
+            }
+            if (dto.TenderPriority != null)
+            {
+                var method = await  webTenderContext.TenderPriorities.FirstOrDefaultAsync(x => x.Name == dto.TenderPriority);
+                if (method != null) 
+                    announcement.TenderPriorityId = method.Id;
             }
             announcement.Documentations = new List<AnnouncementDocumentation>();
             if (dto.Documentations != null && dto.Documentations.Count>0)
@@ -163,11 +181,11 @@ namespace DataMigrationSystem.Services
                     TotalAmount = dtoLot.SumTruNoNds ?? 0,
                     UnitPrice = dtoLot.Price ?? 0,
                     FlagPrequalification = dtoLot.FlagPrequalification,
-                    Terms = null,
+                    Terms = dtoLot.DeliveryTime,
                     TruCode = dtoLot.TruCode
                 };
                 try
-                {
+                {    
                     lot.Quantity = double.Parse(dtoLot.Count, System.Globalization.CultureInfo.InvariantCulture);
                 }
                 catch (Exception)
@@ -209,6 +227,12 @@ namespace DataMigrationSystem.Services
                 {
                     lot.Documentations.Add(document);
                 }
+                lot.PaymentCondition = new PaymentCondition
+                {
+                    PrepayPayment = dtoLot.PrepayPayment,
+                    FinalPayment = dtoLot.FinalPayment,
+                    InterimPayment = dtoLot.InterimPayment
+                };
                 announcement.Lots.Add(lot);
             }
             return announcement;

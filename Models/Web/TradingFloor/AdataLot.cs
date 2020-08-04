@@ -56,7 +56,8 @@ namespace DataMigrationSystem.Models.Web.TradingFloor
         public DateTime RelevanceDate { get; set; } = DateTime.Now;
         [Column("flag_prequalification")]
         public bool FlagPrequalification { get; set; }  
-        public List<LotDocumentation> Documentations { get; set; } =  new List<LotDocumentation>();
+        public List<LotDocumentation> Documentations { get; set; }
+        public PaymentCondition PaymentCondition { get; set; }
     }
 
     [Table("lot_documentations")]

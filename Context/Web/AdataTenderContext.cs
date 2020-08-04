@@ -17,7 +17,9 @@ namespace DataMigrationSystem.Context.Web
         public DbSet<Measure> Measures { get; set; }    
         public DbSet<TruCode> TruCodes { get; set; }    
         public DbSet<DocumentationType> DocumentationTypes { get; set; }  
-        
+        public DbSet<TenderPriority> TenderPriorities { get; set; }    
+        public DbSet<PaymentCondition> PaymentConditions { get; set; }    
+
         public AdataTenderContext(DbContextOptions<WebContext> options)
             : base(options)
         {
@@ -51,6 +53,11 @@ namespace DataMigrationSystem.Context.Web
                 .WithOne()
                 .HasForeignKey(x => x.LotId)
                 .HasPrincipalKey(x => x.Id);
+            modelBuilder.Entity<AdataLot>()
+                .HasOne(x => x.PaymentCondition)
+                .WithOne()
+                .HasForeignKey<PaymentCondition>(x => x.LotId)
+                .HasPrincipalKey<AdataLot>(x => x.Id);
         }
     }
 }
