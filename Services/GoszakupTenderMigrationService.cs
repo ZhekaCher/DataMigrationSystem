@@ -172,6 +172,10 @@ namespace DataMigrationSystem.Services
             var status =
                 webStatuses?.FirstOrDefault(
                     x => x.Name == lotGoszakupDto.RefLotStatus?.NameRu);
+            if (status == null)
+            {
+                Console.WriteLine(lotGoszakupDto.LotNumber);
+            }
             var method =
                 webMethods?.FirstOrDefault(
                     x => x.Name == lotGoszakupDto.RefTradeMethod?.NameRu);

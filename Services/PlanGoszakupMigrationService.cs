@@ -19,6 +19,8 @@ namespace DataMigrationSystem.Services
         public PlanGoszakupMigrationService(int numOfThreads = 20)
         {
             using var parsedGoszakupContext = new ParsedGoszakupContext();
+            parsedGoszakupContext.Database.ExecuteSqlRaw(
+                "delete from avroradata.plan_goszakup p where p.id not in (select plan_point from avroradata.lot_goszakup)");
             _total = parsedGoszakupContext.PlanGoszakupDtos.Count();
             NumOfThreads = numOfThreads;
         }
@@ -43,8 +45,6 @@ namespace DataMigrationSystem.Services
         {
             await Task.Delay(1);
             await using var parsedGoszakupContext = new ParsedGoszakupContext();
-            await parsedGoszakupContext.Database.ExecuteSqlRawAsync(
-                "delete from avroradata.plan_goszakup p where p.id not in (select plan_point from avroradata.lot_goszakup)");
             foreach (var dto in parsedGoszakupContext.PlanGoszakupDtos.Where(x =>
                     x.Id % NumOfThreads == threadNum))
             {
