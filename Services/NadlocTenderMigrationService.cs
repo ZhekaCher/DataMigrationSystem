@@ -114,7 +114,8 @@ namespace DataMigrationSystem.Services
                 SourceId = 3,
                 EmailAddress = dto.ContactEmail,
                 PhoneNumber = dto.ContactPhone,
-                RelevanceDate = dto.RelevanceDate
+                RelevanceDate = dto.RelevanceDate,
+                PublishDate = dto.DateStart
             };
             // announcement.SourceLink = $"http://reestr.nadloc.kz/ru/protocol/announce/{dto.FullId}";
             if (dto.Status != null)

@@ -130,7 +130,8 @@ namespace DataMigrationSystem.Services
                 SourceId = 1,
                 EmailAddress = dto.Email,
                 PhoneNumber = dto.Phone,
-                FlagPrequalification = dto.FlagPrequalification
+                FlagPrequalification = dto.FlagPrequalification,
+                PublishDate = dto.AcceptanceBeginDatetime
             };
             announcement.SourceLink = $"https://zakup.sk.kz/#/ext(popup:item/{announcement.SourceNumber}/advert)";
             if (dto.AdvertStatus != null)

@@ -151,6 +151,7 @@ namespace DataMigrationSystem.Services
                 LotsAmount = (double) announcementGoszakupDto.TotalSum,
                 SourceLink = $"https://www.goszakup.gov.kz/ru/announce/index/{announcementGoszakupDto.Id}",
                 RelevanceDate = announcementGoszakupDto.Relevance,
+                PublishDate = announcementGoszakupDto.PublishDate,
                 SourceId = _sourceId
             };
             announcement.Lots = new List<AdataLot>();
