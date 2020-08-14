@@ -19,6 +19,18 @@ namespace DataMigrationSystem
 {
     internal static class Program
     {
+        private static string _title;
+        public static string Title
+        {
+            get => _title;
+            set
+            {
+                _title = value;
+                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                    Console.Title = value;
+            }
+        }
+        
         private static Logger _logger;
         public static int NumOfErrors = 0;
 
@@ -70,8 +82,8 @@ namespace DataMigrationSystem
                               "  \n" +
                               "             God Bless         No Bugs\n" +
                               " \n");
-            Console.Title = "Data Migration System";
-            LogManager.Configuration = new XmlLoggingConfiguration("NLog.config");
+            Title = "Data Migration System";
+            LogManager.Configuration = new XmlLoggingConfiguration($"{AppDomain.CurrentDomain.BaseDirectory}NLog.config");
             LogManager.Configuration.Variables["sourceAddress"] = GetLocalIpAddress();
             _logger = LogManager.GetCurrentClassLogger();
             try
