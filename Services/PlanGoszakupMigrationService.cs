@@ -15,16 +15,20 @@ namespace DataMigrationSystem.Services
     {
         private int _total;
         private readonly object _lock = new object();
-        
+
         public PlanGoszakupMigrationService(int numOfThreads = 20)
         {
-            using var parsedGoszakupContext = new ParsedGoszakupContext();
-            parsedGoszakupContext.Database.ExecuteSqlRaw(
-                "delete from avroradata.plan_goszakup p where p.id not in (select plan_point from avroradata.lot_goszakup)");
-            _total = parsedGoszakupContext.PlanGoszakupDtos.Count();
+            using var adataTenderContext = new AdataTenderContext();
+            // using var parsedGoszakupContext = new ParsedGoszakupContext();
+            // parsedGoszakupContext.Database.ExecuteSqlRaw(
+            // "delete from avroradata.plan_goszakup p where p.id not in (select plan_point from avroradata.lot_goszakup)");
+            _total = adataTenderContext.AdataLots.Count(x => x.SourceId == 2 && x.TruCode == null);
+            adataTenderContext.Database.ExecuteSqlRaw("UPDATE adata_tender.announcements SET status_id=58 WHERE application_finish_date<now()");
+            adataTenderContext.Database.ExecuteSqlRaw("UPDATE adata_tender.lots SET status_id=38 WHERE application_finish_date<now()");
+            adataTenderContext.Dispose();
             NumOfThreads = numOfThreads;
         }
-        
+
         protected override Logger InitializeLogger()
         {
             return LogManager.GetCurrentClassLogger();
@@ -39,32 +43,43 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
+            await using var parsedGoszakupContext = new ParsedGoszakupContext();
+            parsedGoszakupContext.Database.ExecuteSqlRaw("truncate table avroradata.announcement_goszakup restart identity cascade;");
+            parsedGoszakupContext.Database.ExecuteSqlRaw("truncate table avroradata.lot_goszakup restart identity cascade;");
+            await parsedGoszakupContext.DisposeAsync();
         }
 
         private async Task Migrate(int threadNum)
         {
             await Task.Delay(1);
-            await using var parsedGoszakupContext = new ParsedGoszakupContext();
-            foreach (var dto in parsedGoszakupContext.PlanGoszakupDtos.Where(x =>
-                    x.Id % NumOfThreads == threadNum))
+            await using var adataTenderContext = new AdataTenderContext();
+
+            foreach (var model in adataTenderContext.AdataLots.Where(x =>
+                x.Id % NumOfThreads == threadNum &&
+                x.SourceId == 2 &&
+                x.TruCode == null))
             {
                 try
                 {
-                    if (dto.Id==35959475)
-                    {
-                        Console.WriteLine(2); 
-                    }
+                    await using var tempAdataTenderContext = new AdataTenderContext();
                     await using var innerParsedGoszakupContext = new ParsedGoszakupContext();
-                    await using var adataTenderContext = new AdataTenderContext();
-                    var lot = innerParsedGoszakupContext.LotGoszakupDtos.FirstOrDefault(x => x.PlanPoint == dto.Id);
-                    if (lot.LotNumber.Contains("35332956-ОК1"))
+                    var dtoLot =
+                        innerParsedGoszakupContext.LotGoszakupDtos.FirstOrDefault(
+                            x => x.LotNumber == model.SourceNumber);
+                    if (dtoLot == null)
+                        continue;
+                    var plan = innerParsedGoszakupContext.PlanGoszakupDtos.FirstOrDefault(x =>
+                        x.Id == dtoLot.PlanPoint);
+                    if (plan != null)
                     {
-                        Console.WriteLine(1);
+                        tempAdataTenderContext.Database
+                            .ExecuteSqlRawAsync(
+                                $"UPDATE lots SET tru_code = '{plan.RefEnstruCode}', terms= '{plan.SupplyDateRu}' WHERE source_number = '{model.SourceNumber}'")
+                            .GetAwaiter().GetResult();
                     }
-                    if (lot != null)
-                    {
-                        adataTenderContext.Database.ExecuteSqlRawAsync($"UPDATE lots SET tru_code = '{dto.RefEnstruCode}', terms= '{dto.SupplyDateRu}' WHERE source_number = '{lot.LotNumber}'").GetAwaiter().GetResult();
-                    }
+
+                    innerParsedGoszakupContext.Dispose();
+                    tempAdataTenderContext.Dispose();
                 }
                 catch (Exception e)
                 {

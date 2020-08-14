@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Web;
@@ -23,6 +24,7 @@ namespace DataMigrationSystem.Services
         {
             var parsedDocs = new ParsedGoszakupContext();
             _total = parsedDocs.TenderDocumentsGoszakup.Count();
+            NumOfThreads = numOfThreads;
             parsedDocs.Dispose();
         }
 
@@ -39,8 +41,10 @@ namespace DataMigrationSystem.Services
 
         private async Task Migrate(int threadNum)
         {
+            await Task.Delay(500);
             var parsedDocs = new ParsedGoszakupContext();
-
+            var adataTenderContextTemp = new AdataTenderContext();
+            adataTenderContextTemp.Dispose();
             foreach (var dto in parsedDocs.TenderDocumentsGoszakup.AsNoTracking().Where(x =>
                 x.Id % NumOfThreads == threadNum))
             {
@@ -61,7 +65,7 @@ namespace DataMigrationSystem.Services
                     var anno =
                         adataTenderContext.AdataAnnouncements.FirstOrDefault(x => x.SourceNumber == dto.Number);
                     if (anno == null) continue;
-
+                    await adataTenderContext.Database.ExecuteSqlRawAsync("");
                     adataTenderContext.AnnouncementDocumentations.Add(new AnnouncementDocumentation()
                     {
                         AnnouncementId = anno.Id,
@@ -101,8 +105,9 @@ namespace DataMigrationSystem.Services
                 catch (Exception e)
                 {
                 }
+
                 adataTenderContext.Dispose();
-                Console.WriteLine(--_total);
+                Console.WriteLine(--_total + " " + Thread.CurrentThread.ManagedThreadId);
             }
         }
     }

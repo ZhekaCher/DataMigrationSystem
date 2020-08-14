@@ -20,6 +20,7 @@ namespace DataMigrationSystem.Context.Parsed
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            optionsBuilder.EnableSensitiveDataLogging();
             optionsBuilder.UseNpgsql(
                 "Server = 192.168.1.25; Database = adata; Port=5432; User ID = administrator; Password = Z4P6PjEHnJ5nPT; Search Path = avroradata; Integrated Security=true; Pooling=true; Command Timeout=0; ");
         }
