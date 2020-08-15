@@ -115,6 +115,8 @@ namespace DataMigrationSystem.Services
             }
             var documentationTypes = parsedSamrukContext.SamrukFiles.Select(x => new DocumentationType {Name = x.Category}).Distinct();
             await webTenderContext.DocumentationTypes.UpsertRange(documentationTypes).On(x => x.Name).RunAsync();
+            var statuses = parsedSamrukContext.SamrukAdverts.Select(x => new Status{Name = x.AdvertStatus}).Distinct();
+            await webTenderContext.Statuses.UpsertRange(statuses).On(x => x.Name).RunAsync(); 
         }
         private async Task<AdataAnnouncement> DtoToWebAnnouncement(AdataTenderContext webTenderContext, SamrukAdvertDto dto)
         {
