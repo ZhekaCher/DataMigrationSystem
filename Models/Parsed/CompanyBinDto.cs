@@ -18,5 +18,8 @@ namespace DataMigrationSystem.Models.Parsed
         public List<IndustrialCertificatesDto> IndustrialCertificatesDtos { get; set; }
         [NotMapped]
         public List<ExportCertificatesDto> ExportCertificatesDtos { get; set; }
+        [NotMapped]
+        public List<UnscrupulousSuppliersDto> UnscrupulousSuppliersDtos { get; set; }
+        
     }
 }
