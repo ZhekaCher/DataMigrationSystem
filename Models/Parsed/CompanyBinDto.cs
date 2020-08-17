@@ -11,6 +11,12 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("biin")] 
         public long? Code {get; set;}
         [NotMapped]
-        public List<EnforcementDebtDto> EnforcementDebtDtos { get; set; } 
+        public List<EnforcementDebtDto> EnforcementDebtDtos { get; set; }
+        [NotMapped]
+        public List<LocalCertificatesDto> LocalCertificatesDto { get; set; }
+        [NotMapped]
+        public List<IndustrialCertificatesDto> IndustrialCertificatesDtos { get; set; }
+        [NotMapped]
+        public List<ExportCertificatesDto> ExportCertificatesDtos { get; set; }
     }
 }
