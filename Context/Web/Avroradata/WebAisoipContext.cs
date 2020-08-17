@@ -7,5 +7,6 @@ namespace DataMigrationSystem.Context.Web.Avroradata
     {
         public DbSet<Aisoip> Aisoip { get; set; }
         public DbSet<AisoipList> AisoipLists{ get; set; }
+        public DbSet<AisoipDetails> AisoipDetails{ get; set; }
     }
 }

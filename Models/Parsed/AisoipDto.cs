@@ -1,42 +1,33 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DataMigrationSystem.Models.Web.Avroradata
+namespace DataMigrationSystem.Models.Parsed
 {
     [Table("aisoip_companies")]
-    public class Aisoip
+    public class AisoipDto
     {
         [Key]
         [Column("id")]
-        public long? Id { get; set; }
+        public long Id { get; set; }
         
         [Column("biin")]
         public long? Biin { get; set; }
-        
-        [Column("ares_id")]
-        public long? AresId { get; set; }
         
         [Column("result")]
         public bool Result { get; set; }
         
         [Column("relevance_date")]
         public DateTime? RelevanceDate { get; set; } = DateTime.Now;
-    }
-    
-    [Table("aisoip_list")]
-    public class AisoipList
-    {
-        [Key]
-        [Column("id")]
-        public long Id { get; set; }
         
-        [Column("name")]
-        public string Name { get; set; }
-    }
-    
+        [Column("title")]
+        public string Title { get; set; }
+        public List<AisoipDetailsDto> AisoipDetailsDtos { get; set; }
+     }
+
     [Table("aisoip_details")]
-    public class AisoipDetails
+    public class AisoipDetailsDto
     {
         [Key]
         [Column("id")]
@@ -44,9 +35,6 @@ namespace DataMigrationSystem.Models.Web.Avroradata
 
         [Column("ares_id")]
         public long AresId { get; set; }
-        
-        [Column("biin")]
-        public long? Biin { get; set; }
         
         [Column("date")]
         public DateTime Date { get; set; }
@@ -62,6 +50,5 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         
         [Column("relevance_date")]
         public DateTime RelevanceDate { get; set; } = DateTime.Now;
-        
     }
 }
