@@ -42,8 +42,8 @@ namespace DataMigrationSystem.Services
             await Task.WhenAll(tasks);
            
             await using var parsedRegisterOfCertificatesContext = new ParsedRegisterOfCertificatesContext();
-            //await parsedRegisterOfCertificatesContext.Database.ExecuteSqlRawAsync(
-            //    "truncate avroradata.industrial_certificate, avroradata.local_certificate,avroradata.export_certificate restart identity;");
+            await parsedRegisterOfCertificatesContext.Database.ExecuteSqlRawAsync(
+                "truncate avroradata.industrial_certificate, avroradata.local_certificate,avroradata.export_certificate restart identity;");
 
         }
         private async Task MigrateLocal(int numThread)

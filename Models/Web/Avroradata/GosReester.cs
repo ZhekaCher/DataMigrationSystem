@@ -39,7 +39,6 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         public DateTime? NewsletterDate { get; set; }
 
         [Column("relevance_date")] public DateTime RelevanceDate { get; set; } = DateTime.Now;
-
-
+        
     }
 }
