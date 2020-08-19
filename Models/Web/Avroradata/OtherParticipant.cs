@@ -89,7 +89,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
             [Column("comp_id")] public long CompId { get; set; }
             [Column("decision_number")] public string DecisionNumber { get; set; }
             [Column("full_name")] public string FullName { get; set; }
-            [Column("decision_date")] public DateTime DecisionDate { get; set; }
+            [Column("decision_date")] public DateTime? DecisionDate { get; set; }
             [Column("report_date")] public string ReportDate { get; set; }
             [Column("iin")] public long? Iin { get; set; }
             
