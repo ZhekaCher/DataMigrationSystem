@@ -8,16 +8,6 @@ namespace DataMigrationSystem.Context.Web.Avroradata
         public  DbSet<ParticipantNadloc> ParticipantsNadloc { get; set; }
         public DbSet<CustomerNadloc> CustomersNadloc { get; set; }
         public DbSet<SupplierNadloc> SupplierNadloc { get; set; }
-        public WebParticipantNadlocContext(DbContextOptions<WebParticipantNadlocContext> options) 
-            : base(options)
-        {
-            
-        }
-
-        public WebParticipantNadlocContext()
-        {
-            
-        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
