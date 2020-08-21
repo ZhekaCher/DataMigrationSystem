@@ -1,6 +1,5 @@
 ﻿using DataMigrationSystem.Models.Parsed;
 using Microsoft.EntityFrameworkCore;
-using CustomUnionDeclarationsAd = DataMigrationSystem.Models.Web.Avroradata.CustomUnionDeclarationsAd;
 
 namespace DataMigrationSystem.Context.Parsed
 {
