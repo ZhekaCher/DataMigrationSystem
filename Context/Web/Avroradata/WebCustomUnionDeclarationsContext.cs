@@ -1,5 +1,4 @@
-﻿using DataMigrationSystem.Models.Parsed;
-using DataMigrationSystem.Models.Web.Avroradata;
+﻿using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Web.Avroradata

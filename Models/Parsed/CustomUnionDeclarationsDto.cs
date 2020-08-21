@@ -17,13 +17,13 @@ namespace DataMigrationSystem.Models.Parsed
         public DateTime ValFrom { get; set; }
 
         [Column("validity_until")] 
-        public DateTime ValUntil { get; set; }
+        public DateTime? ValUntil { get; set; }
 
         [Column("declarants_name")] 
         public string DeclarantsName { get; set; }
 
         [Column("declarants_iin_biin")] 
-        public long DeclarantsIinBiin { get; set; }
+        public long? DeclarantsIinBiin { get; set; }
 
         [Column("declarants_address")] 
         public string DeclarantsAddress { get; set; }
