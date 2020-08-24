@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Web;
@@ -55,17 +56,28 @@ namespace DataMigrationSystem.Services
                 try
                 {
                     var found = webTenderContext.AdataAnnouncements
-                        .Select(x=> new {x.Id, x.SourceNumber, x.SourceId})
                         .FirstOrDefault(x => x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
                     if (found != null)
                     {
-                        webTenderContext.AdataLots.RemoveRange(webTenderContext.AdataLots.Where(x=>x.AnnouncementId == found.Id));
-                        await webTenderContext.SaveChangesAsync();
-                        announcement.Lots.ForEach(x=>x.AnnouncementId = found.Id);
-                        await webTenderContext.AdataLots.AddRangeAsync(announcement.Lots);
-                        await webTenderContext.SaveChangesAsync();
-                        await webTenderContext.AdataAnnouncements.Upsert(announcement).On(x => new {x.SourceNumber, x.SourceId})
-                            .RunAsync();
+                        if (announcement.StatusId != 1 && found.StatusId == 1)
+                        {
+                            found.StatusId=announcement.StatusId;
+                            await webTenderContext.AdataLots.Where(x => x.AnnouncementId == found.Id)
+                                .ForEachAsync(x => x.StatusId = announcement.StatusId);
+                            await webTenderContext.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            webTenderContext.AdataLots.RemoveRange(
+                                webTenderContext.AdataLots.Where(x => x.AnnouncementId == found.Id));
+                            await webTenderContext.SaveChangesAsync();
+                            announcement.Lots.ForEach(x => x.AnnouncementId = found.Id);
+                            await webTenderContext.AdataLots.AddRangeAsync(announcement.Lots);
+                            await webTenderContext.SaveChangesAsync();
+                            await webTenderContext.AdataAnnouncements.Upsert(announcement)
+                                .On(x => new {x.SourceNumber, x.SourceId})
+                                .RunAsync();
+                        }
                     }
                     else
                     {
