@@ -56,14 +56,12 @@ namespace DataMigrationSystem.Services
                 try
                 {
                     var found = webTenderContext.AdataAnnouncements
-                        .Select(x=> new {x.Id, x.SourceNumber, x.SourceId})
                         .FirstOrDefault(x => x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
                     if (found != null)
                     {
                         if (announcement.StatusId != 1)
                         {
-                            webTenderContext.AdataAnnouncements.Attach(announcement)
-                                .Property(x => x.StatusId).IsModified = true;
+                            found.StatusId=announcement.StatusId;
                             await webTenderContext.AdataLots.Where(x => x.AnnouncementId == found.Id)
                                 .ForEachAsync(x => x.StatusId = announcement.StatusId);
                             await webTenderContext.SaveChangesAsync();
