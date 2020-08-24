@@ -59,7 +59,7 @@ namespace DataMigrationSystem.Services
                         .FirstOrDefault(x => x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
                     if (found != null)
                     {
-                        if (announcement.StatusId != 1)
+                        if (announcement.StatusId != 1 && found.StatusId == 1)
                         {
                             found.StatusId=announcement.StatusId;
                             await webTenderContext.AdataLots.Where(x => x.AnnouncementId == found.Id)
