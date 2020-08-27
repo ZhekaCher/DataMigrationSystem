@@ -46,6 +46,7 @@ namespace DataMigrationSystem.Services
                 "truncate avroradata.industrial_certificate, avroradata.local_certificate,avroradata.export_certificate restart identity;");
 
         }
+        
         private async Task MigrateLocal(int numThread)
         {
             await using var webRegisterOfCertificates = new WebRegisterOfCertificates();
@@ -53,6 +54,7 @@ namespace DataMigrationSystem.Services
             var companiesDto = parsedRegisterOfCertificatesContext.CompanyBinDtos
                 .Where(x => x.Code % NumOfThreads == numThread)
                 .Include(x => x.LocalCertificatesDto);
+
             foreach (var binDto in companiesDto)
             {
                 if (binDto.LocalCertificatesDto.Count == 0)
