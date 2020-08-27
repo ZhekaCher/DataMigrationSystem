@@ -8,6 +8,7 @@ namespace DataMigrationSystem.Context.Web.Avroradata
     public class WebKgdDebtorsContext : WebContext
     {
         public DbSet<KgdDebtors> KgdDebtors { get; set; }
+        public DbSet<KgdAllDebtorsCategory> KgdAllDebtorsCategory { get; set; }
         public DbSet<KgdDebtorsAgents> KgdDebtorsAgents { get; set; }
         public DbSet<KgdDebtorsCustomers> KgdDebtorsCustomers { get; set; }
     }

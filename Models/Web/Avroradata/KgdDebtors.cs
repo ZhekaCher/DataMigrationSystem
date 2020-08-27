@@ -13,10 +13,9 @@ namespace DataMigrationSystem.Models.Parsed
         
         [Column("iin_biin")]
         public long? IinBiin { get; set; }
-        
-        [Column("rnn")]
-        public long? Rnn { get; set; }
-        
+        [Column("code")]
+        public long Code { get; set; }
+
         [Column("fullname")]
         public string Fullname { get; set; }
         
@@ -34,6 +33,13 @@ namespace DataMigrationSystem.Models.Parsed
         
         [Column("relevance_date")]
         public DateTime RelevanceDate { get; set; }
+        [Column("category_id")]
+        public long CategoryId { get; set; }
+        
+        [Column("parse_date")]
+        public DateTime ParseDate { get; set; }
+        [Column("category_date")]
+        public DateTime CategoryDate { get; set; }
     }
     
     [Table("kgd_debtors_agents")]
@@ -47,9 +53,6 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("iin_biin")]
         public long? IinBiin { get; set; }
         
-        [Column("rnn")]
-        public long? Rnn { get; set; }
-        
         [Column("fullname")]
         public string Fullname { get; set; }
         
@@ -58,6 +61,13 @@ namespace DataMigrationSystem.Models.Parsed
         
         [Column("relevance_date")]
         public DateTime RelevanceDate { get; set; }
+        [Column("category_id")]
+        public long CategoryId { get; set; }
+        
+        [Column("parse_date")]
+        public DateTime ParseDate { get; set; }
+        [Column("category_date")]
+        public DateTime CategoryDate { get; set; }
     }
     
     [Table("kgd_debtors_customers")]
@@ -78,5 +88,23 @@ namespace DataMigrationSystem.Models.Parsed
         
         [Column("relevance_date")]
         public DateTime RelevanceDate { get; set; }
+        [Column("category_id")]
+        public long CategoryId { get; set; }
+        
+        [Column("parse_date")]
+        public DateTime ParseDate { get; set; }
+        [Column("category_date")]
+        public DateTime CategoryDate { get; set; }
+    }
+    [Table("kgd_all_debtors_category")]
+    public class KgdAllDebtorsCategory
+    {
+        [Key] 
+        [Column("id")]
+        public long Id { get; set; }
+        [Column("category")]
+        public string Category { get; set; }
+
+        [Column("relevance_date")] public DateTime RelevanceDate { get; set; } = DateTime.Now;
     }
 }
