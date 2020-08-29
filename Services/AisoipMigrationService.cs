@@ -44,48 +44,41 @@ namespace DataMigrationSystem.Services
 
         private async Task Migrate(int numThread)
         {
+            await Task.Delay(1);
             await using var parsedAisoipContext = new ParsedAisoipContext();
-            await using var webAisoipContext = new WebAisoipContext();
             var aisoips = parsedAisoipContext
                 .AisoipDtos
                 .Where(x => x.Id % NumOfThreads == numThread)
                 .Include(x => x.AisoipDetailsDtos); 
             foreach (var aisoip in aisoips)
             {
-                try
-                {await webAisoipContext.Aisoip.Upsert(new Aisoip
-                    {
-                        Result = aisoip.Result,
-                        Biin = aisoip.Biin,
-                        RelevanceDate = aisoip.RelevanceDate,
-                        AresId = _dictionary[aisoip.Title]
-                    }).On(x => new {x.Biin, x.AresId}).RunAsync();
-                    webAisoipContext.AisoipDetails.RemoveRange(webAisoipContext.AisoipDetails.Where(x => x.Biin == aisoip.Biin && x.AresId == _dictionary[aisoip.Title]));
-                    await webAisoipContext.SaveChangesAsync();
-                    if (aisoip.Result)
-                    {
-                        await webAisoipContext.AisoipDetails.AddRangeAsync(aisoip.AisoipDetailsDtos.Select(x=> new AisoipDetails
-                        {
-                            Biin = aisoip.Biin,
-                            AresId =_dictionary[aisoip.Title], 
-                            Date = x.Date,
-                            Address = x.Address,
-                            Name = x.Name,
-                            Tel = x.Tel,
-                            RelevanceDate = x.RelevanceDate
-                        }));
-                        Console.WriteLine();
-                        await parsedAisoipContext.SaveChangesAsync();
-                    }
-                    await webAisoipContext.SaveChangesAsync();
-                    lock (_forLock)
-                    {
-                        Logger.Trace(_counter++);
-                    }
-                }
-                catch (Exception e)
+                await using var webAisoipContext = new WebAisoipContext();
+                await webAisoipContext.Aisoip.Upsert(new Aisoip
                 {
-                    Console.WriteLine(e);
+                    Result = aisoip.Result,
+                    Biin = aisoip.Biin,
+                    RelevanceDate = aisoip.RelevanceDate,
+                    AresId = _dictionary[aisoip.Title]
+                }).On(x => new {x.Biin, x.AresId}).RunAsync();
+                webAisoipContext.AisoipDetails.RemoveRange(webAisoipContext.AisoipDetails.Where(x => x.Biin == aisoip.Biin && x.AresId == _dictionary[aisoip.Title]));
+                await webAisoipContext.SaveChangesAsync();
+                if (aisoip.Result)
+                {
+                    await webAisoipContext.AisoipDetails.AddRangeAsync(aisoip.AisoipDetailsDtos.Select(x=> new AisoipDetails
+                    {
+                        Biin = aisoip.Biin,
+                        AresId =_dictionary[aisoip.Title], 
+                        Date = x.Date,
+                        Address = x.Address,
+                        Name = x.Name,
+                        Tel = x.Tel,
+                        RelevanceDate = x.RelevanceDate
+                    }));
+                    await webAisoipContext.SaveChangesAsync();
+                }
+                lock (_forLock)
+                {
+                    Logger.Trace(_counter++);
                 }
             }
         }
@@ -104,6 +97,5 @@ namespace DataMigrationSystem.Services
                 _dictionary[aisoipList.Name] = aisoipList.Id;
             }
         }
-        
     }
 }
