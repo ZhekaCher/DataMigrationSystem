@@ -8,6 +8,7 @@ namespace DataMigrationSystem.Context.Parsed
         public DbSet<LocalCertificatesDto> LocalCertificatesDtos { get; set; }
         public DbSet<IndustrialCertificatesDto> IndustrialCertificatesDtos { get; set; }
         public DbSet<ExportCertificatesDto> ExportCertificatesDtos { get; set; }
+       
         public DbSet<CompanyBinDto> CompanyBinDtos { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
