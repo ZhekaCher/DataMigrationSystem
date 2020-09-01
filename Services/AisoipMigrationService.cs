@@ -48,11 +48,13 @@ namespace DataMigrationSystem.Services
             await using var parsedAisoipContext = new ParsedAisoipContext();
             var aisoips = parsedAisoipContext
                 .AisoipDtos
+                .AsNoTracking()
                 .Where(x => x.Id % NumOfThreads == numThread)
                 .Include(x => x.AisoipDetailsDtos); 
             foreach (var aisoip in aisoips)
             {
                 await using var webAisoipContext = new WebAisoipContext();
+                webAisoipContext.ChangeTracker.AutoDetectChangesEnabled = false;
                 await webAisoipContext.Aisoip.Upsert(new Aisoip
                 {
                     Result = aisoip.Result,
