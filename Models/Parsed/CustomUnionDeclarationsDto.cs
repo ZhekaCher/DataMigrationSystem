@@ -50,7 +50,7 @@ namespace DataMigrationSystem.Models.Parsed
         public string IdentificateInform { get; set; }
 
         [Column("tn_code")]
-        public string? TnCode { get; set; }
+        public string TnCode { get; set; }
 
         [Column("npa")]
         public string Npa { get; set; }
