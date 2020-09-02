@@ -24,7 +24,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         public string Owner { get; set; }
         
         [Column("name")]
-        public string? Name { get; set; }
+        public string Name { get; set; }
         
         [Column("mktu_text")]
         public string MktuText { get; set; }

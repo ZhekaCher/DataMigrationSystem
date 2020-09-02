@@ -37,9 +37,9 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("goods_count")]
         public string GoodsCount { get; set; }
         [Column("unit_metric")]
-        public string? UnitMetric { get; set; }
+        public string UnitMetric { get; set; }
         [Column("code_of_unit_metric")]
-        public string? CodeOfUnitMetric { get; set; }
+        public string CodeOfUnitMetric { get; set; }
         [Column("origin_criterion")]
         public string OriginCriterion { get; set; }
         [Column("percentage")]
@@ -47,7 +47,7 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("receiver_iin_biin")]
         public long? ReceiverIinBiin { get; set; }
         [Column("receiver_name")]
-        public string? ReceiverName { get; set; }
+        public string ReceiverName { get; set; }
         [Column("receiver_address")]
         public string ReceiverAddress { get; set; }
         [Column("certificate_end_date")]
@@ -93,17 +93,17 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("goods_count_per_year")]
         public string GoodsCountPerYear {get; set; }
         [Column("tn")]
-        public string? Tn { get; set; }
+        public string Tn { get; set; }
         [Column("kp")]
         public string Kp { get; set; }
         [Column("assesment_doc")]
-        public string? AssesmentDoc { get; set; }
+        public string AssesmentDoc { get; set; }
         [Column("issue_date")]
         public DateTime? IssueDate { get; set; }
         [Column("end_date")]
         public DateTime? EndDate { get; set; }
         [Column("licence_num")]
-        public string? LicenceNum { get; set; }
+        public string LicenceNum { get; set; }
         [Column("workers_count")]
         public string WorkersCount { get; set; }
         [Column("reester_insert_date")]
