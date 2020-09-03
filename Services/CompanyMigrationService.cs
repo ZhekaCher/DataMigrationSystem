@@ -38,10 +38,11 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             await using var parsedCompanyContext = new ParsedCompanyContext();
+            await using var webContext = new WebCompanyContext();
             await parsedCompanyContext.Database.ExecuteSqlRawAsync(
                 "insert into avroradata.company_bin (code) select bin from avroradata.company a where not exists(select from avroradata.company_bin b where a.bin = b.code);");
-            await parsedCompanyContext.Database.ExecuteSqlRawAsync("DELETE FROM avroradata.companies_oked T1 USING avroradata.companies_oked T2 WHERE T1.ctid < T2.ctid AND T1.c_id = T2.c_id AND T1.type=1 and T2.type=1;");
-            await parsedCompanyContext.Database.ExecuteSqlRawAsync("delete from avroradata.oked where i='0';");
+            await webContext.Database.ExecuteSqlRawAsync("DELETE FROM avroradata.companies_oked T1 USING avroradata.companies_oked T2 WHERE T1.ctid < T2.ctid AND T1.c_id = T2.c_id AND T1.type=1 and T2.type=1;");
+            await webContext.Database.ExecuteSqlRawAsync("delete from avroradata.oked where i='0';");
             await parsedCompanyContext.Database.ExecuteSqlRawAsync("truncate avroradata.company restart identity;");
             Logger.Info("Ended");
         }
