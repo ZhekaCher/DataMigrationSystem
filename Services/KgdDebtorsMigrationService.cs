@@ -46,15 +46,27 @@ namespace DataMigrationSystem.Services
         private async Task MigrateReferences()
         {
            
-            var categories = _parsedKgdDebtors.KgdDebtorsDtos
+            var categories =await _parsedKgdDebtors.KgdDebtorsDtos
                 .Select(x => new KgdAllDebtorsCategory
                 {
                     Category = x.Category
-                }).Distinct();
+                }).Distinct().ToListAsync();
+            categories.AddRange(await _parsedKgdDebtors.KgdDebtorsAgentsDtos
+                .Select(x => new KgdAllDebtorsCategory
+                {
+                    Category = x.Category
+                }).Distinct().ToListAsync());
+            categories.AddRange(await _parsedKgdDebtors.KgdDebtorsCustomersDtos
+                .Select(x => new KgdAllDebtorsCategory
+                {
+                    Category = x.Category
+                }).Distinct().ToListAsync());
+            
             await _webKgdDebtors.KgdAllDebtorsCategory.UpsertRange(categories).On(x => x.Category).RunAsync();
             foreach (var category in _webKgdDebtors.KgdAllDebtorsCategory)
             {
                 _dictionary[category.Category] = category.Id;
+                Console.WriteLine();
             }
         }
 
