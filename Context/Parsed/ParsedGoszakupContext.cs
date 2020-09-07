@@ -9,7 +9,7 @@ namespace DataMigrationSystem.Context.Parsed
     {
         public DbSet<AnnouncementGoszakupDto> AnnouncementGoszakupDtos { get; set; }
         public DbSet<LotGoszakupDto> LotGoszakupDtos { get; set; }
-        public DbSet<PlanGoszakupDto> PlanGoszakupDtos { get; set; }
+        public DbSet<TenderPlanGoszakupDto> TenderPlanGoszakupDtos { get; set; }
         public DbSet<TenderDocumentGoszakupDto> TenderDocumentsGoszakup { get; set; }
         public DbSet<RefTradeMethodGoszakupDto> RefTradeMethodGoszakupDtos { get; set; }
         public DbSet<RefLotStatusGoszakupDto> RefLotStatusGoszakupDtos { get; set; }
