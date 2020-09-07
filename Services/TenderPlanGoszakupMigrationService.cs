@@ -27,7 +27,7 @@ namespace DataMigrationSystem.Services
             _total = adataTenderContext.AdataLots.Count(x => x.SourceId == 2 && x.TruCode == null);
             var adataParsingContext = new ParsedGoszakupContext();
             adataParsingContext.Database.ExecuteSqlRaw(
-               @"delete
+                @"delete
             from avroradata.tender_plan_goszakup
                 WHERE id not in (select distinct plan_point as id from avroradata.lot_goszakup)");
 
@@ -60,7 +60,8 @@ namespace DataMigrationSystem.Services
             adataTenderContext.Database.ExecuteSqlRaw(
                 "UPDATE adata_tender.announcements SET status_id=58 WHERE application_finish_date<now() and source_id=2 and source_id=2");
             adataTenderContext.Database
-                .ExecuteSqlRawAsync("UPDATE adata_tender.lots SET status_id=38 WHERE application_finish_date<now() and source_id=2")
+                .ExecuteSqlRawAsync(
+                    "UPDATE adata_tender.lots SET status_id=38 WHERE application_finish_date<now() and source_id=2")
                 .GetAwaiter().GetResult();
         }
 
@@ -89,17 +90,36 @@ namespace DataMigrationSystem.Services
                         x.Id == dtoLot.PlanPoint);
                     if (plan != null)
                     {
-                        var tempLots = tempAdataTenderContext.AdataLots.Where(x => x.SourceNumber==model.SourceNumber);
+                        var tempLots =
+                            tempAdataTenderContext.AdataLots.Where(x => x.SourceNumber == model.SourceNumber);
                         foreach (var adataLot in tempLots)
                         {
                             adataLot.TruCode = plan.RefEnstruCode;
-                            adataLot.Terms = plan.SupplyDateRu;
                         }
-                        
-                        tempAdataTenderContext.Database
-                            .ExecuteSqlRawAsync(
-                                $"UPDATE lots SET tru_code = '{plan.RefEnstruCode}', terms= '{plan.SupplyDateRu}' WHERE source_number = '{model.SourceNumber}'")
-                            .GetAwaiter().GetResult();
+
+                        try
+                        {
+                            tempAdataTenderContext.Database
+                                .ExecuteSqlRawAsync(
+                                    $"UPDATE lots SET tru_code = '{plan.RefEnstruCode}' WHERE source_number = '{model.SourceNumber}'")
+                                .GetAwaiter().GetResult();
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Trace(e.Message);
+                        }
+
+                        try
+                        {
+                            tempAdataTenderContext.Database
+                                .ExecuteSqlRawAsync(
+                                    $"UPDATE lots SET terms= '{plan.SupplyDateRu}' WHERE source_number = '{model.SourceNumber}'")
+                                .GetAwaiter().GetResult();
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Trace(e.Message);
+                        }
                     }
 
                     innerParsedGoszakupContext.Dispose();
