@@ -1,22 +1,26 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
-using NLog;
-using System.Linq;
 using DataMigrationSystem.Context.Web.Avroradata;
-using DataMigrationSystem.Models.Parsed;
 using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
+using NLog;
 
 namespace DataMigrationSystem.Services
 {
-    public class BankruptMigrationService : MigrationService
+    public class NewBankruptMigrationService : MigrationService
     {
-        public BankruptMigrationService(int numOfThreads = 1)
+        private readonly WebNewBankruptContext _web;
+        private readonly ParsedNewBakruptContext _parsed;
+        private readonly object _forLock;
+        private int _counter;
+
+        public NewBankruptMigrationService(int numOfThreads = 30)
         {
-            
+            _web = new WebNewBankruptContext();
+            _parsed = new ParsedNewBakruptContext();
             NumOfThreads = numOfThreads;
-            using var parsedBankruptsAtStageContext = new ParsedBankruptContext();
+            _forLock = new object();
         }
 
         protected override Logger InitializeLogger()
@@ -26,108 +30,76 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
-            await MigrateReferences();
-            Logger.Warn(NumOfThreads);
-            Logger.Info("Start");
-            var tasks = new List<Task>();
-            for (var i = 0; i < NumOfThreads; i++)
-                tasks.Add(MigrateAsync(i));
-            await Task.WhenAll(tasks);
-            await using var webBankruptContext = new WebBankruptContext();
-            await using var parsedBankruptContext = new ParsedBankruptContext();
-            var lastDate = await  parsedBankruptContext.BankruptAtStageDtos.MinAsync(x => x.DateOfRelevance);
-            webBankruptContext.BankruptAtStages.RemoveRange(webBankruptContext.BankruptAtStages.Where(x=>x.RelevanceDate<lastDate));
-            lastDate = await  parsedBankruptContext.BankruptCompletedDtos.MinAsync(x => x.DateOfRelevance);
-            webBankruptContext.BankruptCompleteds.RemoveRange(webBankruptContext.BankruptCompleteds.Where(x=>x.RelevanceDate<lastDate));
-            await webBankruptContext.SaveChangesAsync();
+            await MigrateBankruptCompleted();
+            await MigrateBankruptAtStage();
+            await MigrateRehabilityCompleted();
+            await using var parsed = new ParsedNewBakruptContext();
+            await parsed.Database.ExecuteSqlRawAsync(
+                "truncate avroradata.bankrupt_completed, avroradata.bankrupt_at_stage,avroradata.rehability_completed restart identity;");
+
         }
 
-        private async Task MigrateAsync(int threadNum)
+        private async Task MigrateBankruptCompleted()
         {
-            await using var webBankruptContext = new WebBankruptContext();
-            await using var parsedBankruptContext = new ParsedBankruptContext();
-            var atStages = from dto in parsedBankruptContext.BankruptAtStageDtos
-                where dto.Id % NumOfThreads == threadNum
-                join com in parsedBankruptContext.CompanyBinDtos on dto.Bin equals com.Code
-                select new BankruptAtStage
+            await foreach (var bankruptCompleted in _parsed.NewBankruptCompleteds)
+            {
+                var newBankruptCompleted = new NewBankruptCompleted
                 {
-                    RelevanceDate = dto.DateOfRelevance,
-                    DateOfEntryIntoForce = dto.DateOfEntryIntoForce,
-                    DateOfCourtDecision = dto.DateOfCourtDecision,
-                    BiinCompanies = dto.Bin
+                    Bin = bankruptCompleted.Bin,
+                    DateDecision = bankruptCompleted.DateDecision,
+                    DateEntry = bankruptCompleted.DateEntry,
+                    DateDecisionEnd = bankruptCompleted.DateDecisionEnd,
+                    DateEntryEnd = bankruptCompleted.DateEntryEnd,
+                    DateOfRelevance = bankruptCompleted.DateOfRelevance
                 };
-            await webBankruptContext.BankruptAtStages.UpsertRange(atStages).On(x => x.BiinCompanies).RunAsync();
-            var completeds = from dto in parsedBankruptContext.BankruptCompletedDtos
-                where dto.Id % NumOfThreads == threadNum
-                join com in parsedBankruptContext.CompanyBinDtos on dto.Bin equals com.Code
-                select new BankruptCompleted
+                await _web.NewBankruptCompleteds.Upsert(newBankruptCompleted).On(x => x.Bin).RunAsync();
+                await _web.SaveChangesAsync();
+                lock (_forLock)
                 {
-                    DateDecision = dto.DateDecision,
-                    DateEntry = dto.DateEntry,
-                    DateDecisionEnd = dto.DateDecisionEnd,
-                    DateEntryEnd = dto.DateEntryEnd,
-                    RelevanceDate = dto.DateOfRelevance,
-                    BiinCompanies = dto.Bin
-                };
-            await webBankruptContext.BankruptCompleteds.UpsertRange(completeds).On(x => x.BiinCompanies).RunAsync();
+                    Logger.Trace(_counter--);
+                }
+            }
         }
-
-        private async Task MigrateReferences()
+        private async Task MigrateBankruptAtStage()
         {
-            await using var webBankruptContext = new WebBankruptContext();
-            await using var parsedBankruptContext = new ParsedBankruptContext();
-            var addressesS = parsedBankruptContext.BankruptAtStageDtos.Select(x => x.Address).Distinct();
-            foreach (var address in addressesS)
+            await foreach (var newBankruptAtStage in _parsed.NewBankruptAtStages)
             {
-                await webBankruptContext.BankruptSAddresses.Upsert(new BankruptSAddress
+                var bankruptAtStage = new NewBankruptAtStage
                 {
-                    Name = address
-                }).On(x => x.Name).RunAsync();
+                    Bin = newBankruptAtStage.Bin,
+                    DateOfCourtDecision = newBankruptAtStage.DateOfCourtDecision,
+                    DateOfEntryIntoForce = newBankruptAtStage.DateOfEntryIntoForce,
+                    DateOfRelevance = newBankruptAtStage.DateOfRelevance
+                };
+                await _web.NewBankruptAtStages.Upsert(bankruptAtStage).On(x => x.Bin).RunAsync();
+                await _web.SaveChangesAsync();
+                lock (_forLock)
+                {
+                    Logger.Trace(_counter--);
+                }
             }
-
-            var regionsS = parsedBankruptContext.BankruptAtStageDtos.Select(x => x.Region).Distinct();
-            foreach (var region in regionsS)
+        }
+        private async Task MigrateRehabilityCompleted()
+        {
+            foreach (var newRehabilityCompleted in _parsed.NewRehabilityCompleteds)
             {
-                await webBankruptContext.RegionSes.Upsert(new RegionS
+                var rehabilityCompleted = new NewRehabilityCompleted
                 {
-                    Name = region
-                }).On(x => x.Name).RunAsync();
-            }
-
-            var servicesS = parsedBankruptContext.BankruptAtStageDtos.Select(x => x.TypeOfService).Distinct();
-            foreach (var service in servicesS)
-            {
-                await webBankruptContext.TypeOfServiceSes.Upsert(new TypeOfServiceS
+                    Bin = newRehabilityCompleted.Bin,
+                    DateDecision = newRehabilityCompleted.DateDecision,
+                    DateEntry = newRehabilityCompleted.DateEntry,
+                    DateDecisionEnd = newRehabilityCompleted.DateDecisionEnd,
+                    DateEntryEnd = newRehabilityCompleted.DateEntryEnd,
+                    DateOfRelevance = newRehabilityCompleted.DateOfRelevance
+                };
+                await _web.NewRehabilityCompleteds.Upsert(rehabilityCompleted).On(x => x.Bin).RunAsync();
+                await _web.SaveChangesAsync();
+                lock (_forLock)
                 {
-                    Name = service
-                }).On(x => x.Name).RunAsync();
-            }
-            var addressesC = parsedBankruptContext.BankruptCompletedDtos.Select(x => x.Address).Distinct();
-            foreach (var address in addressesC)
-            {
-                await webBankruptContext.BankruptSAddresses.Upsert(new BankruptSAddress
-                {
-                    Name = address
-                }).On(x => x.Name).RunAsync();
-            }
-
-            var regionsC = parsedBankruptContext.BankruptCompletedDtos.Select(x => x.Region).Distinct();
-            foreach (var region in regionsC)
-            {
-                await webBankruptContext.RegionSes.Upsert(new RegionS
-                {
-                    Name = region
-                }).On(x => x.Name).RunAsync();
-            }
-
-            var servicesC = parsedBankruptContext.BankruptCompletedDtos.Select(x => x.TypeOfService).Distinct();
-            foreach (var service in servicesC)
-            {
-                await webBankruptContext.TypeOfServiceSes.Upsert(new TypeOfServiceS
-                {
-                    Name = service
-                }).On(x => x.Name).RunAsync();
+                    Logger.Trace(_counter--);
+                }
             }
         }
     }
+    
 }
