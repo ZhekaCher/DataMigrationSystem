@@ -49,11 +49,10 @@ namespace DataMigrationSystem.Services
         private async Task Migrate(int numThread)
         {
             await using var parsedTaxDebtContext = new ParsedTaxDebtContext();
-            await using var webTaxDebtContext = new WebTaxDebtContext();
-            
-            var taxDebts = from taxDebt in parsedTaxDebtContext.TaxDebts
-                orderby taxDebt.IinBin where taxDebt.IinBin %NumOfThreads == numThread
-                select new TaxDebt
+            parsedTaxDebtContext.ChangeTracker.AutoDetectChangesEnabled = false;
+            var taxDebts = parsedTaxDebtContext.TaxDebts.AsNoTracking().OrderBy(taxDebt => taxDebt.IinBin)
+                .Where(taxDebt => taxDebt.IinBin % NumOfThreads == numThread)
+                .Select(taxDebt => new TaxDebt
                 {
                     Total = taxDebt.Total,
                     PensionContribution = taxDebt.PensionContribution,
@@ -61,10 +60,11 @@ namespace DataMigrationSystem.Services
                     SocialHealthInsurance = taxDebt.SocialHealthInsurance,
                     IinBin = taxDebt.IinBin,
                     RelevanceDate = taxDebt.RelevanceDate
-                };
+                });
 
             foreach (var taxDebt in taxDebts)
             {
+                await using var webTaxDebtContext = new WebTaxDebtContext();
                 await webTaxDebtContext.TaxDebts.Upsert(taxDebt).On(x => x.IinBin).RunAsync();
                 lock (_forLock)
                 {
