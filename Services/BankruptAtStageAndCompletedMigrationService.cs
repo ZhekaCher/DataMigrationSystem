@@ -8,14 +8,14 @@ using NLog;
 
 namespace DataMigrationSystem.Services
 {
-    public class NewBankruptMigrationService : MigrationService
+    public class BankruptAtStageAndCompletedMigrationService : MigrationService
     {
         private readonly WebNewBankruptContext _web;
         private readonly ParsedNewBakruptContext _parsed;
         private readonly object _forLock;
         private int _counter;
 
-        public NewBankruptMigrationService(int numOfThreads = 30)
+        public BankruptAtStageAndCompletedMigrationService(int numOfThreads = 30)
         {
             _web = new WebNewBankruptContext();
             _parsed = new ParsedNewBakruptContext();
