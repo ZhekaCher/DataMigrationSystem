@@ -47,6 +47,7 @@ namespace DataMigrationSystem.Services
                     Owner =gosReesterDto.Owner,
                     Name = gosReesterDto.Name,
                     MktuText = gosReesterDto.MktuText,
+                    Path = gosReesterDto.Path,
                     ValidationDate = gosReesterDto.ValidationDate,
                     NewsletterNum = gosReesterDto.NewsletterNum,
                     NewsletterDate = gosReesterDto.NewsletterDate,
