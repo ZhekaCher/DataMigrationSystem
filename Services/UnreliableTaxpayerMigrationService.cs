@@ -12,7 +12,8 @@ namespace DataMigrationSystem.Services
     public class UnreliableTaxpayerMigrationService : MigrationService
     {
         private readonly object _forLock;
-        public UnreliableTaxpayerMigrationService(int numOfThreads = 1)
+        private int _count;
+        public UnreliableTaxpayerMigrationService(int numOfThreads = 20)
         {
             NumOfThreads = numOfThreads;
             _forLock = new object();
@@ -25,6 +26,8 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
+            await using var parsedUnreliableTaxpayerContext = new ParsedUnreliableTaxpayerContext();
+            _count = await parsedUnreliableTaxpayerContext.UnreliableTaxpayerDtos.CountAsync();
             var tasks = new List<Task>();
             for (var i = 0; i < NumOfThreads; i++)
             {
@@ -33,7 +36,6 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             await using var webUnreliableTaxpayerContext = new WebUnreliableTaxpayerContext();
-            await using var parsedUnreliableTaxpayerContext = new ParsedUnreliableTaxpayerContext();
             var minDate = await parsedUnreliableTaxpayerContext.UnreliableTaxpayerDtos.MinAsync(x => x.RelevanceDate);
             await webUnreliableTaxpayerContext.Database.ExecuteSqlInterpolatedAsync(
                 $"delete from avroradata.unreliable_taxpayers where relevance_date<{minDate}");
@@ -62,6 +64,10 @@ namespace DataMigrationSystem.Services
             foreach (var taxpayer in taxpayers)
             {
                 await webUnreliableTaxpayerContext.UnreliableTaxpayers.Upsert(taxpayer).On(x => new {x.BinCompany, x.IdListType}).RunAsync();
+                lock (_forLock)
+                {
+                    Logger.Trace(--_count);
+                }
             }
         }
     }

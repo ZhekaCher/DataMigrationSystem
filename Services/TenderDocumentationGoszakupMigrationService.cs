@@ -65,8 +65,8 @@ namespace DataMigrationSystem.Services
                     var anno =
                         adataTenderContext.AdataAnnouncements.FirstOrDefault(x => x.SourceNumber == dto.Number);
                     if (anno == null) continue;
-                    await adataTenderContext.Database.ExecuteSqlRawAsync("");
-                    adataTenderContext.AnnouncementDocumentations.Add(new AnnouncementDocumentation()
+                    adataTenderContext.RemoveRange(adataTenderContext.AnnouncementDocumentations.Where(x => x.AnnouncementId==anno.Id && x.SourceLink==anno.SourceLink));
+                    adataTenderContext.AnnouncementDocumentations.Add(new AnnouncementDocumentation
                     {
                         AnnouncementId = anno.Id,
                         DocumentationTypeId = docType.Id,
@@ -89,6 +89,7 @@ namespace DataMigrationSystem.Services
                         adataTenderContext.AdataLots.FirstOrDefault(x => x.SourceNumber == dto.Number);
                     if (lot == null) continue;
 
+                    adataTenderContext.RemoveRange(adataTenderContext.LotDocumentations.Where(x => x.LotId==lot.Id && x.SourceLink==lot.SourceLink));
                     adataTenderContext.LotDocumentations.Add(new LotDocumentation
                     {
                         LotId = lot.Id,

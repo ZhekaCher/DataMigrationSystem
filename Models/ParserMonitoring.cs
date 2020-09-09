@@ -12,8 +12,6 @@ namespace DataMigrationSystem.Models
 		[Column("parsed")] public bool? Parsed{get; set;}
 		[Column("last_migrated")] public DateTime? LastMigrated{get; set;}
 		[Column("last_parsed")] public DateTime? LastParsed{get; set;}
-		[Column("owner")] public int? Owner{get; set;}
 		[Column("active")] public bool? Active{get; set;}
-		
 	}
 }
