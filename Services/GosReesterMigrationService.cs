@@ -53,7 +53,7 @@ namespace DataMigrationSystem.Services
                     NewsletterDate = gosReesterDto.NewsletterDate,
                     RelevanceDate = gosReesterDto.RelevanceDate
                 }; 
-                await _webGosRessterContext.GosReesters.Upsert(gosRessters).On(X => X.RegNum).RunAsync();
+                await _webGosRessterContext.GosReesters.Upsert(gosRessters).On(x => x.RegNum).RunAsync();
                 lock (_forLock)
                 {
                     Logger.Trace(_counter--);
