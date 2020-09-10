@@ -23,7 +23,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         public double SocialContribution{ get; set; }
         [Column("social_health_insurance")]
         public double SocialHealthInsurance{ get; set; }
-        public List<TaxDebtOrg> TaxDebtOrgs { get; set; }
+        public IEnumerable<TaxDebtOrg> TaxDebtOrgs { get; set; }
     }
     
     [Table("tax_debt_org")]
@@ -43,8 +43,8 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         public double SocialHealthInsurance { get; set; }
         [Column("bin")] 
         public long IinBin { get; set; }
-        public List<TaxDebtPayer> TaxDebtPayers { get; set; }
-        public TaxDebt TaxDebt { get; set; }
+        public IEnumerable<TaxDebtPayer> TaxDebtPayers { get; set; }
+        // public TaxDebt TaxDebt { get; set; }
     }
     
     [Table("tax_debt_payer")]
@@ -58,8 +58,8 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         public long CharCode { get; set; }
         [Column("head_bin")] 
         public long HeadIinBin { get; set; }
-        public List<TaxDebtBcc> TaxDebtBccs { get; set; }
-        public TaxDebtOrg TaxDebtOrg { get; set; }
+        public IEnumerable<TaxDebtBcc> TaxDebtBccs { get; set; }
+        // public TaxDebtOrg TaxDebtOrg { get; set; }
     }
     
     
@@ -80,7 +80,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         public long CharCode { get; set; }
         [Column("bin")]
         public long IinBin { get; set; }
-        public TaxDebtPayer TaxDebtPayer { get; set; }
+        // public TaxDebtPayer TaxDebtPayer { get; set; }
     }
     
     [Table("tax_debt_org_name")]
