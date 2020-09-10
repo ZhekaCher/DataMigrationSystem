@@ -41,8 +41,8 @@ namespace DataMigrationSystem.Services
             }
 
             await Task.WhenAll(tasks);
-            // await parsedContactContext.Database.ExecuteSqlRawAsync(
-            //     "truncate avroradata.contacts restart identity cascade;");
+            await parsedContactContext.Database.ExecuteSqlRawAsync(
+                "truncate avroradata.contacts restart identity cascade;");
         }
 
         private async Task Migrate(int threadNum)
