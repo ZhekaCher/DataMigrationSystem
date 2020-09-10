@@ -29,6 +29,9 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("mktu_text")]
         public string MktuText { get; set; }
         
+        [Column("path")]
+        public string Path { get; set; }
+        
         [Column("validation_date")]
         public DateTime? ValidationDate { get; set; }
         
