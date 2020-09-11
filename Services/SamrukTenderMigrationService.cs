@@ -28,76 +28,83 @@ namespace DataMigrationSystem.Services
         public override async Task StartMigratingAsync()
         {
             Logger.Info($"Starting migration with '{NumOfThreads}' threads");
+            
             await MigrateReferences();
-            var tasks = new List<Task>();
-            for (var i = 0; i < NumOfThreads; i++)
-                tasks.Add(Migrate(i));
+            await Migrate();
 
-            await Task.WhenAll(tasks);
             Logger.Info("End of migration");
             await using var parsedSamrukContext = new ParsedSamrukContext();
             await parsedSamrukContext.Database.ExecuteSqlRawAsync("truncate table avroradata.samruk_advert, avroradata.samruk_lots, avroradata.samruk_files restart identity");
         }
 
-        private async Task Migrate(int threadNum)
+        private async Task Insert(SamrukAdvertDto dto)
+        {
+            await using var webTenderContext = new AdataTenderContext();
+            webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
+            var announcement = await DtoToWebAnnouncement(webTenderContext, dto);
+            try
+            {
+                var found = webTenderContext.AdataAnnouncements.Select(x => new{x.Id, x.SourceNumber, x.SourceId})
+                    .FirstOrDefault(x => x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
+                if (found != null)
+                {
+                    await webTenderContext.AdataAnnouncements.Upsert(announcement).On(x => new {x.SourceNumber, x.SourceId})
+                        .RunAsync();
+                    foreach (var lot in announcement.Lots)
+                    {
+                        lot.AnnouncementId = found.Id;
+                        var foundLot = webTenderContext.AdataLots.Select(x => new{x.Id, x.SourceNumber, x.SourceId})
+                            .FirstOrDefault(x => x.SourceNumber == lot.SourceNumber && x.SourceId == lot.SourceId);
+                        if (foundLot != null)
+                        {
+                            await webTenderContext.AdataLots.Upsert(lot).On(x => new {x.SourceNumber, x.SourceId})
+                                .RunAsync();
+                            lot.PaymentCondition.LotId = foundLot.Id;
+                            await webTenderContext.PaymentConditions.Upsert(lot.PaymentCondition).On(x => x.LotId)
+                                .RunAsync();
+                        }
+                        else
+                        {
+                            await webTenderContext.AdataLots.AddAsync(lot);
+                            await webTenderContext.SaveChangesAsync();
+                        }
+                    }
+                }
+                else
+                {
+                    await webTenderContext.AdataAnnouncements.AddAsync(announcement);
+                    await webTenderContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e.StackTrace);
+            }
+
+            lock (_lock)
+                Logger.Trace($"Left {--_total}");
+        }
+        private async Task Migrate()
         {
             Logger.Info("Started Thread");
             await using var parsedSamrukContext = new ParsedSamrukContext();
             var samrukAdvertDtos = parsedSamrukContext.SamrukAdverts
                 .AsNoTracking()
-                .Where(t => t.Id % NumOfThreads == threadNum)
                 .Include(x=>x.Lots)
                 .ThenInclude(x=> x.Documentations)
                 .Include(x=>x.Documentations);
+            var tasks = new List<Task>();
             foreach (var dto in samrukAdvertDtos)
             {
-                await using var webTenderContext = new AdataTenderContext();
-                webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
-                var announcement = await DtoToWebAnnouncement(webTenderContext, dto);
-                try
+                tasks.Add(Insert(dto));
+                if (tasks.Count >= NumOfThreads)
                 {
-                    var found = webTenderContext.AdataAnnouncements.Select(x => new{x.Id, x.SourceNumber, x.SourceId})
-                        .FirstOrDefault(x => x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
-                    if (found != null)
-                    {
-                        await webTenderContext.AdataAnnouncements.Upsert(announcement).On(x => new {x.SourceNumber, x.SourceId})
-                            .RunAsync();
-                        foreach (var lot in announcement.Lots)
-                        {
-                            lot.AnnouncementId = found.Id;
-                            var foundLot = webTenderContext.AdataLots.Select(x => new{x.Id, x.SourceNumber, x.SourceId})
-                                .FirstOrDefault(x => x.SourceNumber == lot.SourceNumber && x.SourceId == lot.SourceId);
-                            if (foundLot != null)
-                            {
-                                await webTenderContext.AdataLots.Upsert(lot).On(x => new {x.SourceNumber, x.SourceId})
-                                    .RunAsync();
-                                lot.PaymentCondition.LotId = foundLot.Id;
-                                await webTenderContext.PaymentConditions.Upsert(lot.PaymentCondition).On(x => x.LotId)
-                                    .RunAsync();
-                            }
-                            else
-                            {
-                                await webTenderContext.AdataLots.AddAsync(lot);
-                                await webTenderContext.SaveChangesAsync();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        await webTenderContext.AdataAnnouncements.AddAsync(announcement);
-                        await webTenderContext.SaveChangesAsync();
-                    }
+                    await Task.WhenAny(tasks);
+                    tasks.RemoveAll(x => x.IsCompleted);
                 }
-                catch (Exception e)
-                {
-                    Logger.Error(e.StackTrace);
-                }
-
-                lock (_lock)
-                    Logger.Trace($"Left {--_total}");
             }
 
-            Logger.Info("Completed thread");
+            await Task.WhenAll(tasks);
             
         }
 
@@ -216,9 +223,9 @@ namespace DataMigrationSystem.Services
                 }
                 // if (dtoLot.TruCode != null)
                 // {
-                    // var tru = await webTenderContext.TruCodes.FirstOrDefaultAsync(x => x.Code == dtoLot.TruCode);
-                    // if (tru != null)
-                        // lot.TruId = tru.Id;
+                // var tru = await webTenderContext.TruCodes.FirstOrDefaultAsync(x => x.Code == dtoLot.TruCode);
+                // if (tru != null)
+                // lot.TruId = tru.Id;
                 // }
                 lot.Documentations = new List<LotDocumentation>();
                 foreach (var document in dtoLot.Documentations.Select(fileDto => new LotDocumentation

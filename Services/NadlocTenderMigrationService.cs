@@ -30,71 +30,77 @@ namespace DataMigrationSystem.Services
         {
             Logger.Info($"Starting migration with '{NumOfThreads}' threads");
             await MigrateReferences();
-            var tasks = new List<Task>();
-            for (var i = 0; i < NumOfThreads; i++)
-                tasks.Add(Migrate(i));
-
-            await Task.WhenAll(tasks);
+            await Migrate();
             Logger.Info("End of migration");
+          
             await using var parsedAnnouncementNadlocContext = new ParsedNadlocContext();
             await parsedAnnouncementNadlocContext.Database.ExecuteSqlRawAsync("truncate table avroradata.nadloc_tenders, avroradata.nadloc_lots");
         }
 
-        private async Task Migrate(int threadNum)
+        private async Task Insert(AnnouncementNadlocDto dto)
+        {
+            await using var webTenderContext = new AdataTenderContext();
+            webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
+            var announcement = await DtoToWebAnnouncement(webTenderContext, dto);
+            try
+            {
+                var found = webTenderContext.AdataAnnouncements
+                    .FirstOrDefault(x => x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
+                if (found != null)
+                {
+                    if (announcement.StatusId != 1 && found.StatusId == 1)
+                    {
+                        found.StatusId=announcement.StatusId;
+                        await webTenderContext.AdataLots.Where(x => x.AnnouncementId == found.Id)
+                            .ForEachAsync(x => x.StatusId = announcement.StatusId);
+                        await webTenderContext.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        webTenderContext.AdataLots.RemoveRange(
+                            webTenderContext.AdataLots.Where(x => x.AnnouncementId == found.Id));
+                        await webTenderContext.SaveChangesAsync();
+                        announcement.Lots.ForEach(x => x.AnnouncementId = found.Id);
+                        await webTenderContext.AdataLots.AddRangeAsync(announcement.Lots);
+                        await webTenderContext.SaveChangesAsync();
+                        await webTenderContext.AdataAnnouncements.Upsert(announcement)
+                            .On(x => new {x.SourceNumber, x.SourceId})
+                            .RunAsync();
+                    }
+                }
+                else
+                {
+                    await webTenderContext.AdataAnnouncements.AddAsync(announcement);
+                    await webTenderContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e);
+            }
+
+            lock (_lock)
+                Logger.Trace($"Left {--_total}");
+        }
+        private async Task Migrate()
         {
             Logger.Info("Started Thread");
             await using var parsedAnnouncementNadlocContext = new ParsedNadlocContext();
             var nadlocDtos = parsedAnnouncementNadlocContext.AnnouncementNadlocDtos
                 .AsNoTracking()
-                .Where(t => t.Id % NumOfThreads == threadNum)
                 .Include(x=>x.Lots);
+            var tasks = new List<Task>();
             foreach (var dto in nadlocDtos)
             {
-                await using var webTenderContext = new AdataTenderContext();
-                webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
-                var announcement = await DtoToWebAnnouncement(webTenderContext, dto);
-                try
+                tasks.Add(Insert(dto));
+                if (tasks.Count >= NumOfThreads)
                 {
-                    var found = webTenderContext.AdataAnnouncements
-                        .FirstOrDefault(x => x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
-                    if (found != null)
-                    {
-                        if (announcement.StatusId != 1 && found.StatusId == 1)
-                        {
-                            found.StatusId=announcement.StatusId;
-                            await webTenderContext.AdataLots.Where(x => x.AnnouncementId == found.Id)
-                                .ForEachAsync(x => x.StatusId = announcement.StatusId);
-                            await webTenderContext.SaveChangesAsync();
-                        }
-                        else
-                        {
-                            webTenderContext.AdataLots.RemoveRange(
-                                webTenderContext.AdataLots.Where(x => x.AnnouncementId == found.Id));
-                            await webTenderContext.SaveChangesAsync();
-                            announcement.Lots.ForEach(x => x.AnnouncementId = found.Id);
-                            await webTenderContext.AdataLots.AddRangeAsync(announcement.Lots);
-                            await webTenderContext.SaveChangesAsync();
-                            await webTenderContext.AdataAnnouncements.Upsert(announcement)
-                                .On(x => new {x.SourceNumber, x.SourceId})
-                                .RunAsync();
-                        }
-                    }
-                    else
-                    {
-                        await webTenderContext.AdataAnnouncements.AddAsync(announcement);
-                        await webTenderContext.SaveChangesAsync();
-                    }
+                    await Task.WhenAny(tasks);
+                    tasks.RemoveAll(x => x.IsCompleted);
                 }
-                catch (Exception e)
-                {
-                    Logger.Error(e);
-                }
-
-                lock (_lock)
-                    Logger.Trace($"Left {--_total}");
             }
-            Logger.Info("Completed thread");
-            
+
+            await Task.WhenAll(tasks);
         }
 
         private async Task MigrateReferences()
