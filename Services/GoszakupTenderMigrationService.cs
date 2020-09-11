@@ -129,7 +129,10 @@ namespace DataMigrationSystem.Services
         {
             using var webTenderContext = new AdataTenderContext();
 
-
+            if (announcementGoszakupDto.RefTradeMethodsId==128)
+            {
+                Console.WriteLine(1);
+            }
             var status =
                 webStatuses?.FirstOrDefault(
                     x => x.Name == announcementGoszakupDto.RefBuyStatus?.NameRu);
