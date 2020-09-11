@@ -48,9 +48,10 @@ namespace DataMigrationSystem.Services
             await using var webParticipantGoszakupContext = new WebParticipantGoszakupContext();
             await using var webParticipantGoszakupContext2 = new WebParticipantGoszakupContext();
             await using var parsedParticipantGoszakupContext = new ParsedParticipantGoszakupContext();
-            var firstParsedTime = parsedParticipantGoszakupContext.ParticipantGoszakupDtos.OrderBy(x => x.Relevance).FirstOrDefault().Relevance; 
+            var firstParsedTime = parsedParticipantGoszakupContext.ParticipantGoszakupDtos.OrderBy(x => x.Relevance)
+                .FirstOrDefault().Relevance;
             var old = webParticipantGoszakupContext.ParticipantsGoszakup.Where(x =>
-                x.RelevanceDate < firstParsedTime).Where(x => x.Status==true);
+                x.RelevanceDate < firstParsedTime).Where(x => x.Status == true);
             var left = old.Count();
             foreach (var participantGoszakup in old)
                 try
@@ -67,8 +68,10 @@ namespace DataMigrationSystem.Services
                         $"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|;");
                     Program.NumOfErrors++;
                 }
+
             Logger.Info("Removing done");
-            await parsedParticipantGoszakupContext.Database.ExecuteSqlRawAsync("truncate table avroradata.participant_goszakup restart identity cascade;");
+            await parsedParticipantGoszakupContext.Database.ExecuteSqlRawAsync(
+                "truncate table avroradata.participant_goszakup restart identity cascade;");
             Logger.Info("Truncated");
         }
 
@@ -76,23 +79,38 @@ namespace DataMigrationSystem.Services
         {
             await using var webParticipantGoszakupContext = new WebParticipantGoszakupContext();
             await using var parsedParticipantGoszakupContext = new ParsedParticipantGoszakupContext();
-         
+
             foreach (var dto in parsedParticipantGoszakupContext.ParticipantGoszakupDtos.Where(x =>
                     x.Pid % NumOfThreads == threadNum)
                 .Where(x => x.Inn == null && x.Unp == null && (x.Bin != null || x.Iin != null)))
             {
+                Start:
                 var temp = DtoToWeb(dto);
                 try
                 {
-                    await webParticipantGoszakupContext.ParticipantsGoszakup.Upsert(temp)
-                        .On(x => x.BiinCompanies).RunAsync();
-                    
+                        await webParticipantGoszakupContext.ParticipantsGoszakup.Upsert(temp)
+                            .On(x => x.BiinCompanies).RunAsync();
                 }
                 catch (Exception e)
                 {
                     if (e.Message.Contains("violates foreign key"))
                     {
-                        // Logger.Warn($"Message:|{e.Message}|; Biin:|{temp.BiinCompanies}|;");
+                        if (dto.Bin != null || dto.Iin != null)
+                        {
+                            var companiesContext = new WebCompanyContext();
+                            var idType = dto.Bin != null ? 1 : 2;
+                            companiesContext.Companies.Add(new Company
+                            {
+                                Bin = (long) (dto.Bin ?? dto.Iin),
+                                DateRegistration = dto.Regdate,
+                                NameRu = dto.NameRu,
+                                NameKz = dto.NameKz,
+                                IdType = idType,
+                                IdDataSource = 2
+                            });
+                            await companiesContext.SaveChangesAsync();
+                            goto Start;
+                        }
                     }
                     else
                     {
@@ -131,6 +149,5 @@ namespace DataMigrationSystem.Services
             participantGoszakup.MarkNationalCompany = participantGoszakupDto.MarkNationalCompany;
             return participantGoszakup;
         }
-        
     }
 }
