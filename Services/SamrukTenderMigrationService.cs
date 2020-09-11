@@ -16,7 +16,7 @@ namespace DataMigrationSystem.Services
         private int _total = 0;
         private readonly object _lock = new object();
 
-        public SamrukTenderMigrationService(int numOfThreads = 20)
+        public SamrukTenderMigrationService(int numOfThreads = 5)
         {
             NumOfThreads = numOfThreads;
         }

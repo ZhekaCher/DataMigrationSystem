@@ -17,7 +17,7 @@ namespace DataMigrationSystem.Services
         private int _total = 0;
         private readonly object _lock = new object();
 
-        public NadlocTenderMigrationService(int numOfThreads = 20)
+        public NadlocTenderMigrationService(int numOfThreads = 5)
         {
             NumOfThreads = numOfThreads;
         }
