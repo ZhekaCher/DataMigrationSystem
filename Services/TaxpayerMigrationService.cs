@@ -43,7 +43,7 @@ namespace DataMigrationSystem.Services
         private async Task Migrate()
         {
             await using var parsedTaxpayerContext = new ParsedTaxpayerContext();
-            var taxpayers = parsedTaxpayerContext.TaxpayerDtos.Select(x=> new Taxpayer
+            var taxpayers = parsedTaxpayerContext.TaxpayerDtos.AsNoTracking().Select(x=> new Taxpayer
             {
                 Rnn = x.Rnn,
                 FullName = x.FullName,
