@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Parsed
 {
-    public class ParsedBankruptContext : ParsedContext
+    public class ParsedNewBakruptContext : ParsedContext
     {
-        public DbSet<BankruptAtStageDto> BankruptAtStageDtos { get; set; }
-        public DbSet<BankruptCompletedDto> BankruptCompletedDtos { get; set; }    
-        public DbSet<CompanyBinDto> CompanyBinDtos { get; set; }
+        public DbSet<NewBankruptAtStage> NewBankruptAtStages { get; set; }
+        public DbSet<NewBankruptCompleted> NewBankruptCompleteds { get; set; }
+        public DbSet<NewRehabilityCompleted> NewRehabilityCompleteds { get; set; }
     }
 }

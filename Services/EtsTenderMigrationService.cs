@@ -1,0 +1,172 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using DataMigrationSystem.Context.Parsed;
+using DataMigrationSystem.Context.Web;
+using DataMigrationSystem.Context.Web.TradingFloor;
+using DataMigrationSystem.Models.Parsed;
+using DataMigrationSystem.Models.Web.TradingFloor;
+using Microsoft.EntityFrameworkCore;
+using NLog;
+
+namespace DataMigrationSystem.Services
+{
+    public class EtsTenderMigrationService : MigrationService
+    {
+        private int _total = 0;
+        private readonly object _lock = new object();
+
+        public EtsTenderMigrationService(int numOfThreads = 10)
+        {
+            NumOfThreads = numOfThreads;
+        }
+
+        protected override Logger InitializeLogger()
+        {
+            return LogManager.GetCurrentClassLogger();
+        }
+
+        public override async Task StartMigratingAsync()
+        {
+            Logger.Info($"Starting migration with '{NumOfThreads}' threads");
+            var tasks = new List<Task>();
+            for (var i = 0; i < NumOfThreads; i++)
+                tasks.Add(Migrate(i));
+            await Task.WhenAll(tasks);
+            await using var parsedEtsTenderContext = new ParsedEtsTenderContext();
+            await parsedEtsTenderContext.Database.ExecuteSqlRawAsync("truncate table avroradata.ets_announcements ,avroradata.ets_lots ,avroradata.ets_purchasing_positions");
+            Logger.Info("Truncated");
+            Logger.Info("End of migration");
+        }
+
+        private async Task Migrate(int threadNum)
+        {
+            Logger.Info("started thread");
+
+            await using var parsedEtsTenderContext = new ParsedEtsTenderContext();
+            var etsTenderDtos = parsedEtsTenderContext.AnnouncementEtsTenderDtos.AsNoTracking()
+                .Where(x => x.Id % NumOfThreads == threadNum).Include(x => x.Lots);
+            foreach (var dto in etsTenderDtos)
+            {
+                await using var adataTenderContext = new AdataTenderContext();
+                adataTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
+                var announcement = await DtoToWebAnnouncement(adataTenderContext, dto);
+                try
+                {
+                    var found = adataTenderContext.AdataAnnouncements
+                        .FirstOrDefault(x =>
+                            x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
+                    if (found != null)
+                    {
+                        if (announcement.StatusId != 1 && found.StatusId == 1)
+                        {
+                            found.StatusId = announcement.StatusId;
+                            await adataTenderContext.AdataLots.Where(x => x.AnnouncementId == found.Id)
+                                .ForEachAsync(x => x.StatusId = announcement.StatusId);
+                            await adataTenderContext.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            adataTenderContext.AdataLots.RemoveRange(
+                                adataTenderContext.AdataLots.Where(x => x.AnnouncementId == found.Id));
+                            await adataTenderContext.SaveChangesAsync();
+                            announcement.Lots.ForEach(x => x.AnnouncementId = found.Id);
+                            await adataTenderContext.AdataLots.AddRangeAsync(announcement.Lots);
+                            await adataTenderContext.SaveChangesAsync();
+                            await adataTenderContext.AdataAnnouncements.Upsert(announcement)
+                                .On(x => new {x.SourceNumber, x.SourceId})
+                                .RunAsync();
+                        }
+                    }
+                    else
+                    {
+                        await adataTenderContext.AdataAnnouncements.AddAsync(announcement);
+                        await adataTenderContext.SaveChangesAsync();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e);
+                }
+
+                lock (_lock)
+                    Logger.Trace($"Left {--_total}");
+            }
+
+            Logger.Info("Completed thread");
+
+        }
+    
+
+
+
+        private static async Task<AdataAnnouncement> DtoToWebAnnouncement(AdataTenderContext webTenderContext, AnnouncementEtsTenderDto dto)
+        {
+            // await using var webTenderContext = new AdataTenderContext();
+            var announcement = new AdataAnnouncement
+            {
+                SourceNumber =  dto.SourceCode,
+                Title =  dto.Title,
+                ApplicationStartDate =  dto.StartDate,
+                ApplicationFinishDate = dto.FinishDate,
+                CustomerBin = dto.CustomerBin,
+                SourceLink =  dto.SourceLink,
+                LotsAmount =  dto.FullPrice,
+                LotsQuantity = dto.Lots.Count,
+                SourceId = 4,
+                RelevanceDate = dto.RelevanceDate,
+                PublishDate = dto.StartDate
+            };
+          
+            if (dto.Status)
+            {
+               
+                    announcement.StatusId = 1;
+            }
+            announcement.StatusId = 38;
+            if (dto.PurchaseType != null)
+            {
+                var method = await webTenderContext.Methods.FirstOrDefaultAsync(x => x.Name == dto.PurchaseType);
+                if (method != null)
+                    announcement.MethodId = method.Id;
+            }
+            
+            announcement.Lots = new List<AdataLot>();
+            foreach (var dtoLot in dto.Lots)
+            {
+                var lot = new AdataLot
+                {
+                    Title = dtoLot.LotName,
+                    StatusId = announcement.StatusId,
+                    MethodId = announcement.MethodId,
+                    SourceId = 4,
+                    ApplicationStartDate = announcement.ApplicationStartDate,
+                    ApplicationFinishDate = announcement.ApplicationFinishDate,
+                    CustomerBin = announcement.CustomerBin ,
+                    SupplyLocation = dto.DeliveryPlace,
+                    TenderLocation = null, 
+                    Characteristics = dto.Rubrics,
+                    Quantity =  0,
+                    TotalAmount = dtoLot.FullPrice,
+                    Terms = dto.PaymentConditions,
+                    SourceNumber = announcement.SourceNumber + "-" + dtoLot.LotNumber,
+                    RelevanceDate = dto.RelevanceDate 
+                };
+                if (lot.Quantity > 0 && lot.TotalAmount > 0)
+                {
+                    lot.UnitPrice = lot.TotalAmount / lot.Quantity;
+                }
+                if (dtoLot.LotName != null)
+                {
+                    var tru = await webTenderContext.TruCodes.FirstOrDefaultAsync(x => x.Code == dtoLot.LotName);
+                    if (tru != null)
+                        lot.TruCode = tru.Code;
+                }
+                lot.Documentations = new List<LotDocumentation>();
+                announcement.Lots.Add(lot);
+            }
+            return announcement;
+        }
+    }
+}

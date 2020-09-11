@@ -86,7 +86,6 @@ namespace DataMigrationSystem.Services
             {
                 Start:
                 var temp = DtoToWeb(dto);
-                var contacts = OnlyContacts(dto);
                 try
                 {
                         await webParticipantGoszakupContext.ParticipantsGoszakup.Upsert(temp)
@@ -120,8 +119,6 @@ namespace DataMigrationSystem.Services
                         Program.NumOfErrors++;
                     }
                 }
-
-                await webParticipantGoszakupContext.Contacts.Upsert(contacts).On(x => new {x.Bin, x.Source}).RunAsync();
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
             }
@@ -151,19 +148,6 @@ namespace DataMigrationSystem.Services
             participantGoszakup.LastUpdateDate = participantGoszakupDto.LastUpdateDate;
             participantGoszakup.MarkNationalCompany = participantGoszakupDto.MarkNationalCompany;
             return participantGoszakup;
-        }
-
-        private Contact OnlyContacts(ParticipantGoszakupDto participantGoszakupDto)
-        {
-            var contact = new Contact();
-            var biin = participantGoszakupDto.Bin ?? participantGoszakupDto.Iin;
-            var source = participantGoszakupDto.Bin != null ? "goszakup_bin" : "goszakup_iin";
-            contact.Bin = biin;
-            contact.Telephone = participantGoszakupDto.Phone;
-            contact.Website = participantGoszakupDto.Website;
-            contact.Email = participantGoszakupDto.Email;
-            contact.Source = source;
-            return contact;
         }
     }
 }

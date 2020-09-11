@@ -69,12 +69,9 @@ namespace DataMigrationSystem.Services
             foreach (var dto in parsedParticipantNadlocContext.ParticipantNadlocDtos.Where(x=>x.Id % NumOfThreads==threadNum))
             {
                 var temp = DtoToWeb(dto);
-                var contacts = OnlyContacts(dto);
                 await webParticipantNadlocContext.ParticipantsNadloc.Upsert(temp).On(x => x.Bin).RunAsync();
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
-
-                await webContactContext.Contacts.Upsert(contacts).On(x=>new {x.Bin, x.Source}).NoUpdate().RunAsync();
             }
 
             foreach (var dto in parsedParticipantNadlocContext.CustomersNadlocDtos.Where(x=>x.Id% NumOfThreads==threadNum).Select(x=>new CustomerNadloc
@@ -135,17 +132,6 @@ namespace DataMigrationSystem.Services
             participantNadloc.RegDate = participantNadlocDto.RegDate;
             participantNadloc.CustomerLink = participantNadlocDto.CustomerLink;
             return participantNadloc;
-        }
-        private Contact OnlyContacts(ParticipantNadlocDto participantNadlocDto)
-        {
-            var contact= new Contact();
-            var source = "nadloc";
-            contact.Bin =  participantNadlocDto.Bin;
-            contact.Telephone = participantNadlocDto.Tel1;
-            contact.Website = participantNadlocDto.WebSite;
-            contact.Email = participantNadlocDto.Email;
-            contact.Source = source;
-            return contact;
         }
     }
 }

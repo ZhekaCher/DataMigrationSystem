@@ -38,10 +38,8 @@ namespace DataMigrationSystem.Services
             foreach (var dto in samrukParticipants)
             {
                 var samrukParticipantsDto = DtoToWeb(dto.samrukParticipantsDto);
-                var contacts = OnlyContacts(dto.samrukParticipantsDto);
                 await webSamrukParticipantsContext.SamrukParticipantses.Upsert(samrukParticipantsDto)
                     .On(x => x.CodeBin).RunAsync();
-                await webSamrukParticipantsContext.Contacts.Upsert(contacts).On(x=>new {x.Bin, x.Source}).NoUpdate().RunAsync();
                 lock (_forLock)
                 {
                     Logger.Trace(_counter++);
@@ -105,18 +103,6 @@ namespace DataMigrationSystem.Services
                 ReliableCompany = samrukParticipantsDto.GenuineSupplier
             };
             return samrukParticipants;
-        }
-        private Contact OnlyContacts(SamrukParticipantsDto samrukParticipantsDto)
-        {
-            var contact = new Contact
-            {
-                Bin = samrukParticipantsDto.CodeBin,
-                Telephone = samrukParticipantsDto.Phone,
-                Website = samrukParticipantsDto.Site,
-                Email = samrukParticipantsDto.Email,
-                Source = "samruk"
-            };
-            return contact;
         }
     }
 }
