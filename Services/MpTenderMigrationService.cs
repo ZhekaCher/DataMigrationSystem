@@ -17,7 +17,7 @@ namespace DataMigrationSystem.Services
         private int _total=0;
         private readonly object _lock = new object();
 
-        public MpTenderMigrationService(int numOfThreads = 1)
+        public MpTenderMigrationService(int numOfThreads = 10)
         {
             NumOfThreads = numOfThreads;
         }
