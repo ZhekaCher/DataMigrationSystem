@@ -11,7 +11,7 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("id")] public long Id { get; set; }
         [Column("advert_id")] public long  AdvertId{ get; set; }
       
-        [Column("lor_id")] public long LotId { get; set; }
+        [Column("lot_id")] public long LotId { get; set; }
         [Column("lot_name")] public string LotName { get; set; }
         [Column("tender_lot_owner")] public string TenderLotOwner { get; set; }
         [Column("type_of_auction")] public string TypeOfAuction { get; set; }

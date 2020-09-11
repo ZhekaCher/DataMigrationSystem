@@ -17,7 +17,7 @@ namespace DataMigrationSystem.Services
         private int _total=0;
         private readonly object _lock = new object();
 
-        public MpTenderMigrationService(int numOfThreads = 20)
+        public MpTenderMigrationService(int numOfThreads = 1)
         {
             NumOfThreads = numOfThreads;
         }
@@ -73,9 +73,9 @@ namespace DataMigrationSystem.Services
                             {
                                 await webTenderContext.AdataLots.Upsert(lot).On(x => new {x.SourceNumber, x.SourceId})
                                     .RunAsync();
-                                lot.PaymentCondition.LotId = foundLot.Id;
+                                /*lot.PaymentCondition.LotId = foundLot.Id;
                                 await webTenderContext.PaymentConditions.Upsert(lot.PaymentCondition).On(x => x.LotId)
-                                    .RunAsync();
+                                    .RunAsync();*/
                             }
                             else
                             {
@@ -158,7 +158,8 @@ namespace DataMigrationSystem.Services
                     Characteristics = dtoLot.LotDescription,
                     TotalAmount = dtoLot.LotVolume ?? 0,
                     UnitPrice = dtoLot.OpeningPrice ?? 0,
-                    Terms = dtoLot.DeliveryTime
+                    Terms = dtoLot.DeliveryTime,
+                    CustomerBin = dto.Bin
                 };
                 try
                 {    
@@ -187,12 +188,6 @@ namespace DataMigrationSystem.Services
                     if (measure != null) 
                         lot.MeasureId = measure.Id;
                 }
-                // if (dtoLot.TruCode != null)
-                // {
-                    // var tru = await webTenderContext.TruCodes.FirstOrDefaultAsync(x => x.Code == dtoLot.TruCode);
-                    // if (tru != null)
-                        // lot.TruId = tru.Id;
-                // }
                 lot.Documentations = new List<LotDocumentation>();
                 foreach (var document in dtoLot.Documentations.Select(fileDto => new LotDocumentation
                 {
@@ -215,6 +210,8 @@ namespace DataMigrationSystem.Services
             await using var parsedMpTenderContext = new ParsedMpTenderContext();
             _total = await parsedMpTenderContext.MpTender.CountAsync();
             var units = parsedMpTenderContext.Lots.Select(x=> new Measure {Name = x.UnitOfAmount}).Distinct();
+            var documentationTypes = parsedMpTenderContext.MpTenderFiles.Select(x => new DocumentationType {Name = x.Name}).Distinct();
+            await webTenderContext.DocumentationTypes.UpsertRange(documentationTypes).On(x => x.Name).RunAsync();
             await webTenderContext.Measures.UpsertRange(units).On(x => x.Name).RunAsync(); 
             var statuses = parsedMpTenderContext.MpTender.Select(x => new Status{Name = x.StatusOfAuc}).Distinct();
             await webTenderContext.Statuses.UpsertRange(statuses).On(x => x.Name).NoUpdate().RunAsync(); 
