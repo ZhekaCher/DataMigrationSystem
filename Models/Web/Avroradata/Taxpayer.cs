@@ -22,7 +22,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
     [Table("taxpayer_type")]
     public class TaxpayerType
     {
-        [Key] [Column("id")] public long? I{get; set;}
+        [Key] [Column("id")] public int? I{get; set;}
         [Column("name")] public string Name{get; set;}
     }
 }

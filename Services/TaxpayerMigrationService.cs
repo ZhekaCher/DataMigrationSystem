@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Web.Avroradata;
-using DataMigrationSystem.Models.Parsed;
 using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
 using NLog;
@@ -14,7 +13,7 @@ namespace DataMigrationSystem.Services
     { 
         private int _total;
         private readonly object _lock = new object();
-
+        private readonly Dictionary<string, int?> _typeDictionary = new Dictionary<string, int?>();
         public TaxpayerMigrationService(int numOfThreads = 10)
         {
             NumOfThreads = numOfThreads;
@@ -28,78 +27,95 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
-            Logger.Info($"Starting migration with '{NumOfThreads}' threads");
             await MigrateReferences();
-            var tasks = new List<Task>();
-            for (int i = 0; i < NumOfThreads; i++)
-            {
-                tasks.Add(Migrate(i));
-
-            }
-            await Task.WhenAll(tasks);
+            await Migrate();
         }
-
-        private async Task Migrate(int threadNum)
+        private async Task Insert(Taxpayer taxpayer)
         {
-            Logger.Info("started thread");
+            // var taxpayer = await DtoToEntity(taxpayerDto);
             await using var webTaxpayerContext = new WebTaxpayerContext();
-            await using var parsedTaxpayerContext = new ParsedTaxpayerContext();
-            var taxpayersDtos = from taxpayersDto in parsedTaxpayerContext.TaxpayerDtos
-                where taxpayersDto.Uin % NumOfThreads == threadNum
-                select taxpayersDto;
-            foreach (var taxpayersDto in taxpayersDtos)
+            await webTaxpayerContext.Taxpayers.Upsert(taxpayer).On(x => new {taxpayer.Uin, taxpayer.TypeId}).RunAsync();
+            lock (_lock)
             {
-                var taxpayer = await DtoToEntity(taxpayersDto);
-                await webTaxpayerContext.Taxpayers.Upsert(taxpayer).On(x => new {taxpayer.Uin, taxpayer.TypeId}).RunAsync();
-                lock (_lock)
+                Logger.Trace(_total--);
+            }
+        }
+        private async Task Migrate()
+        {
+            await using var parsedTaxpayerContext = new ParsedTaxpayerContext();
+            var taxpayers = parsedTaxpayerContext.TaxpayerDtos.Select(x=> new Taxpayer
+            {
+                Rnn = x.Rnn,
+                FullName = x.FullName,
+                Uin = x.Uin,
+                DateReg = x.DateReg,
+                DateUnreg = x.DateUnreg,
+                ReasonUnreg = x.ReasonUnreg,
+                AddInfo = x.AddInfo,
+                Period = x.Period,
+                RelevanceDate = x.RelevanceDate,
+                TypeId = x.Type == null ? null : _typeDictionary[x.Type]
+            });
+            var tasks = new List<Task>();
+            foreach (var taxpayer in taxpayers)
+            {
+                tasks.Add(Insert(taxpayer));
+                if (tasks.Count >= NumOfThreads)
                 {
-                    Logger.Trace(_total--);
+                    await Task.WhenAny(tasks);
+                    tasks.RemoveAll(x => x.IsCompleted);
                 }
             }
+            
+            await Task.WhenAll(tasks);
         }
 
         private async Task MigrateReferences()
         {
             await using var webTaxpayerContext = new WebTaxpayerContext();
             await using var parsedTaxpayerContext = new ParsedTaxpayerContext();
-            var typeOfServices = parsedTaxpayerContext.TaxpayerDtos
+            var types = parsedTaxpayerContext.TaxpayerDtos
                 .Select(x => x.Type).Distinct();
-            foreach (var typeOfService in typeOfServices)
+            foreach (var type in types)
             {
                 await webTaxpayerContext.TypeOfServices.Upsert(new TaxpayerType
                 {
-                    Name = typeOfService
+                    Name = type
                 }).On(x => x.Name).RunAsync();
+            }
+            await foreach (var type in webTaxpayerContext.TypeOfServices)
+            {
+                _typeDictionary[type.Name] = type.I;
             }
         }
 
-        private async Task<Taxpayer> DtoToEntity(TaxpayerDto taxpayerDto)
-        {
-            await using var webTaxpayerContext = new WebTaxpayerContext();
-            var taxpayer = new Taxpayer
-            {
-                Rnn = taxpayerDto.Rnn,
-                FullName = taxpayerDto.FullName,
-                Uin = taxpayerDto.Uin,
-                DateReg = taxpayerDto.DateReg,
-                DateUnreg = taxpayerDto.DateUnreg,
-                ReasonUnreg = taxpayerDto.ReasonUnreg,
-                AddInfo = taxpayerDto.AddInfo,
-                Period = taxpayerDto.Period,
-                RelevanceDate = taxpayerDto.RelevanceDate,
-            };
-            if (taxpayerDto.Type != null)
-            {
-                var l = (await webTaxpayerContext.TypeOfServices.FirstOrDefaultAsync(x =>
-                    x.Name == taxpayerDto.Type))?.I;
-                if (l != null)
-                    taxpayer.TypeId = (int) l;
-            }
-            else
-            {
-                taxpayer.TypeId = null;
-            }
-            return taxpayer;
-        }
+        // private async Task<Taxpayer> DtoToEntity(TaxpayerDto taxpayerDto)
+        // {
+        //     await using var webTaxpayerContext = new WebTaxpayerContext();
+        //     var taxpayer = new Taxpayer
+        //     {
+        //         Rnn = taxpayerDto.Rnn,
+        //         FullName = taxpayerDto.FullName,
+        //         Uin = taxpayerDto.Uin,
+        //         DateReg = taxpayerDto.DateReg,
+        //         DateUnreg = taxpayerDto.DateUnreg,
+        //         ReasonUnreg = taxpayerDto.ReasonUnreg,
+        //         AddInfo = taxpayerDto.AddInfo,
+        //         Period = taxpayerDto.Period,
+        //         RelevanceDate = taxpayerDto.RelevanceDate,
+        //     };
+        //     if (taxpayerDto.Type != null)
+        //     {
+        //         var l = (await webTaxpayerContext.TypeOfServices.FirstOrDefaultAsync(x =>
+        //             x.Name == taxpayerDto.Type))?.I;
+        //         if (l != null)
+        //             taxpayer.TypeId = l;
+        //     }
+        //     else
+        //     {
+        //         taxpayer.TypeId = null;
+        //     }
+        //     return taxpayer;
+        // }
     }
 }
