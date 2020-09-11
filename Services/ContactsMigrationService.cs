@@ -53,23 +53,28 @@ namespace DataMigrationSystem.Services
 
             foreach (var dto in parsedContactContext.ContactsDtos.Where(x => x.Id % NumOfThreads == threadNum))
             {
-                if (dto.Telephone != null)
-                    await webContactContext.ContactTelephones.UpsertRange(AddTel(dto.Telephone, dto.Bin, dto.Source))
-                        .On(x => new {x.Bin, x.Telephone}).RunAsync();
-                if (dto.Email != null)
-                    await webContactContext.ContactEmails.UpsertRange(AddEmail(dto.Email, dto.Bin, dto.Source))
-                        .On(x => new {x.Bin, x.Email}).RunAsync();
-                if (dto.Website != null)
-                    await webContactContext.ContactWebsites.UpsertRange(AddWebsite(dto.Website, dto.Bin, dto.Source))
-                        .On(x => new {x.Bin, x.Website}).RunAsync();
-                lock (_lock)
+                if (dto.Bin != null)
                 {
-                    Logger.Trace($"Left {--_total}");
+                    if (dto.Telephone != null)
+                        await webContactContext.ContactTelephones
+                            .UpsertRange(AddTel(dto.Telephone, dto.Bin, dto.Source))
+                            .On(x => new {x.Bin, x.Telephone}).RunAsync();
+                    if (dto.Email != null)
+                        await webContactContext.ContactEmails.UpsertRange(AddEmail(dto.Email, dto.Bin, dto.Source))
+                            .On(x => new {x.Bin, x.Email}).RunAsync();
+                    if (dto.Website != null)
+                        await webContactContext.ContactWebsites
+                            .UpsertRange(AddWebsite(dto.Website, dto.Bin, dto.Source))
+                            .On(x => new {x.Bin, x.Website}).RunAsync();
+                    lock (_lock)
+                    {
+                        Logger.Trace($"Left {--_total}");
+                    }
                 }
             }
         }
 
-        private static List<ContactTelephone> AddTel(string telephone, long bin, string source)
+        private static List<ContactTelephone> AddTel(string telephone, long? bin, string source)
         {
             var contactTelephones = new List<ContactTelephone>();
             var telephones = ValidateTel(telephone);
@@ -88,7 +93,7 @@ namespace DataMigrationSystem.Services
             return contactTelephones;
         }
 
-        private static List<ContactEmail> AddEmail(string email, long bin, string source)
+        private static List<ContactEmail> AddEmail(string email, long? bin, string source)
         {
             var contactEmails = new List<ContactEmail>();
             var emails = ValidateEmail(email);
@@ -107,7 +112,7 @@ namespace DataMigrationSystem.Services
             return contactEmails;
         }
 
-        private static List<ContactWebsite> AddWebsite(string website, long bin, string source)
+        private static List<ContactWebsite> AddWebsite(string website, long? bin, string source)
         {
             var contactWebsites = new List<ContactWebsite>();
             var websites = ValidateWebsite(website);
