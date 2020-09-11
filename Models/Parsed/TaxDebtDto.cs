@@ -21,7 +21,7 @@ namespace DataMigrationSystem.Models.Parsed
         public double SocialContribution{ get; set; }
         [Column("social_health_insurance")]
         public double SocialHealthInsurance{ get; set; }
-        public List<TaxDebtOrgDto> TaxDebtOrgs { get; set; }
+        public IEnumerable<TaxDebtOrgDto> TaxDebtOrgs { get; set; } = new List<TaxDebtOrgDto>();
     }
     
     [Table("tax_debt_org")]
@@ -41,8 +41,8 @@ namespace DataMigrationSystem.Models.Parsed
         public double SocialHealthInsurance { get; set; }
         [Column("iin_bin")] 
         public long IinBin { get; set; }
-        public List<TaxDebtPayerDto> TaxDebtPayers { get; set; }
-        public TaxDebtDto TaxDebt { get; set; }
+        public IEnumerable<TaxDebtPayerDto> TaxDebtPayers { get; set; } = new List<TaxDebtPayerDto>();
+        // public TaxDebtDto TaxDebt { get; set; }
         [Column("name_ru")]
         public string NameRu { get; set; }
         [Column("name_kk")]
@@ -60,8 +60,8 @@ namespace DataMigrationSystem.Models.Parsed
         public long CharCode { get; set; }
         [Column("head_iin_bin")] 
         public long HeadIinBin { get; set; }
-        public List<TaxDebtBccDto> TaxDebtBccs { get; set; }
-        public TaxDebtOrgDto TaxDebtOrg { get; set; }
+        public IEnumerable<TaxDebtBccDto> TaxDebtBccs { get; set; } = new List<TaxDebtBccDto>();
+        // public TaxDebtOrgDto TaxDebtOrg { get; set; }
     }
     
     
@@ -82,7 +82,7 @@ namespace DataMigrationSystem.Models.Parsed
         public long CharCode { get; set; }
         [Column("iin_bin")] 
         public long IinBin { get; set; }
-        public TaxDebtPayerDto TaxDebtPayer { get; set; }
+        // public TaxDebtPayerDto TaxDebtPayer { get; set; }
         [Column("name_ru")]
         public string NameRu { get; set; }
         [Column("name_kk")]

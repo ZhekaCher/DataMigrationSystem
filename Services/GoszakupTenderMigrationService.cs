@@ -61,6 +61,7 @@ namespace DataMigrationSystem.Services
 
         private async Task Migrate(int threadNum)
         {
+            await Task.Delay(500);
             Logger.Info("Started thread");
             await using var parsedAnnouncementGoszakupContext = new ParsedGoszakupContext();
             parsedAnnouncementGoszakupContext.ChangeTracker.AutoDetectChangesEnabled = false;
@@ -76,7 +77,8 @@ namespace DataMigrationSystem.Services
             {
                 try
                 {
-                    
+                    if(dto.Lots==null || dto.Lots.Count<1 || (int)dto.TotalSum!= (int)dto.Lots.Sum(x => x.Amount))
+                        continue;
                     await using var webTenderContext = new AdataTenderContext();
                     webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
                     var announcement = DtoToWebAnnouncement(dto);
@@ -127,7 +129,10 @@ namespace DataMigrationSystem.Services
         {
             using var webTenderContext = new AdataTenderContext();
 
-
+            if (announcementGoszakupDto.RefTradeMethodsId==128)
+            {
+                Console.WriteLine(1);
+            }
             var status =
                 webStatuses?.FirstOrDefault(
                     x => x.Name == announcementGoszakupDto.RefBuyStatus?.NameRu);

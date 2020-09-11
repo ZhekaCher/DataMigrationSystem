@@ -3,35 +3,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
-using DataMigrationSystem.Context.Web;
 using DataMigrationSystem.Context.Web.Avroradata;
-using DataMigrationSystem.Context.Web.TradingFloor;
+using DataMigrationSystem.Models.Parsed;
+using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
 namespace DataMigrationSystem.Services
 {
+    /// @author Yevgeniy Cherdantsev
+    /// @date 22.02.2020 14:02:20
+    /// @version 1.0
+    /// <summary>
+    /// migration of goszakup participants
+    /// </summary>
     public class PlanGoszakupMigrationService : MigrationService
     {
         private int _total;
         private readonly object _lock = new object();
 
-        public PlanGoszakupMigrationService(int numOfThreads = 20)
-        {
-            using var adataTenderContext = new AdataTenderContext();
-            // using var parsedGoszakupContext = new ParsedGoszakupContext();
-            // parsedGoszakupContext.Database.ExecuteSqlRaw(
-            // "delete from avroradata.plan_goszakup p where p.id not in (select plan_point from avroradata.lot_goszakup)");
-            _total = adataTenderContext.AdataLots.Count(x => x.SourceId == 2 && x.TruCode == null);
-            adataTenderContext.Database.ExecuteSqlRaw("UPDATE adata_tender.announcements SET status_id=58 WHERE application_finish_date<now()");
-            adataTenderContext.Database.ExecuteSqlRaw("UPDATE adata_tender.lots SET status_id=38 WHERE application_finish_date<now()");
-            adataTenderContext.Dispose();
-            NumOfThreads = numOfThreads;
-        }
-
         protected override Logger InitializeLogger()
         {
             return LogManager.GetCurrentClassLogger();
+        }
+
+        public PlanGoszakupMigrationService(int numOfThreads = 30)
+        {
+            NumOfThreads = numOfThreads;
+            using var parsedPlanGoszakupContext = new ParsedPlanGoszakupContext();
+            _total = parsedPlanGoszakupContext.PlanGoszakupDtos.Count();
         }
 
         public override async Task StartMigratingAsync()
@@ -43,43 +43,24 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
-            await using var parsedGoszakupContext = new ParsedGoszakupContext();
-            parsedGoszakupContext.Database.ExecuteSqlRaw("truncate table avroradata.announcement_goszakup restart identity cascade;");
-            parsedGoszakupContext.Database.ExecuteSqlRaw("truncate table avroradata.lot_goszakup restart identity cascade;");
-            await parsedGoszakupContext.DisposeAsync();
+            // await parsedParticipantGoszakupContext.Database.ExecuteSqlRawAsync("truncate table avroradata.participant_goszakup restart identity cascade;");
+            // Logger.Info("Truncated");
         }
 
         private async Task Migrate(int threadNum)
         {
-            await Task.Delay(1);
-            await using var adataTenderContext = new AdataTenderContext();
-
-            foreach (var model in adataTenderContext.AdataLots.Where(x =>
-                x.Id % NumOfThreads == threadNum &&
-                x.SourceId == 2 &&
-                x.TruCode == null))
+            await using var webPlanGoszakupContext = new WebPlanGoszakupContext();
+            await using var parsedPlanGoszakupContext = new ParsedPlanGoszakupContext();
+            webPlanGoszakupContext.ChangeTracker.AutoDetectChangesEnabled = false;
+            parsedPlanGoszakupContext.ChangeTracker.AutoDetectChangesEnabled = false;
+            foreach (var dto in parsedPlanGoszakupContext.PlanGoszakupDtos.AsNoTracking().Where(x =>
+                    x.Id % NumOfThreads == threadNum))
             {
+                var temp = DtoToWeb(dto);
                 try
                 {
-                    await using var tempAdataTenderContext = new AdataTenderContext();
-                    await using var innerParsedGoszakupContext = new ParsedGoszakupContext();
-                    var dtoLot =
-                        innerParsedGoszakupContext.LotGoszakupDtos.FirstOrDefault(
-                            x => x.LotNumber == model.SourceNumber);
-                    if (dtoLot == null)
-                        continue;
-                    var plan = innerParsedGoszakupContext.PlanGoszakupDtos.FirstOrDefault(x =>
-                        x.Id == dtoLot.PlanPoint);
-                    if (plan != null)
-                    {
-                        tempAdataTenderContext.Database
-                            .ExecuteSqlRawAsync(
-                                $"UPDATE lots SET tru_code = '{plan.RefEnstruCode}', terms= '{plan.SupplyDateRu}' WHERE source_number = '{model.SourceNumber}'")
-                            .GetAwaiter().GetResult();
-                    }
-
-                    innerParsedGoszakupContext.Dispose();
-                    tempAdataTenderContext.Dispose();
+                    await webPlanGoszakupContext.PlansGoszakup.Upsert(temp)
+                        .On(x => x.Id).RunAsync();
                 }
                 catch (Exception e)
                 {
@@ -90,14 +71,73 @@ namespace DataMigrationSystem.Services
                     else
                     {
                         Logger.Error(
-                            $"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|;");
+                            $"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|; Biin:|{temp.SubjectBiin}|; Id:|{temp.Id}|");
                         Program.NumOfErrors++;
                     }
                 }
-
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
             }
+
+
+            // Logger.Info($"Completed thread at {_total}");
+        }
+
+
+        private PlanGoszakup DtoToWeb(PlanGoszakupDto planGoszakupDto)
+        {
+            var planGoszakup = new PlanGoszakup()
+            {
+                Amount =  planGoszakupDto.Amount,
+                Count = planGoszakupDto.Count,
+                Id = planGoszakupDto.Id,
+                Prepayment = planGoszakupDto.Prepayment,
+                Price = planGoszakupDto.Prepayment,
+                Sum1 = planGoszakupDto.Sum1,
+                Sum2 = planGoszakupDto.Sum2,
+                Sum3 = planGoszakupDto.Sum3,
+                Timestamp = planGoszakupDto.Timestamp,
+                DateApproved = planGoszakupDto.DateApproved,
+                DateCreate = planGoszakupDto.DateCreate,
+                DescKz = planGoszakupDto.DescKz,
+                DescRu = planGoszakupDto.DescRu,
+                IsQvazi = planGoszakupDto.IsQvazi,
+                NameKz = planGoszakupDto.NameKz,
+                NameRu = planGoszakupDto.NameRu,
+                PlanPreliminary = planGoszakupDto.PlanPreliminary,
+                RootrecordId = planGoszakupDto.RootrecordId,
+                SubjectBiin = planGoszakupDto.SubjectBiin,
+                SystemId = planGoszakupDto.SystemId,
+                TransferType = planGoszakupDto.TransferType,
+                DisablePersonId = planGoszakupDto.DisablePersonId,
+                ExtraDescKz = planGoszakupDto.ExtraDescKz,
+                ExtraDescRu = planGoszakupDto.ExtraDescRu,
+                PlanActId = planGoszakupDto.PlanActId,
+                PlanActNumber = planGoszakupDto.PlanActNumber,
+                PlanFinYear = planGoszakupDto.PlanFinYear,
+                PlnPointYear = planGoszakupDto.PlnPointYear,
+                RefAbpCode = planGoszakupDto.RefAbpCode,
+                RefEnstruCode = planGoszakupDto.RefEnstruCode,
+                RefFinsourceId = planGoszakupDto.RefFinsourceId,
+                RefJustificationId = planGoszakupDto.RefJustificationId,
+                RefMonthsId = planGoszakupDto.RefMonthsId,
+                RefUnitsCode = planGoszakupDto.RefUnitsCode,
+                SubjectNameKz = planGoszakupDto.SubjectNameKz,
+                SubjectNameRu = planGoszakupDto.SubjectNameRu,
+                SupplyDateRu = planGoszakupDto.SupplyDateRu,
+                SysSubjectsId = planGoszakupDto.SysSubjectsId,
+                ContractPrevPointId = planGoszakupDto.ContractPrevPointId,
+                RefBudgetTypeId = planGoszakupDto.RefBudgetTypeId,
+                RefPlanStatusId = planGoszakupDto.RefPlanStatusId,
+                RefPointTypeId = planGoszakupDto.RefPointTypeId,
+                RefSubjectTypesId = planGoszakupDto.RefSubjectTypesId,
+                RefTradeMethodsId = planGoszakupDto.RefTradeMethodsId,
+                TransferSysSubjectsId = planGoszakupDto.TransferSysSubjectsId,
+                RefAmendmAgreemJustifId = planGoszakupDto.RefAmendmAgreemJustifId,
+                RefAmendmentAgreemTypeId = planGoszakupDto.RefAmendmentAgreemTypeId,
+                RefPlnPointStatusId = planGoszakupDto.RefPlnPointStatusId
+            };
+            return planGoszakup;
         }
     }
 }

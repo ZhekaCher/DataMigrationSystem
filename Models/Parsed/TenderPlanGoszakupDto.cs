@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 // ReSharper disable IdentifierTypo
 // ReSharper disable CommentTypo
@@ -14,8 +15,8 @@ namespace DataMigrationSystem.Models.Parsed
     /// <summary>
     /// Plan Parsing DB table object
     /// </summary>
-    [Table("plan_goszakup")]
-    public class PlanGoszakupDto
+    [Table("tender_plan_goszakup")]
+    public class TenderPlanGoszakupDto : DbLoggerCategory.Model
     {
         [Key] [Column("id")] public long? Id { get; set; }
         [Column("plan_act_id")] public long? PlanActId { get; set; }

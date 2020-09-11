@@ -15,4 +15,5 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
         [Column("source")] public string Source { get; set; }
         [Column("relevance_date")] public DateTime RelevanceDate { get; set; }
     }
+   
 }
