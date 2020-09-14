@@ -4,9 +4,12 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
+using DataMigrationSystem.Context.Parsed.Avroradata;
 using DataMigrationSystem.Context.Web;
+using DataMigrationSystem.Context.Web.AdataTender;
 using DataMigrationSystem.Models.Parsed;
-using DataMigrationSystem.Models.Web.TradingFloor;
+using DataMigrationSystem.Models.Parsed.Avroradata;
+using DataMigrationSystem.Models.Web.AdataTender;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -39,7 +42,7 @@ namespace DataMigrationSystem.Services
 
         private async Task Insert(AnnouncementNadlocDto dto)
         {
-            await using var webTenderContext = new AdataTenderContext();
+            await using var webTenderContext = new WebTenderContext();
             webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
             var announcement = await DtoToWebAnnouncement(webTenderContext, dto);
             try
@@ -105,7 +108,7 @@ namespace DataMigrationSystem.Services
 
         private async Task MigrateReferences()
         {
-            await using var webTenderContext = new AdataTenderContext();
+            await using var webTenderContext = new WebTenderContext();
             await using var parsedAnnouncementNadlocContext = new ParsedNadlocContext();
             _total = await parsedAnnouncementNadlocContext.AnnouncementNadlocDtos.CountAsync();
             var units = parsedAnnouncementNadlocContext.LotNadlocDtos.Select(x=> x.Unit).Distinct().Select(x=>new Measure {Name = x});
@@ -116,7 +119,7 @@ namespace DataMigrationSystem.Services
                 await webTenderContext.TruCodes.UpsertRange(truCode).On(x => x.Code).RunAsync();
             }
         }
-        private static async Task<AdataAnnouncement> DtoToWebAnnouncement(AdataTenderContext webTenderContext, AnnouncementNadlocDto dto)
+        private static async Task<AdataAnnouncement> DtoToWebAnnouncement(WebTenderContext webTenderContext, AnnouncementNadlocDto dto)
         {
             // await using var webTenderContext = new AdataTenderContext();
             var announcement = new AdataAnnouncement

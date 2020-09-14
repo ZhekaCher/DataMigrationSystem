@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Web.Avroradata
 {
-    public class WebUnreliableTaxpayerContext: WebContext
+    public class WebUnreliableTaxpayerContext: WebAvroradataContext
     {
         
         public DbSet<UnreliableTaxpayer> UnreliableTaxpayers { get; set; }    

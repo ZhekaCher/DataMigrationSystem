@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Web.Avroradata
 {
-    public class WebQamqorFinesContext : WebContext
+    public class WebQamqorFinesContext : WebAvroradataContext
     {
         public DbSet<QamqorFines> QamqorFineses { get; set; }
     }

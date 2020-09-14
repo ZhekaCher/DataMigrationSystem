@@ -12,7 +12,7 @@ namespace DataMigrationSystem.Context.Web.Avroradata
     /// Контекст для работы с таблицей 'participant_goszakup'
     /// </summary>
 
-    public class WebParticipantGoszakupContext : WebContext
+    public class WebParticipantGoszakupContext : WebAvroradataContext
     {
         public DbSet<ParticipantGoszakup> ParticipantsGoszakup { get; set; }
         

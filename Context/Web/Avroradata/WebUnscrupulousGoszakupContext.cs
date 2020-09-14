@@ -11,7 +11,7 @@ namespace DataMigrationSystem.Context.Web.Avroradata
     /// Контекст для работы с таблицей 'unscrupulous_goszakup'
     /// </summary>
 
-    public class WebUnscrupulousGoszakupContext : WebContext
+    public class WebUnscrupulousGoszakupContext : WebAvroradataContext
     {
         public DbSet<UnscrupulousGoszakup> UnscrupulousGoszakup { get; set; }
     }

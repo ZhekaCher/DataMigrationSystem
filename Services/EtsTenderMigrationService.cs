@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
+using DataMigrationSystem.Context.Parsed.Avroradata;
 using DataMigrationSystem.Context.Web;
-using DataMigrationSystem.Context.Web.TradingFloor;
+using DataMigrationSystem.Context.Web.AdataTender;
 using DataMigrationSystem.Models.Parsed;
-using DataMigrationSystem.Models.Web.TradingFloor;
+using DataMigrationSystem.Models.Parsed.Avroradata;
+using DataMigrationSystem.Models.Web.AdataTender;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -49,7 +51,7 @@ namespace DataMigrationSystem.Services
                 .Where(x => x.Id % NumOfThreads == threadNum).Include(x => x.Lots);
             foreach (var dto in etsTenderDtos)
             {
-                await using var adataTenderContext = new AdataTenderContext();
+                await using var adataTenderContext = new WebTenderContext();
                 adataTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
                 var announcement = await DtoToWebAnnouncement(adataTenderContext, dto);
                 try
@@ -101,7 +103,7 @@ namespace DataMigrationSystem.Services
 
 
 
-        private static async Task<AdataAnnouncement> DtoToWebAnnouncement(AdataTenderContext webTenderContext, AnnouncementEtsTenderDto dto)
+        private static async Task<AdataAnnouncement> DtoToWebAnnouncement(WebTenderContext webTenderContext, AnnouncementEtsTenderDto dto)
         {
             // await using var webTenderContext = new AdataTenderContext();
             var announcement = new AdataAnnouncement

@@ -4,9 +4,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
+using DataMigrationSystem.Context.Parsed.Avroradata;
 using DataMigrationSystem.Context.Web;
+using DataMigrationSystem.Context.Web.AdataTender;
 using DataMigrationSystem.Models.Parsed;
-using DataMigrationSystem.Models.Web.TradingFloor;
+using DataMigrationSystem.Models.Parsed.Avroradata;
+using DataMigrationSystem.Models.Web.AdataTender;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -32,7 +35,7 @@ namespace DataMigrationSystem.Services
 
             NumOfThreads = numOfThreads;
 
-            using var webTenderContext = new AdataTenderContext();
+            using var webTenderContext = new WebTenderContext();
 
 
             webStatuses = webTenderContext.Statuses.ToArray();
@@ -79,7 +82,7 @@ namespace DataMigrationSystem.Services
                 {
                     if(dto.Lots==null || dto.Lots.Count<1 || (int)dto.TotalSum!= (int)dto.Lots.Sum(x => x.Amount))
                         continue;
-                    await using var webTenderContext = new AdataTenderContext();
+                    await using var webTenderContext = new WebTenderContext();
                     webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
                     var announcement = DtoToWebAnnouncement(dto);
                     
@@ -127,7 +130,7 @@ namespace DataMigrationSystem.Services
 
         private AdataAnnouncement DtoToWebAnnouncement(AnnouncementGoszakupDto announcementGoszakupDto)
         {
-            using var webTenderContext = new AdataTenderContext();
+            using var webTenderContext = new WebTenderContext();
 
             if (announcementGoszakupDto.RefTradeMethodsId==128)
             {

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DataMigrationSystem.Context.Parsed;
-using DataMigrationSystem.Context.Web;
-using DataMigrationSystem.Models.Web.TradingFloor;
+using DataMigrationSystem.Context.Parsed.Avroradata;
+using DataMigrationSystem.Context.Web.AdataTender;
+using DataMigrationSystem.Models.Web.AdataTender;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -43,12 +43,12 @@ namespace DataMigrationSystem.Services
         {
             await Task.Delay(500);
             var parsedDocs = new ParsedGoszakupContext();
-            var adataTenderContextTemp = new AdataTenderContext();
+            var adataTenderContextTemp = new WebTenderContext();
             adataTenderContextTemp.Dispose();
             foreach (var dto in parsedDocs.TenderDocumentsGoszakup.AsNoTracking().Where(x =>
                 x.Id % NumOfThreads == threadNum))
             {
-                var adataTenderContext = new AdataTenderContext();
+                var adataTenderContext = new WebTenderContext();
                 var docType = adataTenderContext.DocumentationTypes.FirstOrDefault(x => x.Name == dto.Type);
                 if (docType == null)
                 {
@@ -78,7 +78,7 @@ namespace DataMigrationSystem.Services
                     {
                         await adataTenderContext.SaveChangesAsync();
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                     }
                 }
@@ -103,7 +103,7 @@ namespace DataMigrationSystem.Services
                 {
                     await adataTenderContext.SaveChangesAsync();
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                 }
 

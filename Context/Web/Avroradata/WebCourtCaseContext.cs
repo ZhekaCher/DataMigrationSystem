@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Web.Avroradata
 {
-    public class WebCourtCaseContext: WebContext
+    public class WebCourtCaseContext: WebAvroradataContext
     {
 
         public DbSet<CourtCase> CourtCases { get; set; }    

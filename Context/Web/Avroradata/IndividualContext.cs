@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Web.Avroradata
 {
-    public class IndividualContext: WebContext
+    public class IndividualContext: WebAvroradataContext
     {
         public DbSet<Individual> Individuals { get; set; }
     }

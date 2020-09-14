@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Web.Avroradata
 {
-    public class WebHeadHunterContext : WebContext
+    public class WebHeadHunterContext : WebAvroradataContext
     {
         public DbSet<CompanyHh> CompanyHhs { get; set; }
         public DbSet<VacancyHh> VacancyHhs { get; set; }

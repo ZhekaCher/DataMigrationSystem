@@ -10,7 +10,7 @@ namespace DataMigrationSystem.Context.Web.Avroradata
     /// <summary>
     /// INPUT
     /// </summary>
-    public class WebCompanyDirectorContext : WebContext
+    public class WebCompanyDirectorContext : WebAvroradataContext
     {
         public DbSet<CompanyDirector> CompanyDirectors { get; set; }    
         public DbSet<DataSource> DataSources { get; set; }

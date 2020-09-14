@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
-using DataMigrationSystem.Context.Web;
+using DataMigrationSystem.Context.Web.AdataTender;
 using DataMigrationSystem.Models.Parsed;
-using DataMigrationSystem.Models.Web.TradingFloor;
+using DataMigrationSystem.Models.Parsed.Avroradata;
+using DataMigrationSystem.Models.Web.AdataTender;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -51,7 +52,7 @@ namespace DataMigrationSystem.Services
                 .ThenInclude(x => x.Documentations);
             foreach (var dto in mpTenderDtos)
             {
-                await using var webTenderContext = new AdataTenderContext();
+                await using var webTenderContext = new WebTenderContext();
                 webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
                 var announcement = await DtoToWebAnnouncement(webTenderContext, dto);
                 try
@@ -101,7 +102,7 @@ namespace DataMigrationSystem.Services
             
         }
 
-        private async Task<AdataAnnouncement> DtoToWebAnnouncement(AdataTenderContext webTenderContext, MpTenderDto dto)
+        private async Task<AdataAnnouncement> DtoToWebAnnouncement(WebTenderContext webTenderContext, MpTenderDto dto)
         {
             var announcement = new AdataAnnouncement
             {
@@ -192,7 +193,7 @@ namespace DataMigrationSystem.Services
 
         private async Task MigrateReferences()
         {
-            await using var webTenderContext = new AdataTenderContext();
+            await using var webTenderContext = new WebTenderContext();
             await using var parsedMpTenderContext = new ParsedMpTenderContext();
             _total = await parsedMpTenderContext.MpTender.CountAsync();
             var units = parsedMpTenderContext.Lots.Select(x=> new Measure {Name = x.UnitOfAmount}).Distinct();
