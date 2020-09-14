@@ -85,9 +85,9 @@ namespace DataMigrationSystem.Services
                     await Task.WhenAny(tasks);
                     tasks.RemoveAll(x => x.IsCompleted);
                 }
-
-                await Task.WhenAll(tasks);
             }
+            await Task.WhenAll(tasks);
+
         }
 
         private async Task MigrateReferences()
