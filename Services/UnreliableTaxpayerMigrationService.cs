@@ -28,47 +28,50 @@ namespace DataMigrationSystem.Services
         {
             await using var parsedUnreliableTaxpayerContext = new ParsedUnreliableTaxpayerContext();
             _count = await parsedUnreliableTaxpayerContext.UnreliableTaxpayerDtos.CountAsync();
-            var tasks = new List<Task>();
-            for (var i = 0; i < NumOfThreads; i++)
-            {
-                tasks.Add(MigrateAsync(i));
-            }
-
-            await Task.WhenAll(tasks);
+            await MigrateAsync();
+            
             await using var webUnreliableTaxpayerContext = new WebUnreliableTaxpayerContext();
             var minDate = await parsedUnreliableTaxpayerContext.UnreliableTaxpayerDtos.MinAsync(x => x.RelevanceDate);
-            await webUnreliableTaxpayerContext.Database.ExecuteSqlInterpolatedAsync(
-                $"delete from avroradata.unreliable_taxpayers where relevance_date<{minDate}");
+            await webUnreliableTaxpayerContext.Database.ExecuteSqlInterpolatedAsync($"delete from avroradata.unreliable_taxpayers where relevance_date<{minDate}");
             await parsedUnreliableTaxpayerContext.Database.ExecuteSqlRawAsync("truncate table avroradata.unreliable_taxpayers;");
             await webUnreliableTaxpayerContext.Database.ExecuteSqlRawAsync($"call avroradata.unreliable_companies_updater();");
         }
 
-        private async Task MigrateAsync(int numThread)
+        private async Task Insert(UnreliableTaxpayer unreliableTaxpayer)
         {
             await using var webUnreliableTaxpayerContext = new WebUnreliableTaxpayerContext();
+            await webUnreliableTaxpayerContext.UnreliableTaxpayers.Upsert(unreliableTaxpayer).On(x => new {x.BinCompany, x.IdListType}).RunAsync();
+            lock (_forLock)
+            {
+                Logger.Trace(--_count);
+            }
+        }
+        private async Task MigrateAsync()
+        {
             await using var parsedUnreliableTaxpayerContext = new ParsedUnreliableTaxpayerContext();
-            
-            var taxpayers = from dto in parsedUnreliableTaxpayerContext.UnreliableTaxpayerDtos
-                where dto.Id % NumOfThreads == numThread
-                join com in parsedUnreliableTaxpayerContext.CompanyBinDtos on dto.BinCompany equals com.Code
-                select new UnreliableTaxpayer
-                {
-                    RelevanceDate = dto.RelevanceDate,
-                    DocumentDate = dto.DocumentDate,
-                    IdListType = dto.IdListType,
-                    IdTypeDocument = dto.IdTypeDocument,
-                    Note = dto.Note,
-                    DocumentNumber = dto.DocumentNumber,
-                    BinCompany = dto.BinCompany
-                };
+            var taxpayers = parsedUnreliableTaxpayerContext.UnreliableTaxpayerDtos
+                .Join(parsedUnreliableTaxpayerContext.CompanyBinDtos, dto => dto.BinCompany, com => com.Code,
+                    (dto, com) => new UnreliableTaxpayer
+                    {
+                        RelevanceDate = dto.RelevanceDate,
+                        DocumentDate = dto.DocumentDate,
+                        IdListType = dto.IdListType,
+                        IdTypeDocument = dto.IdTypeDocument,
+                        Note = dto.Note,
+                        DocumentNumber = dto.DocumentNumber,
+                        BinCompany = dto.BinCompany
+                    });
+            var tasks = new List<Task>();
             foreach (var taxpayer in taxpayers)
             {
-                await webUnreliableTaxpayerContext.UnreliableTaxpayers.Upsert(taxpayer).On(x => new {x.BinCompany, x.IdListType}).RunAsync();
-                lock (_forLock)
+                tasks.Add(Insert(taxpayer));
+                if (tasks.Count >= NumOfThreads)
                 {
-                    Logger.Trace(--_count);
+                    await Task.WhenAny(tasks);
+                    tasks.RemoveAll(x => x.IsCompleted);
                 }
             }
+            await Task.WhenAll(tasks);
         }
     }
 }
