@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
-using DataMigrationSystem.Context.Web.TradingFloor;
+using DataMigrationSystem.Context.Parsed.Avroradata;
+using DataMigrationSystem.Context.Web.AdataTender;
 using DataMigrationSystem.Models.Parsed;
-using DataMigrationSystem.Models.Web.TradingFloor;
+using DataMigrationSystem.Models.Parsed.Avroradata;
+using DataMigrationSystem.Models.Web.AdataTender;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 

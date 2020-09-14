@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Web.Avroradata
 {
-    public class WebKgdDebtorsContext : WebContext
+    public class WebKgdDebtorsContext : WebAvroradataContext
     {
         public DbSet<KgdDebtors> KgdDebtors { get; set; }
         public DbSet<KgdAllDebtorsCategory> KgdAllDebtorsCategory { get; set; }

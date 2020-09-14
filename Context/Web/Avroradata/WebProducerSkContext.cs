@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Web.Avroradata
 {
-    public class WebProducerSkContext: WebContext
+    public class WebProducerSkContext: WebAvroradataContext
     {
         public DbSet<ProducersSk> ProducerSks { get; set; }
         public DbSet<ProducerProducts> ProducerProductses { get; set; }

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Web.Avroradata
 {
-    public class WebNewBankruptContext : WebContext
+    public class WebNewBankruptContext : WebAvroradataContext
     {
         public DbSet<NewBankruptAtStage> NewBankruptAtStages { get; set; }
         public DbSet<NewRehabilityCompleted> NewRehabilityCompleteds { get; set; }

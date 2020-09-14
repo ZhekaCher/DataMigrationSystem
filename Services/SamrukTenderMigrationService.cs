@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
-using DataMigrationSystem.Context.Web;
+using DataMigrationSystem.Context.Parsed.Avroradata;
+using DataMigrationSystem.Context.Web.AdataTender;
 using DataMigrationSystem.Models.Parsed;
-using DataMigrationSystem.Models.Web.TradingFloor;
+using DataMigrationSystem.Models.Parsed.Avroradata;
+using DataMigrationSystem.Models.Web.AdataTender;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -51,7 +53,7 @@ namespace DataMigrationSystem.Services
                 .Include(x=>x.Documentations);
             foreach (var dto in samrukAdvertDtos)
             {
-                await using var webTenderContext = new AdataTenderContext();
+                await using var webTenderContext = new WebTenderContext();
                 webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
                 var announcement = await DtoToWebAnnouncement(webTenderContext, dto);
                 try
@@ -103,7 +105,7 @@ namespace DataMigrationSystem.Services
 
         private async Task MigrateReferences()
         {
-            await using var webTenderContext = new AdataTenderContext();
+            await using var webTenderContext = new WebTenderContext();
             await using var parsedSamrukContext = new ParsedSamrukContext();
             _total = await parsedSamrukContext.SamrukAdverts.CountAsync();
             var units = parsedSamrukContext.Lots.Select(x=> new Measure {Name = x.MkeiRussian}).Distinct();
@@ -118,7 +120,7 @@ namespace DataMigrationSystem.Services
             var statuses = parsedSamrukContext.SamrukAdverts.Select(x => new Status{Name = x.AdvertStatus}).Distinct();
             await webTenderContext.Statuses.UpsertRange(statuses).On(x => x.Name).NoUpdate().RunAsync(); 
         }
-        private async Task<AdataAnnouncement> DtoToWebAnnouncement(AdataTenderContext webTenderContext, SamrukAdvertDto dto)
+        private async Task<AdataAnnouncement> DtoToWebAnnouncement(WebTenderContext webTenderContext, SamrukAdvertDto dto)
         {
             var announcement = new AdataAnnouncement
             {

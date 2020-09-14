@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
+using DataMigrationSystem.Context.Parsed.Avroradata;
 using DataMigrationSystem.Context.Web;
+using DataMigrationSystem.Context.Web.AdataTender;
 using DataMigrationSystem.Context.Web.Avroradata;
-using DataMigrationSystem.Context.Web.TradingFloor;
 using DataMigrationSystem.Models.Parsed;
-using DataMigrationSystem.Models.Web.TradingFloor;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -20,7 +20,7 @@ namespace DataMigrationSystem.Services
 
         public TenderPlanGoszakupMigrationService(int numOfThreads = 20)
         {
-            using var adataTenderContext = new AdataTenderContext();
+            using var adataTenderContext = new WebTenderContext();
             // using var parsedGoszakupContext = new ParsedGoszakupContext();
             // parsedGoszakupContext.Database.ExecuteSqlRaw(
             // "delete from avroradata.tender_plan_goszakup p where p.id not in (select plan_point from avroradata.lot_goszakup)");
@@ -56,7 +56,7 @@ namespace DataMigrationSystem.Services
             parsedGoszakupContext.Database.ExecuteSqlRaw(
                 "truncate table avroradata.lot_goszakup restart identity cascade;");
             await parsedGoszakupContext.DisposeAsync();
-            using var adataTenderContext = new AdataTenderContext();
+            using var adataTenderContext = new WebTenderContext();
             adataTenderContext.Database.ExecuteSqlRaw(
                 "UPDATE adata_tender.announcements SET status_id=58 WHERE application_finish_date<now() and source_id=2 and source_id=2");
             adataTenderContext.Database
@@ -68,7 +68,7 @@ namespace DataMigrationSystem.Services
         private async Task Migrate(int threadNum)
         {
             await Task.Delay(1);
-            await using var adataTenderContext = new AdataTenderContext();
+            await using var adataTenderContext = new WebTenderContext();
 
             foreach (var model in adataTenderContext.AdataLots.AsNoTracking().Where(x =>
                 x.Id % NumOfThreads == threadNum &&
@@ -77,7 +77,7 @@ namespace DataMigrationSystem.Services
             {
                 try
                 {
-                    await using var tempAdataTenderContext = new AdataTenderContext();
+                    await using var tempAdataTenderContext = new WebTenderContext();
                     tempAdataTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
                     await using var innerParsedGoszakupContext = new ParsedGoszakupContext();
                     innerParsedGoszakupContext.ChangeTracker.AutoDetectChangesEnabled = false;

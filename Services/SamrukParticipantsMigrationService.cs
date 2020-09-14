@@ -5,7 +5,9 @@ using DataMigrationSystem.Context.Web.Avroradata;
 using DataMigrationSystem.Models.Web.Avroradata;
 using NLog;
 using System.Linq;
+using DataMigrationSystem.Context.Parsed.Avroradata;
 using DataMigrationSystem.Models.Parsed;
+using DataMigrationSystem.Models.Parsed.Avroradata;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Services

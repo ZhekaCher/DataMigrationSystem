@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Web.Avroradata
 {
-    public class WebTerroristContext: WebContext
+    public class WebTerroristContext: WebAvroradataContext
     {
         public DbSet<Terrorist> Terrorists { get; set; }
     }

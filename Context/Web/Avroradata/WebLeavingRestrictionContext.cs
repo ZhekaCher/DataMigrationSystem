@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Web.Avroradata
 {
-    public class WebLeavingRestrictionContext: WebContext
+    public class WebLeavingRestrictionContext: WebAvroradataContext
     {
 
         public DbSet<LeavingRestriction> LeavingRestrictions { get; set; }
