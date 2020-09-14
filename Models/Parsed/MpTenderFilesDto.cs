@@ -14,5 +14,6 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("name")] public string Name {get; set;}
         [Column("file_path")] public string FilePath{get; set;}
         [Column("relevance_date")] public DateTime? RelevanceDate { get; set; } = DateTime.Now;
+        [Column("local_file_path")] public string LocalFilePath { get; set; }
     }
 }

@@ -192,7 +192,8 @@ namespace DataMigrationSystem.Services
                 foreach (var document in dtoLot.Documentations.Select(fileDto => new LotDocumentation
                 {
                     Name = fileDto.Name,
-                    Location = fileDto.FilePath,
+                    Location = fileDto.LocalFilePath,
+                    SourceLink = fileDto.FilePath,
                     DocumentationTypeId = webTenderContext.DocumentationTypes.FirstOrDefault(x=>x.Name == fileDto.Name)?.Id
                 }))
                 {
