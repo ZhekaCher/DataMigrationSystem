@@ -24,13 +24,8 @@ namespace DataMigrationSystem.Models.Parsed
         [Column("type_of_auction")] public string TypeOfAuction { get; set; }
         [Column("count")] public int Count  { get; set; }
         [Column("sum_of_lots")] public double? SumOfLots  { get; set; }
-
-
-
-
-
+        
         public List<MpTenderLotsDto> Lots { get; set; }
-        public List<MpTenderFilesDto> Documentations { get; set; }
 
     }
 

@@ -18,11 +18,6 @@ namespace DataMigrationSystem.Context.Parsed
                 .WithOne()
                 .HasForeignKey(x => x.AdvertId)
                 .HasPrincipalKey(x => x.AdvertId);
-            modelBuilder.Entity<MpTenderDto>()
-                .HasMany(x => x.Documentations)
-                .WithOne()
-                .HasForeignKey(x => x.AdvertId)
-                .HasPrincipalKey(x => x.AdvertId);
             modelBuilder.Entity<MpTenderLotsDto>()
                 .HasMany(x => x.Documentations)
                 .WithOne()

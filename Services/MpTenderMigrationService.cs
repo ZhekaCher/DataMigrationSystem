@@ -48,9 +48,8 @@ namespace DataMigrationSystem.Services
             var mpTenderDtos = parsedMpTenderContext.MpTender
                 .AsNoTracking()
                 .Where(t => t.Id % NumOfThreads == threadNum)
-                .Include(x=>x.Lots)
-                .ThenInclude(x=> x.Documentations)
-                .Include(x=>x.Documentations);
+                .Include(x => x.Lots)
+                .ThenInclude(x => x.Documentations);
             foreach (var dto in mpTenderDtos)
             {
                 await using var webTenderContext = new AdataTenderContext();
@@ -129,19 +128,6 @@ namespace DataMigrationSystem.Services
                 var method = await  webTenderContext.Methods.FirstOrDefaultAsync(x => x.Name == dto.TypeOfAuction);
                 if (method != null) 
                     announcement.MethodId = method.Id;
-            }
-            announcement.Documentations = new List<AnnouncementDocumentation>();
-            if (dto.Documentations != null && dto.Documentations.Count>0)
-            {
-                foreach (var document in dto.Documentations.Select(fileDto => new AnnouncementDocumentation
-                {
-                    Name = fileDto.Name,
-                    Location = fileDto.FilePath,
-                    DocumentationTypeId = webTenderContext.DocumentationTypes.FirstOrDefault(x=>x.Name == fileDto.Name)?.Id
-                }))
-                {
-                    announcement.Documentations.Add(document);
-                }
             }
             announcement.Lots = new List<AdataLot>();
             foreach (var dtoLot in dto.Lots)
