@@ -140,21 +140,16 @@ namespace DataMigrationSystem.Services
                     ApplicationStartDate = dtoLot.StartAuc,
                     ApplicationFinishDate = dtoLot.EndAuc,
                     SupplyLocation = dtoLot.DeliveryAdres,
-                    TenderLocation = dtoLot.LotRegion, 
+                    TenderLocation = dtoLot.LotRegion,
                     Characteristics = dtoLot.LotDescription,
                     TotalAmount = dtoLot.LotVolume ?? 0,
                     UnitPrice = dtoLot.OpeningPrice ?? 0,
                     Terms = dtoLot.DeliveryTime,
-                    CustomerBin = dto.Bin
+                    CustomerBin = dto.Bin,
+                    Quantity = dtoLot.Amount ?? 0
                 };
-                try
-                {    
-                    lot.Quantity = (double) dtoLot.Amount;
-                }
-                catch (Exception)
-                {
-                    Console.WriteLine();
-                }
+
+
                 lot.SourceLink = $"https://mp.kz/tender/{lot.SourceNumber}-{lot.Title})";
                 if (dtoLot.StatusOfAuc != null)
                 {
