@@ -40,6 +40,9 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         
         [Column("newsletter_date")]
         public DateTime? NewsletterDate { get; set; }
+        
+        [Column("bin")]
+        public long? Bin { get; set; }
 
         [Column("relevance_date")] public DateTime RelevanceDate { get; set; } = DateTime.Now;
         
