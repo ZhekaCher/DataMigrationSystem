@@ -52,7 +52,8 @@ namespace DataMigrationSystem.Services
                     ValidationDate = gosReesterDto.ValidationDate,
                     NewsletterNum = gosReesterDto.NewsletterNum,
                     NewsletterDate = gosReesterDto.NewsletterDate,
-                    RelevanceDate = gosReesterDto.RelevanceDate
+                    RelevanceDate = gosReesterDto.RelevanceDate,
+                    Bin = gosReesterDto.Bin
                 }; 
                 await _webGosRessterContext.GosReesters.Upsert(gosRessters).On(x => x.RegNum).RunAsync();
                 lock (_forLock)
