@@ -11,20 +11,12 @@ namespace DataMigrationSystem.Context.Web.AdataTender
     /// </summary>
     public class WebContractContext : WebAdataTenderContext
     {
-        
-        public DbSet<Contract> Contracts { get; set; }    
-        public DbSet<ContractGoszakup> ContractsGoszakup { get; set; }    
-        public DbSet<STradingFloor> STradingFloors { get; set; }    
+        public DbSet<AdataContract> Contracts { get; set; }    
+        public DbSet<ContractStatuses> ContractStatuses { get; set; }
+        public DbSet<Method> ContractMethods { get; set; }
+        public DbSet<ContractTypes> ContractTypes { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasDefaultSchema("trading_floor");
-        }
-        
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.EnableSensitiveDataLogging();
-            optionsBuilder.UseNpgsql(
-                "Server = 192.168.1.158; Database = avroradata; Port=5432; User ID = administrator; Password = Z4P6PjEHnJ5nPT; Search Path = adata_tender; Integrated Security=true; Pooling=true;");
         }
     }
 }
