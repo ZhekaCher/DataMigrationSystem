@@ -12,6 +12,25 @@ namespace DataMigrationSystem.Context.Parsed.Avroradata
     public class ParsedContractGoszakupContext : ParsedAvroradataContext
     {
         public DbSet<ContractGoszakupDto> ContractGoszakupDtos { get; set; }
- 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ContractGoszakupDto>()
+                .HasOne(x => x.RefStatus)
+                .WithOne()
+                .HasForeignKey<ContractGoszakupDto>(x => x.RefContractStatusId)
+                .HasPrincipalKey<RefContractStatusGoszakupDto>(x => x.Id);
+            
+            modelBuilder.Entity<ContractGoszakupDto>()
+                .HasOne(x => x.RefTradeMethod)
+                .WithOne()
+                .HasForeignKey<ContractGoszakupDto>(x => x.FaktTradeMethodsId)
+                .HasPrincipalKey<RefTradeMethodGoszakupDto>(x => x.Id);
+            
+            modelBuilder.Entity<ContractGoszakupDto>()
+                .HasOne(x => x.RefType)
+                .WithOne()
+                .HasForeignKey<ContractGoszakupDto>(x => x.RefContractTypeId)
+                .HasPrincipalKey<RefContractTypeGoszakupDto>(x => x.Id);
+        }
     }
 }
