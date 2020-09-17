@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Web.AdataTender;
-using DataMigrationSystem.Models.Parsed;
 using DataMigrationSystem.Models.Parsed.Avroradata;
 using DataMigrationSystem.Models.Web.AdataTender;
 using Microsoft.EntityFrameworkCore;
@@ -30,29 +29,18 @@ namespace DataMigrationSystem.Services
         public override async Task StartMigratingAsync()
         {
             Logger.Info($"Starting migration with '{NumOfThreads}' threads");
+            
             await MigrateReferences();
-            var tasks = new List<Task>();
-            for (var i = 0; i < NumOfThreads; i++)
-                tasks.Add(Migrate(i));
-
-            await Task.WhenAll(tasks);
+            await Migrate();
+            
             Logger.Info("End of migration");
             await using var parsedAnnouncementMpContext = new ParsedMpTenderContext();
             await parsedAnnouncementMpContext.Database.ExecuteSqlRawAsync("truncate table avroradata.mp_advert, avroradata.mp_lots, avroradata.mp_lot_file restart identity");
         }
 
-        private async Task Migrate(int threadNum)
+        private async Task Insert(MpTenderDto dto)
         {
-            Logger.Info("Started Thread");
-            await using var parsedMpTenderContext = new ParsedMpTenderContext();
-            var mpTenderDtos = parsedMpTenderContext.MpTender
-                .AsNoTracking()
-                .Where(t => t.Id % NumOfThreads == threadNum)
-                .Include(x => x.Lots)
-                .ThenInclude(x => x.Documentations);
-            foreach (var dto in mpTenderDtos)
-            {
-                await using var webTenderContext = new WebTenderContext();
+             await using var webTenderContext = new WebTenderContext();
                 webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
                 var announcement = await DtoToWebAnnouncement(webTenderContext, dto);
                 try
@@ -96,9 +84,27 @@ namespace DataMigrationSystem.Services
 
                 lock (_lock)
                     Logger.Trace($"Left {--_total}");
+        }
+        private async Task Migrate()
+        {
+            Logger.Info("Started Thread");
+            await using var parsedMpTenderContext = new ParsedMpTenderContext();
+            var mpTenderDtos = parsedMpTenderContext.MpTender
+                .AsNoTracking()
+                .Include(x => x.Lots)
+                .ThenInclude(x => x.Documentations);
+            var tasks = new List<Task>();
+            foreach (var dto in mpTenderDtos)
+            {
+                tasks.Add(Insert(dto));
+                if (tasks.Count >= NumOfThreads)
+                {
+                    await Task.WhenAny(tasks);
+                    tasks.RemoveAll(x => x.IsCompleted);
+                }
             }
 
-            Logger.Info("Completed thread");
+            await Task.WhenAll(tasks);
             
         }
 
