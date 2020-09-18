@@ -122,7 +122,7 @@ namespace DataMigrationSystem.Services
                 SourceId = 4,
                 PublishDate = dto.StartAuc
             };
-            announcement.SourceLink = $"https://mp.kz/tenders/{announcement.SourceNumber}-{announcement.Title})";
+            announcement.SourceLink = $"https://mp.kz/tenders/list/{announcement.SourceNumber}-{announcement.Title})";
             if (dto.StatusOfAuc != null)
             {
                 var status = await webTenderContext.Statuses.FirstOrDefaultAsync(x => x.Name == dto.StatusOfAuc);
