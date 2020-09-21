@@ -30,8 +30,8 @@ namespace DataMigrationSystem.Services
         {
             await Migrate();
             var parsedQamqorFinesContext = new ParsedQamqorFinesContext();
-            await parsedQamqorFinesContext.Database.ExecuteSqlRawAsync(
-                "truncate avroradata.qamqor_fines restart identity;");
+     //     await parsedQamqorFinesContext.Database.ExecuteSqlRawAsync(
+     //         "truncate avroradata.qamqor_fines restart identity;");
 
         }
 
