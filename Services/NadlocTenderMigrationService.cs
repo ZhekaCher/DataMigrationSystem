@@ -109,10 +109,10 @@ namespace DataMigrationSystem.Services
             await using var webTenderContext = new WebTenderContext();
             await using var parsedAnnouncementNadlocContext = new ParsedNadlocContext();
             _total = await parsedAnnouncementNadlocContext.AnnouncementNadlocDtos.CountAsync();
-            var units = parsedAnnouncementNadlocContext.LotNadlocDtos.Select(x=> x.Unit).Distinct().Select(x=>new Measure {Name = x});
-            await webTenderContext.Measures.UpsertRange(units).On(x => x.Name).RunAsync();
-            var truCodes = parsedAnnouncementNadlocContext.LotNadlocDtos.Select(x=> new TruCode {Code = x.ScpCode, Name = x.ScpDescription}).Distinct();
-            await webTenderContext.TruCodes.UpsertRange(truCodes).On(x => x.Code).RunAsync();
+            var units = parsedAnnouncementNadlocContext.LotNadlocDtos.Select(x=>new Measure {Name = x.Unit}).Distinct().Where(x=>x.Name!=null);
+            await webTenderContext.Measures.UpsertRange(units).On(x => x.Name).NoUpdate().RunAsync();
+            var truCodes = parsedAnnouncementNadlocContext.LotNadlocDtos.Select(x=> new TruCode {Code = x.ScpCode, Name = x.ScpDescription}).Distinct().Where(x=>x.Name!=null);
+            await webTenderContext.TruCodes.UpsertRange(truCodes).On(x => x.Code).NoUpdate().RunAsync();
             foreach (var dict in webTenderContext.Measures)
                 _measures.Add(dict.Name, dict.Id);
             foreach (var dict in webTenderContext.Statuses)

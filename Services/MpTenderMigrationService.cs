@@ -43,50 +43,50 @@ namespace DataMigrationSystem.Services
 
         private async Task Insert(MpTenderDto dto)
         {
-             await using var webTenderContext = new WebTenderContext();
-                webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
-                var announcement = DtoToWebAnnouncement(dto);
-                try
+            await using var webTenderContext = new WebTenderContext();
+            webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
+            var announcement = DtoToWebAnnouncement(dto);
+            try
+            {
+                var found = webTenderContext.AdataAnnouncements.Select(x => new{x.Id, x.SourceNumber, x.SourceId})
+                    .FirstOrDefault(x => x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
+                if (found != null)
                 {
-                    var found = webTenderContext.AdataAnnouncements.Select(x => new{x.Id, x.SourceNumber, x.SourceId})
-                        .FirstOrDefault(x => x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
-                    if (found != null)
+                    await webTenderContext.AdataAnnouncements.Upsert(announcement).On(x => new {x.SourceNumber, x.SourceId})
+                        .RunAsync();
+                    foreach (var lot in announcement.Lots)
                     {
-                        await webTenderContext.AdataAnnouncements.Upsert(announcement).On(x => new {x.SourceNumber, x.SourceId})
-                            .RunAsync();
-                        foreach (var lot in announcement.Lots)
+                        lot.AnnouncementId = found.Id;
+                        var foundLot = webTenderContext.AdataLots.Select(x => new{x.Id, x.SourceNumber, x.SourceId})
+                            .FirstOrDefault(x => x.SourceNumber == lot.SourceNumber && x.SourceId == lot.SourceId);
+                        if (foundLot != null)
                         {
-                            lot.AnnouncementId = found.Id;
-                            var foundLot = webTenderContext.AdataLots.Select(x => new{x.Id, x.SourceNumber, x.SourceId})
-                                .FirstOrDefault(x => x.SourceNumber == lot.SourceNumber && x.SourceId == lot.SourceId);
-                            if (foundLot != null)
-                            {
-                                await webTenderContext.AdataLots.Upsert(lot).On(x => new {x.SourceNumber, x.SourceId})
-                                    .RunAsync();
-                                /*lot.PaymentCondition.LotId = foundLot.Id;
-                                await webTenderContext.PaymentConditions.Upsert(lot.PaymentCondition).On(x => x.LotId)
-                                    .RunAsync();*/
-                            }
-                            else
-                            {
-                                await webTenderContext.AdataLots.AddAsync(lot);
-                                await webTenderContext.SaveChangesAsync();
-                            }
+                            await webTenderContext.AdataLots.Upsert(lot).On(x => new {x.SourceNumber, x.SourceId})
+                                .RunAsync();
+                            /*lot.PaymentCondition.LotId = foundLot.Id;
+                            await webTenderContext.PaymentConditions.Upsert(lot.PaymentCondition).On(x => x.LotId)
+                                .RunAsync();*/
+                        }
+                        else
+                        {
+                            await webTenderContext.AdataLots.AddAsync(lot);
+                            await webTenderContext.SaveChangesAsync();
                         }
                     }
-                    else
-                    {
-                        await webTenderContext.AdataAnnouncements.AddAsync(announcement);
-                        await webTenderContext.SaveChangesAsync();
-                    }
                 }
-                catch (Exception e)
+                else
                 {
-                    Logger.Error(e.StackTrace);
+                    await webTenderContext.AdataAnnouncements.AddAsync(announcement);
+                    await webTenderContext.SaveChangesAsync();
                 }
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e.StackTrace);
+            }
 
-                lock (_lock)
-                    Logger.Trace($"Left {--_total}");
+            lock (_lock)
+                Logger.Trace($"Left {--_total}");
         }
         private async Task Migrate()
         {
@@ -205,7 +205,7 @@ namespace DataMigrationSystem.Services
             _total = await parsedMpTenderContext.MpTender.CountAsync();
             var units = parsedMpTenderContext.Lots.Select(x=> new Measure {Name = x.UnitOfAmount}).Distinct().Where(x=>x.Name!=null);
             await webTenderContext.Measures.UpsertRange(units).On(x => x.Name).NoUpdate().RunAsync(); 
-            var statuses = parsedMpTenderContext.MpTender.Select(x => new Status{Name = x.StatusOfAuc}).Distinct();
+            var statuses = parsedMpTenderContext.MpTender.Select(x => new Status{Name = x.StatusOfAuc}).Distinct().Where(x=>x.Name!=null);
             await webTenderContext.Statuses.UpsertRange(statuses).On(x => x.Name).NoUpdate().RunAsync();
             foreach (var dict in webTenderContext.Measures)
                 _measures.Add(dict.Name, dict.Id);

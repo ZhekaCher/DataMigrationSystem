@@ -118,34 +118,24 @@ namespace DataMigrationSystem.Services
             await using var webTenderContext = new WebTenderContext();
             await using var parsedSamrukContext = new ParsedSamrukContext();
             _total = await parsedSamrukContext.SamrukAdverts.CountAsync();
-            var units = parsedSamrukContext.Lots.Select(x=> new Measure {Name = x.MkeiRussian}).Distinct();
-            await webTenderContext.Measures.UpsertRange(units).On(x => x.Name).RunAsync();
-            var truCodes = parsedSamrukContext.Lots.Select(x=> new TruCode {Code = x.TruCode, Name = x.TruDetailRussian}).Distinct();
-            await webTenderContext.TruCodes.UpsertRange(truCodes).On(x => x.Code).RunAsync();
-            var documentationTypes = parsedSamrukContext.SamrukFiles.Select(x => new DocumentationType {Name = x.Category}).Distinct();
-            await webTenderContext.DocumentationTypes.UpsertRange(documentationTypes).On(x => x.Name).RunAsync();
-            var statuses = parsedSamrukContext.SamrukAdverts.Select(x => new Status{Name = x.AdvertStatus}).Distinct();
+            var units = parsedSamrukContext.Lots.Select(x=> new Measure {Name = x.MkeiRussian}).Distinct().Where(x=>x.Name!=null);;
+            await webTenderContext.Measures.UpsertRange(units).On(x => x.Name).NoUpdate().RunAsync();
+            var truCodes = parsedSamrukContext.Lots.Select(x=> new TruCode {Code = x.TruCode, Name = x.TruDetailRussian}).Distinct().Where(x=>x.Name!=null);;
+            await webTenderContext.TruCodes.UpsertRange(truCodes).On(x => x.Code).NoUpdate().RunAsync();
+            var documentationTypes = parsedSamrukContext.SamrukFiles.Select(x => new DocumentationType {Name = x.Category}).Distinct().Where(x=>x.Name!=null);;
+            await webTenderContext.DocumentationTypes.UpsertRange(documentationTypes).On(x => x.Name).NoUpdate().RunAsync();
+            var statuses = parsedSamrukContext.SamrukAdverts.Select(x => new Status{Name = x.AdvertStatus}).Distinct().Where(x=>x.Name!=null);;
             await webTenderContext.Statuses.UpsertRange(statuses).On(x => x.Name).NoUpdate().RunAsync(); 
             foreach (var dict in webTenderContext.Measures)
-            {
                 _measures.Add(dict.Name, dict.Id);
-            }
             foreach (var dict in webTenderContext.Statuses)
-            {
                 _statuses.Add(dict.Name, dict.Id);
-            }
-            foreach (var dict in webTenderContext.Methods)
-            {
+            foreach (var dict in webTenderContext.Methods) 
                 _methods.Add(dict.Name, dict.Id);
-            }
             foreach (var dict in webTenderContext.TenderPriorities)
-            {
                 _priorities.Add(dict.Name, dict.Id);
-            }
             foreach (var dict in webTenderContext.DocumentationTypes)
-            {
                 _documentationTypes.Add(dict.Name, dict.Id);
-            }
         }
         private AdataAnnouncement DtoToWebAnnouncement(SamrukAdvertDto dto)
         {
