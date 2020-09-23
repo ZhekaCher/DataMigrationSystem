@@ -107,6 +107,7 @@ namespace DataMigrationSystem.Services
         {
             var contract = new AdataContract
             {
+                ContractSourceId = dto.Id,
                 AmountSum = dto.ContractSumWnds,
                 AnnoNumber = dto.TrdBuyNumberAnno,
                 BiinSupplier = dto.SupplierBiin,
