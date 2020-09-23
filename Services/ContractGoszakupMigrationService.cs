@@ -107,6 +107,7 @@ namespace DataMigrationSystem.Services
         {
             var contract = new AdataContract
             {
+                ContractSourceId = dto.Id,
                 AmountSum = dto.ContractSumWnds,
                 AnnoNumber = dto.TrdBuyNumberAnno,
                 BiinSupplier = dto.SupplierBiin,
@@ -127,12 +128,15 @@ namespace DataMigrationSystem.Services
                 SupplierBankNameRu = dto.SupplierBankNameRu,
                 SignReasonDocName = dto.SignReasonDocName
             };
-            contract.StatusId =
-                _contractStatuses.FirstOrDefault(x => x.NameRu == dto.RefStatus.NameRu)?.Id;
-            contract.MethodId =
-                _contractMethods.FirstOrDefault(x => x.Name == dto.RefTradeMethod.NameRu)?.Id;
-            contract.TypeId =
-                _contractTypes.FirstOrDefault(x => x.NameRu == dto.RefStatus.NameRu)?.Id;
+            if (dto.RefStatus != null)
+                contract.StatusId =
+                    _contractStatuses.FirstOrDefault(x => x.NameRu == dto.RefStatus.NameRu)?.Id;
+            if (dto.RefTradeMethod != null)
+                contract.MethodId =
+                    _contractMethods.FirstOrDefault(x => x.Name == dto.RefTradeMethod.NameRu)?.Id;
+            if (dto.RefStatus != null)
+                contract.TypeId =
+                    _contractTypes.FirstOrDefault(x => x.NameRu == dto.RefType.NameRu)?.Id;
             var annoCtx = new WebTenderContext();
             contract.IdAnno = annoCtx.AdataAnnouncements.FirstOrDefault(x => x.SourceNumber == dto.ContractNumber)?.Id;
             annoCtx.Dispose();

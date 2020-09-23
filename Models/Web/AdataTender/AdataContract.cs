@@ -8,6 +8,7 @@ namespace DataMigrationSystem.Models.Web.AdataTender
 	public class AdataContract
 	{
 		[Key] [Column("id")] public long? Id{get; set;}
+		[Column("contract_source_id")] public long? ContractSourceId{get; set;}
 		[Column("id_anno")] public long? IdAnno{get; set;}
 		[Column("anno_number")] public string AnnoNumber{get; set;}
 		[Column("contract_number")] public string ContractNumber{get; set;}
