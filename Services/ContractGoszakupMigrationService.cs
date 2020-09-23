@@ -17,23 +17,27 @@ namespace DataMigrationSystem.Services
     /// @date 24.02.2020 18:23:38
     /// @version 1.0
     /// <summary>
-    /// INPUT
+    /// ContractGoszakup
     /// </summary>
     public class ContractGoszakupMigrationService : MigrationService
     {
-        private const string CurrentTradingFloor = "goszakup";
-        private readonly int _sTradingFloorId;
         private int _total;
-        private readonly object _lock = new object();
+        private object _lock = new object();
+        private List<ContractStatuses> _contractStatuses;
+        private List<ContractTypes> _contractTypes;
+        private List<Method> _contractMethods;
 
         public ContractGoszakupMigrationService(int numOfThreads = 30)
         {
             NumOfThreads = numOfThreads;
             using var parsedContractGoszakupContext = new ParsedContractGoszakupContext();
-            using var webContractContext = new WebContractContext();
             _total = parsedContractGoszakupContext.ContractGoszakupDtos.Count();
-            _sTradingFloorId = webContractContext.STradingFloors
-                .FirstOrDefault(x => x.Code.Equals(CurrentTradingFloor)).Id;
+            parsedContractGoszakupContext.Dispose();
+            using var webContractContext = new WebContractContext();
+            _contractMethods = webContractContext.ContractMethods.ToList();
+            _contractStatuses = webContractContext.ContractStatuses.ToList();
+            _contractTypes = webContractContext.ContractTypes.ToList();
+            webContractContext.Dispose();
         }
 
         protected override Logger InitializeLogger()
@@ -50,10 +54,10 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
-            await using var parsedContractGoszakupContext = new ParsedContractGoszakupContext();
-            await parsedContractGoszakupContext.Database.ExecuteSqlRawAsync(
-                "truncate table avroradata.contract_goszakup restart identity cascade;");
-            Logger.Info("Truncated");
+            // await using var parsedContractGoszakupContext = new ParsedContractGoszakupContext();
+            // await parsedContractGoszakupContext.Database.ExecuteSqlRawAsync(
+            // "truncate table avroradata.contract_goszakup restart identity cascade;");
+            // Logger.Info("Truncated");
         }
 
         private async Task Migrate(int threadNum)
@@ -63,20 +67,19 @@ namespace DataMigrationSystem.Services
 
             await using var parsedContractGoszakupContext = new ParsedContractGoszakupContext();
             foreach (var dto in parsedContractGoszakupContext.ContractGoszakupDtos.AsNoTracking().Where(x =>
-                x.Id % NumOfThreads == threadNum))
+                    x.Id % NumOfThreads == threadNum)
+                .Include(x => x.RefStatus)
+                .Include(x => x.RefType)
+                .Include(x => x.RefTradeMethod)
+            )
             {
-                Contract temp;
-                ContractGoszakup tempGoszakup;
-                (temp, tempGoszakup) = DtoToWeb(dto);
-                temp.IdTf = _sTradingFloorId;
+                var contract = DtoToWeb(dto);
                 try
                 {
                     await using var webContractContext = new WebContractContext();
                     webContractContext.ChangeTracker.AutoDetectChangesEnabled = false;
-                    await webContractContext.Contracts.Upsert(temp)
-                        .On(x => new {x.IdContract, x.IdTf}).RunAsync();
-                    await webContractContext.ContractsGoszakup.Upsert(tempGoszakup)
-                        .On(x => x.IdContract).RunAsync();
+                    await webContractContext.Contracts.Upsert(contract)
+                        .On(x => new {x.SourceId, x.ContractSourceNumber}).RunAsync();
                 }
                 catch (Exception e)
                 {
@@ -87,7 +90,7 @@ namespace DataMigrationSystem.Services
                     else
                     {
                         Logger.Error(
-                            $"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|; IdContract:|{temp.IdContract}|; Id:|{temp.Id}|");
+                            $"Message:|{e.Message}|; StackTrace:|{e.StackTrace}|; IdContract:|{contract.ContractSourceNumber}|; Id:|{contract}|");
                         Program.NumOfErrors++;
                     }
                 }
@@ -100,36 +103,67 @@ namespace DataMigrationSystem.Services
             // Logger.Info($"Completed thread at {_total}");
         }
 
-        private (Contract, ContractGoszakup) DtoToWeb(ContractGoszakupDto contractGoszakupDto)
+        private AdataContract DtoToWeb(ContractGoszakupDto dto)
         {
-            var contract = new Contract();
-            var contractGoszakup = new ContractGoszakup();
+            var contract = new AdataContract
+            {
+                AmountSum = dto.ContractSumWnds,
+                AnnoNumber = dto.TrdBuyNumberAnno,
+                BiinSupplier = dto.SupplierBiin,
+                BinCustomer = dto.CustomerBin,
+                ContractNumber = dto.ContractNumber,
+                DescriptionKz = dto.DescriptionKz,
+                DescriptionRu = dto.DescriptionRu,
+                DtEnd = dto.EcEndDate,
+                DtStart = dto.SignDate,
+                FinYear = dto.FinYear,
+                RelevanceDate = dto.Relevance,
+                SourceId = 2,
+                ContractSourceNumber = dto.ContractNumberSys,
+                FaktSumWnds = dto.FaktSumWnds,
+                CustomerBankNameKz = dto.CustomerBankNameKz,
+                CustomerBankNameRu = dto.CustomerBankNameRu,
+                SupplierBankNameKz = dto.SupplierBankNameKz,
+                SupplierBankNameRu = dto.SupplierBankNameRu,
+                SignReasonDocName = dto.SignReasonDocName
+            };
+            contract.StatusId =
+                _contractStatuses.FirstOrDefault(x => x.NameRu == dto.RefStatus.NameRu)?.Id;
+            contract.MethodId =
+                _contractMethods.FirstOrDefault(x => x.Name == dto.RefTradeMethod.NameRu)?.Id;
+            contract.TypeId =
+                _contractTypes.FirstOrDefault(x => x.NameRu == dto.RefStatus.NameRu)?.Id;
+            var annoCtx = new WebTenderContext();
+            contract.IdAnno = annoCtx.AdataAnnouncements.FirstOrDefault(x => x.SourceNumber == dto.ContractNumber)?.Id;
+            annoCtx.Dispose();
 
-            contract.AmountSum = contractGoszakupDto.ContractSumWnds;
-            contract.BinCustomer = contractGoszakupDto.CustomerBin;
-            contract.BiinSupplier = contractGoszakupDto.SupplierBiin;
-            contract.DtEnd = contractGoszakupDto.EcEndDate;
-            contract.DtStart = contractGoszakupDto.SignDate;
-            contract.FinYear = contractGoszakupDto.FinYear;
-            contract.IdAnno = contractGoszakupDto.TrdBuyId;
-            contract.IdContract = contractGoszakupDto.Id;
-            contract.IdStatus = contractGoszakupDto.RefContractStatusId;
-            contract.IdType = contractGoszakupDto.RefContractTypeId;
-            contract.NumberContract = contractGoszakupDto.ContractNumberSys;
-            //TODO(Relevance loading from dto incorrect)
-            contract.RelevanceDate = contractGoszakupDto.Relevance;
-            contractGoszakup.DescriptionKz = contractGoszakupDto.DescriptionKz;
-            contractGoszakup.DescriptionRu = contractGoszakupDto.DescriptionRu;
-            contractGoszakup.IdContract = contractGoszakupDto.Id;
-            contractGoszakup.FaktSumWnds = contractGoszakupDto.FaktSumWnds;
-            contractGoszakup.CustomerBankNameKz = contractGoszakupDto.CustomerBankNameKz;
-            contractGoszakup.CustomerBankNameRu = contractGoszakupDto.CustomerBankNameRu;
-            contractGoszakup.SupplierBankNameKz = contractGoszakupDto.SupplierBankNameKz;
-            contractGoszakup.SupplierBankNameRu = contractGoszakupDto.SupplierBankNameRu;
-            contractGoszakup.SignReasonDocName = contractGoszakupDto.SignReasonDocName;
-            contractGoszakup.TypeContract = contractGoszakupDto.RefContractTypeId;
-            contractGoszakup.TradeMethod = contractGoszakupDto.FaktTradeMethodsId;
-            return (contract, contractGoszakup);
+
+            // contract.AmountSum = contractGoszakupDto.ContractSumWnds;
+            // contract.BinCustomer = contractGoszakupDto.CustomerBin;
+            // contract.BiinSupplier = contractGoszakupDto.SupplierBiin;
+            // contract.DtEnd = contractGoszakupDto.EcEndDate;
+            // contract.DtStart = contractGoszakupDto.SignDate;
+            // contract.FinYear = contractGoszakupDto.FinYear;
+            // contract.IdAnno = contractGoszakupDto.TrdBuyId;
+            // contract.IdContract = contractGoszakupDto.Id;
+            // contract.IdStatus = contractGoszakupDto.RefContractStatusId;
+            // contract.IdType = contractGoszakupDto.RefContractTypeId;
+            // contract.NumberContract = contractGoszakupDto.ContractNumberSys;
+            // TODO(Relevance loading from dto incorrect)
+            // contract.RelevanceDate = contractGoszakupDto.Relevance;
+            // contractGoszakup.DescriptionKz = contractGoszakupDto.DescriptionKz;
+            // contractGoszakup.DescriptionRu = contractGoszakupDto.DescriptionRu;
+            // contractGoszakup.IdContract = contractGoszakupDto.Id;
+            // contractGoszakup.FaktSumWnds = contractGoszakupDto.FaktSumWnds;
+            // contractGoszakup.CustomerBankNameKz = contractGoszakupDto.CustomerBankNameKz;
+            // contractGoszakup.CustomerBankNameRu = contractGoszakupDto.CustomerBankNameRu;
+            // contractGoszakup.SupplierBankNameKz = contractGoszakupDto.SupplierBankNameKz;
+            // contractGoszakup.SupplierBankNameRu = contractGoszakupDto.SupplierBankNameRu;
+            // contractGoszakup.SignReasonDocName = contractGoszakupDto.SignReasonDocName;
+            // contractGoszakup.TypeContract = contractGoszakupDto.RefContractTypeId;
+            // contractGoszakup.TradeMethod = contractGoszakupDto.FaktTradeMethodsId;
+            // return (contract, contractGoszakup);
+            return contract;
         }
     }
 }

@@ -18,7 +18,7 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
         [Column("root_id")] public int? RootId { get; set; }
         [Column("trd_buy_id")] public int? TrdBuyId { get; set; }
         [Column("trd_buy_number_anno")] public string TrdBuyNumberAnno { get; set; }
-        [Column("ref_contract_status_id")] public int? RefContractStatusId { get; set; }
+        [Column("ref_contract_status_id")] public long? RefContractStatusId { get; set; }
         [Column("deleted")] public bool? Deleted { get; set; }
         [Column("crdate")] public DateTime? Crdate { get; set; }
         [Column("last_update_date")] public DateTime? LastUpdateDate { get; set; }
@@ -51,10 +51,10 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
         [Column("fakt_sum_wnds")] public double? FaktSumWnds { get; set; }
         [Column("contract_end_date")] public DateTime? ContractEndDate { get; set; }
         [Column("ref_contract_cancel_id")] public int? RefContractCancelId { get; set; }
-        [Column("ref_contract_type_id")] public int? RefContractTypeId { get; set; }
+        [Column("ref_contract_type_id")] public long? RefContractTypeId { get; set; }
         [Column("description_kz")] public string DescriptionKz { get; set; }
         [Column("description_ru")] public string DescriptionRu { get; set; }
-        [Column("fakt_trade_methods_id")] public int? FaktTradeMethodsId { get; set; }
+        [Column("fakt_trade_methods_id")] public long? FaktTradeMethodsId { get; set; }
         [Column("ec_customer_approve")] public bool? EcCustomerApprove { get; set; }
         [Column("ec_supplier_approve")] public bool? EcSupplierApprove { get; set; }
         [Column("contract_ms")] public double? ContractMs { get; set; }
@@ -68,5 +68,9 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
         [Column("index_date")] public DateTime? IndexDate { get; set; }
         [Column("relevance")] public DateTime? Relevance { get; set; }
         [Column("fakt_exec_date")] public DateTime? FaktExecDate { get; set; }
+        
+        public RefTradeMethodGoszakupDto RefTradeMethod { get; set; }
+        public RefContractStatusGoszakupDto RefStatus { get; set; }
+        public RefContractTypeGoszakupDto RefType { get; set; }
     }
 }
