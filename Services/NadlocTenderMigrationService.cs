@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Parsed.Avroradata;
-using DataMigrationSystem.Context.Web;
 using DataMigrationSystem.Context.Web.AdataTender;
-using DataMigrationSystem.Models.Parsed;
 using DataMigrationSystem.Models.Parsed.Avroradata;
 using DataMigrationSystem.Models.Web.AdataTender;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +15,9 @@ namespace DataMigrationSystem.Services
     {
         private int _total = 0;
         private readonly object _lock = new object();
-
+        private readonly Dictionary<string, long?> _measures = new Dictionary<string, long?>();
+        private readonly Dictionary<string, long?> _statuses = new Dictionary<string, long?>();
+        private readonly Dictionary<string, long?> _methods = new Dictionary<string, long?>();
         public NadlocTenderMigrationService(int numOfThreads = 5)
         {
             NumOfThreads = numOfThreads;
@@ -42,11 +40,11 @@ namespace DataMigrationSystem.Services
 
         private async Task Insert(AnnouncementNadlocDto dto)
         {
-            await using var webTenderContext = new WebTenderContext();
-            webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
-            var announcement = await DtoToWebAnnouncement(webTenderContext, dto);
+            var announcement = DtoToWebAnnouncement(dto);
             try
             {
+                await using var webTenderContext = new WebTenderContext();
+                webTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
                 var found = webTenderContext.AdataAnnouncements
                     .FirstOrDefault(x => x.SourceNumber == announcement.SourceNumber && x.SourceId == announcement.SourceId);
                 if (found != null)
@@ -114,12 +112,15 @@ namespace DataMigrationSystem.Services
             var units = parsedAnnouncementNadlocContext.LotNadlocDtos.Select(x=> x.Unit).Distinct().Select(x=>new Measure {Name = x});
             await webTenderContext.Measures.UpsertRange(units).On(x => x.Name).RunAsync();
             var truCodes = parsedAnnouncementNadlocContext.LotNadlocDtos.Select(x=> new TruCode {Code = x.ScpCode, Name = x.ScpDescription}).Distinct();
-            foreach (var truCode in truCodes)
-            {
-                await webTenderContext.TruCodes.UpsertRange(truCode).On(x => x.Code).RunAsync();
-            }
+            await webTenderContext.TruCodes.UpsertRange(truCodes).On(x => x.Code).RunAsync();
+            foreach (var dict in webTenderContext.Measures)
+                _measures.Add(dict.Name, dict.Id);
+            foreach (var dict in webTenderContext.Statuses)
+                _statuses.Add(dict.Name, dict.Id);
+            foreach (var dict in webTenderContext.Methods)
+                _methods.Add(dict.Name, dict.Id);
         }
-        private static async Task<AdataAnnouncement> DtoToWebAnnouncement(WebTenderContext webTenderContext, AnnouncementNadlocDto dto)
+        private AdataAnnouncement DtoToWebAnnouncement(AnnouncementNadlocDto dto)
         {
             // await using var webTenderContext = new AdataTenderContext();
             var announcement = new AdataAnnouncement
@@ -141,15 +142,17 @@ namespace DataMigrationSystem.Services
             // announcement.SourceLink = $"http://reestr.nadloc.kz/ru/protocol/announce/{dto.FullId}";
             if (dto.Status != null)
             {
-                var status = await webTenderContext.Statuses.FirstOrDefaultAsync(x => x.Name == dto.Status);
-                if (status != null) 
-                    announcement.StatusId = status.Id;
+                if (_statuses.TryGetValue(dto.Status, out var temp))
+                {
+                    announcement.StatusId = temp;
+                }
             }
             if (dto.PurchaseMethod != null)
             {
-                var method = await webTenderContext.Methods.FirstOrDefaultAsync(x => x.Name == dto.PurchaseMethod);
-                if (method != null)
-                    announcement.MethodId = method.Id;
+                if (_methods.TryGetValue(dto.PurchaseMethod, out var temp))
+                {
+                    announcement.MethodId = temp;
+                }
             }
 
             if (dto.KonkursDocLink != null)
@@ -165,7 +168,7 @@ namespace DataMigrationSystem.Services
             }
 
             announcement.Lots = new List<AdataLot>();
-            int lotIndex = 0;
+            var lotIndex = 0;
             foreach (var dtoLot in dto.Lots)
             {
                 var lot = new AdataLot
@@ -194,9 +197,10 @@ namespace DataMigrationSystem.Services
                 }
                 if (dtoLot.Unit != null)
                 {
-                    var measure = await webTenderContext.Measures.FirstOrDefaultAsync(x => x.Name == dtoLot.Unit);
-                    if (measure != null) 
-                        lot.MeasureId = measure.Id;
+                    if (_measures.TryGetValue(dtoLot.Unit, out var temp))
+                    {
+                        lot.MeasureId = temp;
+                    }
                 }
                 /*if (dtoLot.ScpCode != null)
                 {
