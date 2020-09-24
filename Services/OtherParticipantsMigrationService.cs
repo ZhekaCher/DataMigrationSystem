@@ -39,7 +39,7 @@ namespace DataMigrationSystem.Services
             await parsedOtherParticipantsContext.Database.ExecuteSqlRawAsync("truncate table avroradata.board_of_directors restart identity cascade;");
             await parsedOtherParticipantsContext.Database.ExecuteSqlRawAsync("truncate table avroradata.exchange_docs restart identity cascade;");
             await parsedOtherParticipantsContext.Database.ExecuteSqlRawAsync("truncate table avroradata.executive_agency restart identity cascade;");
-            await parsedOtherParticipantsContext.Database.ExecuteSqlRawAsync("truncate table avroradata.main_info restart identity cascade;");
+            await parsedOtherParticipantsContext.Database.ExecuteSqlRawAsync("truncate table avroradata.other_participants restart identity cascade;");
             await parsedOtherParticipantsContext.Database.ExecuteSqlRawAsync("truncate table avroradata.org_types restart identity cascade;");
             await parsedOtherParticipantsContext.Database.ExecuteSqlRawAsync("truncate table avroradata.relations_by_contacts restart identity cascade;");
             await parsedOtherParticipantsContext.Database.ExecuteSqlRawAsync("truncate table avroradata.relations_by_reports restart identity cascade;");
