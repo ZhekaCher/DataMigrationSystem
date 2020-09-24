@@ -37,14 +37,19 @@ namespace DataMigrationSystem.Services
             await Migrate();
            
             await using var parsedEtsTenderContext = new ParsedEtsTenderContext();
-            await using var adataTenderContext = new  WebTenderContext();
-            DateTime starDate = await parsedEtsTenderContext.AnnouncementEtsTenderDtos.MinAsync(x => x.RelevanceDate);
-            await adataTenderContext.AdataAnnouncements.Where(x => x.SourceId == 5 && x.RelevanceDate < starDate ).ForEachAsync(x => x.StatusId = 38);
-            await adataTenderContext.AdataLots.Where(x => x.SourceId == 5 && x.RelevanceDate < starDate ).ForEachAsync(x => x.StatusId = 38);
+            await using var webTenderContext = new  WebTenderContext();
+            var starDate = await parsedEtsTenderContext.AnnouncementEtsTenderDtos.MinAsync(x => x.RelevanceDate);
+            await webTenderContext.AdataAnnouncements.Where(x => x.SourceId == 5 && x.RelevanceDate < starDate ).ForEachAsync(x => x.StatusId = 38);
+            await webTenderContext.AdataLots.Where(x => x.SourceId == 5 && x.RelevanceDate < starDate ).ForEachAsync(x => x.StatusId = 38);
+           
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
+            
             await parsedEtsTenderContext.Database.ExecuteSqlRawAsync(
                 "truncate table avroradata.ets_announcements ,avroradata.ets_lots ,avroradata.ets_purchasing_positions");
             Logger.Info("Truncated");
             Logger.Info("End of migration");
+            
         }
 
         private async Task Migrate()

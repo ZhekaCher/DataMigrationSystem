@@ -60,6 +60,10 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
+
+            await using var webTenderContext = new WebTenderContext();
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
         }
 
         private async Task Migrate(int threadNum)
