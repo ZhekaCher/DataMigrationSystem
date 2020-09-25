@@ -136,7 +136,8 @@ namespace DataMigrationSystem.Services
                 LotsQuantity = dto.Lots.Count,
                 SourceId = 5,
                 RelevanceDate = dto.RelevanceDate,
-                PublishDate = dto.StartDate
+                PublishDate = dto.StartDate,
+                PhoneNumber = dto.ContactPerson
             };
 
             if (dto.Status)
@@ -164,13 +165,14 @@ namespace DataMigrationSystem.Services
                     ApplicationFinishDate = announcement.ApplicationFinishDate,
                     CustomerBin = announcement.CustomerBin,
                     SupplyLocation = dto.DeliveryPlace,
-                    TenderLocation = null,
+                    TenderLocation = dto.ProcedurePlace,
                     Characteristics = dto.Rubrics,
                     Quantity = 0,
                     TotalAmount = dtoLot.FullPrice,
                     Terms = dto.PaymentConditions,
                     SourceNumber = announcement.SourceNumber + "-"+ dtoLot.LotNumber,
-                    RelevanceDate = dto.RelevanceDate
+                    RelevanceDate = dto.RelevanceDate,
+                    
                 };
                 if (lot.Quantity > 0 && lot.TotalAmount > 0)
                 {
