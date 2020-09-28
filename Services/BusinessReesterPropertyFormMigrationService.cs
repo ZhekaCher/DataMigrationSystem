@@ -7,14 +7,14 @@ using NLog;
 
 namespace DataMigrationSystem.Services
 {
-    public class BusinessReesterMigrationService : MigrationService
+    public class BusinessReesterPropertyFormMigrationService : MigrationService
     {
         private readonly WebBusinessReesterContext _web;
         private readonly ParsedBusinessReesterContext _parsed;
         private readonly object _forLock;
         private int _counter;
 
-        public BusinessReesterMigrationService(int numOfThreads = 30)
+        public BusinessReesterPropertyFormMigrationService(int numOfThreads = 30)
         {
             _web = new WebBusinessReesterContext();
             _parsed = new ParsedBusinessReesterContext();
