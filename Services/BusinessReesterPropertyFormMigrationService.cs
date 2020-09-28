@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed.Avroradata;
 using DataMigrationSystem.Context.Web.Avroradata;
 using DataMigrationSystem.Models.Web.Avroradata;
@@ -9,15 +11,11 @@ namespace DataMigrationSystem.Services
 {
     public class BusinessReesterPropertyFormMigrationService : MigrationService
     {
-        private readonly WebBusinessReesterContext _web;
-        private readonly ParsedBusinessReesterContext _parsed;
         private readonly object _forLock;
         private int _counter;
 
-        public BusinessReesterPropertyFormMigrationService(int numOfThreads = 30)
+        public BusinessReesterPropertyFormMigrationService(int numOfThreads = 10)
         {
-            _web = new WebBusinessReesterContext();
-            _parsed = new ParsedBusinessReesterContext();
             NumOfThreads = numOfThreads;
             _forLock = new object();
         }
@@ -28,15 +26,23 @@ namespace DataMigrationSystem.Services
         }
 
         public override async Task StartMigratingAsync()
-        {
-            await Migrate();
-            await _parsed.Database.ExecuteSqlRawAsync(
+        { 
+            await using var web = new WebBusinessReesterContext();
+            await using var parsed = new ParsedBusinessReesterContext();
+            var tasks = new List<Task>();
+            for (var i = 0; i < NumOfThreads; i++)
+                tasks.Add(Migrate(i));
+            await Task.WhenAll(tasks);
+            await web.SaveChangesAsync();
+            await parsed.Database.ExecuteSqlRawAsync(
                 "truncate avroradata.business_reester_property_form restart identity;");
         }
 
-        private async Task Migrate()
+        private async Task Migrate(int threadNum)
         {
-            await foreach (var businessReesterDto in _parsed.BusinessReesterDtos)
+            await using var web = new WebBusinessReesterContext();
+            await using var parsed = new ParsedBusinessReesterContext();
+            foreach (var businessReesterDto in parsed.BusinessReesterDtos.Where(x => x.Id % NumOfThreads == threadNum))
             {
                 var businessReester = new BusinessReester
                 {
@@ -55,8 +61,7 @@ namespace DataMigrationSystem.Services
                     Cluster = businessReesterDto.Cluster,
                     Owner = businessReesterDto.Owner
                 };
-                await _web.BusinessReesters.Upsert(businessReester).On(x => new {x.Bin, x.Status}).RunAsync();
-                await _web.SaveChangesAsync();
+                await web.BusinessReesters.Upsert(businessReester).On(x => new {x.Bin, x.Status}).RunAsync();
                 lock (_forLock)
                 {
                     Logger.Trace(_counter--);
