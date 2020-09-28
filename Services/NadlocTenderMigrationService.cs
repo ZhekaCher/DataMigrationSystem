@@ -39,7 +39,7 @@ namespace DataMigrationSystem.Services
             await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
             
             await using var parsedAnnouncementNadlocContext = new ParsedNadlocContext();
-            await parsedAnnouncementNadlocContext.Database.ExecuteSqlRawAsync("delete from avroradata.nadloc_tenders;delete from avroradata.nadloc_lots");
+            await parsedAnnouncementNadlocContext.Database.ExecuteSqlRawAsync("truncate table avroradata.nadloc_tenders, avroradata.nadloc_lots");
         }
 
         private async Task Insert(AnnouncementNadlocDto dto)
