@@ -37,6 +37,11 @@ namespace DataMigrationSystem.Services
             await Migrate();
             
             Logger.Info("End of migration");
+            
+            await using var webTenderContext = new WebTenderContext();
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
+            
             await using var parsedAnnouncementMpContext = new ParsedMpTenderContext();
             await parsedAnnouncementMpContext.Database.ExecuteSqlRawAsync("truncate table avroradata.mp_advert, avroradata.mp_lots, avroradata.mp_lot_file restart identity");
         }

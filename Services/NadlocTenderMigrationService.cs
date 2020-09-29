@@ -18,7 +18,7 @@ namespace DataMigrationSystem.Services
         private readonly Dictionary<string, long?> _measures = new Dictionary<string, long?>();
         private readonly Dictionary<string, long?> _statuses = new Dictionary<string, long?>();
         private readonly Dictionary<string, long?> _methods = new Dictionary<string, long?>();
-        public NadlocTenderMigrationService(int numOfThreads = 5)
+        public NadlocTenderMigrationService(int numOfThreads = 10)
         {
             NumOfThreads = numOfThreads;
         }
@@ -34,12 +34,17 @@ namespace DataMigrationSystem.Services
             await Migrate();
             Logger.Info("End of migration");
           
+            await using var webTenderContext = new WebTenderContext();
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
+            
             await using var parsedAnnouncementNadlocContext = new ParsedNadlocContext();
             await parsedAnnouncementNadlocContext.Database.ExecuteSqlRawAsync("truncate table avroradata.nadloc_tenders, avroradata.nadloc_lots");
         }
 
         private async Task Insert(AnnouncementNadlocDto dto)
         {
+            await Task.Delay(50);
             var announcement = DtoToWebAnnouncement(dto);
             try
             {
