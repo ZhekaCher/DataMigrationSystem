@@ -63,6 +63,8 @@ namespace DataMigrationSystem.Services
                 .ExecuteSqlRawAsync(
                     "UPDATE adata_tender.lots SET status_id=38 WHERE application_finish_date<now() and source_id=2")
                 .GetAwaiter().GetResult();
+            
+            await adataTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
         }
 
         private async Task Migrate(int threadNum)

@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Parsed.Avroradata;
+using DataMigrationSystem.Context.Web.AdataTender;
 using DataMigrationSystem.Context.Web.Avroradata;
 using DataMigrationSystem.Models.Parsed;
 using DataMigrationSystem.Models.Parsed.Avroradata;
+using DataMigrationSystem.Models.Web.AdataTender;
 using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
 using NLog;
@@ -51,17 +53,17 @@ namespace DataMigrationSystem.Services
 
         private async Task Migrate(int threadNum)
         {
-            await using var webPlanGoszakupContext = new WebPlanGoszakupContext();
+            await using var webPlanGoszakupContext = new WebPlanContext();
             await using var parsedPlanGoszakupContext = new ParsedPlanGoszakupContext();
             webPlanGoszakupContext.ChangeTracker.AutoDetectChangesEnabled = false;
             parsedPlanGoszakupContext.ChangeTracker.AutoDetectChangesEnabled = false;
-            foreach (var dto in parsedPlanGoszakupContext.PlanGoszakupDtos.AsNoTracking().Where(x =>
+            foreach (var dto in parsedPlanGoszakupContext.PlanGoszakupDtos.AsNoTracking().Take(20).Where(x =>
                     x.Id % NumOfThreads == threadNum))
             {
                 var temp = DtoToWeb(dto);
                 try
                 {
-                    await webPlanGoszakupContext.PlansGoszakup.Upsert(temp)
+                    await webPlanGoszakupContext.Plans.Upsert(temp)
                         .On(x => x.Id).RunAsync();
                 }
                 catch (Exception e)
@@ -86,13 +88,13 @@ namespace DataMigrationSystem.Services
         }
 
 
-        private PlanGoszakup DtoToWeb(PlanGoszakupDto planGoszakupDto)
+        private Plan DtoToWeb(PlanGoszakupDto planGoszakupDto)
         {
-            var planGoszakup = new PlanGoszakup()
+            var planGoszakup = new Plan
             {
+                PlanSourceId = planGoszakupDto.Id,
                 Amount =  planGoszakupDto.Amount,
                 Count = planGoszakupDto.Count,
-                Id = planGoszakupDto.Id,
                 Prepayment = planGoszakupDto.Prepayment,
                 Price = planGoszakupDto.Prepayment,
                 Sum1 = planGoszakupDto.Sum1,

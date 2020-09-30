@@ -7,17 +7,18 @@ using System.ComponentModel.DataAnnotations.Schema;
 // ReSharper disable StringLiteralTypo
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 
-namespace DataMigrationSystem.Models.Web.Avroradata
+namespace DataMigrationSystem.Models.Web.AdataTender
 {
     /// @author Yevgeniy Cherdantsev
     /// @date 26.02.2020 18:43:05
     /// <summary>
     /// Plan Parsing DB table object
     /// </summary>
-    [Table("plan_goszakup")]
-    public class PlanGoszakup
+    [Table("plans")]
+    public class Plan
     {
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.None)][Column("id")] public long? Id { get; set; }
+        [Key][Column("id")] public long? Id { get; set; }
+        [Column("plon_source_id")] public long? PlanSourceId { get; set; }
         [Column("plan_act_id")] public long? PlanActId { get; set; }
         [Column("plan_act_number")] public string PlanActNumber { get; set; }
         [Column("ref_plan_status_id")] public int? RefPlanStatusId { get; set; }
