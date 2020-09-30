@@ -349,6 +349,7 @@ namespace DataMigrationSystem.Services
                 CustomerBin = lotGoszakupDto.CustomerBin,
                 Title = lotGoszakupDto.NameRu,
                 SupplyLocation = lotGoszakupDto.DeliveryPlace,
+                Terms = lotGoszakupDto.SupplyDateRu,
                 // Tender location
                 UnitPrice = (double) (lotGoszakupDto.Amount / lotGoszakupDto.Count),
                 TruCode = lotGoszakupDto.Tru,
