@@ -71,7 +71,7 @@ namespace DataMigrationSystem.Services
                         await webTenderContext.SaveChangesAsync();
                         await webTenderContext.AdataAnnouncements.Upsert(announcement)
                             .On(x => new {x.SourceNumber, x.SourceId})
-                            .RunAsync();
+                            .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.LotsQuantity != y.LotsQuantity || x.MethodId != y.MethodId || x.TenderPriorityId != y.TenderPriorityId).RunAsync();
                     }
                 }
                 else
@@ -194,7 +194,8 @@ namespace DataMigrationSystem.Services
                     Terms = dtoLot.RequiredContractTerm,
                     SourceNumber = announcement.SourceNumber + "-" + (++lotIndex),
                     TruCode = dtoLot.ScpCode,
-                    RelevanceDate = dtoLot.RelevanceDate
+                    RelevanceDate = dtoLot.RelevanceDate,
+                    SourceLink = announcement.SourceLink
                 };
                 if (lot.Quantity > 0 && lot.TotalAmount > 0)
                 {

@@ -13,7 +13,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("commission_date")]  public DateTime? CommissionDate { get; set; }
         [Column("authority")]  public string Authority { get; set; }
         [Column("main_measure")]  public string MainMeasure { get; set; }
-        [Column("administrative_fine")]  public double AdministrativeFine { get; set; }
+        [Column("administrative_fine")]  public double? AdministrativeFine { get; set; }
         [Column("fine_status")]  public bool FineStatus { get; set; }
         [Column("gos_number")]  public string GosNumber { get; set; }
     }

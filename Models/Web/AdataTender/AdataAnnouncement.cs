@@ -31,9 +31,7 @@ namespace DataMigrationSystem.Models.Web.AdataTender
         [Column("source_link")]
         public string SourceLink { get; set; }
         [Column("relevance_date")]
-        
         public DateTime? RelevanceDate { get; set; } = DateTime.Now;
-        
         [Column("publish_date")]
         public DateTime? PublishDate { get; set; }
         [Column("lots_quantity")]
