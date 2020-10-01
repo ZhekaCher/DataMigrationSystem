@@ -318,8 +318,8 @@ namespace DataMigrationSystem.Services
                     var newWebTruCode = new TruCode
                     {
                         Code = lotGoszakupDto.TruCode,
-                        Name = lotGoszakupDto.TruName,
-                        Characteristics = lotGoszakupDto.TruDescription
+                        Name = lotGoszakupDto.NameRu,
+                        Characteristics = lotGoszakupDto.DescriptionRu
                     };
                     using var ctx = new WebTenderContext();
                     ctx.TruCodes.Add(newWebTruCode);
