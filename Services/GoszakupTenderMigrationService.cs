@@ -135,6 +135,8 @@ namespace DataMigrationSystem.Services
                 webLot.AnnouncementId = annoId;
                 webLot.MethodId = webAnnouncement.MethodId;
                 webLot.SourceLink = webAnnouncement.SourceLink;
+                webLot.ApplicationStartDate = webAnnouncement.ApplicationStartDate;
+                webLot.ApplicationFinishDate = webAnnouncement.ApplicationFinishDate;
 
                 await using var lotWebTenderContext = new WebTenderContext();
                 lotWebTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
@@ -311,11 +313,13 @@ namespace DataMigrationSystem.Services
 
             lock (webTruCodes)
             {
-                if (webTruCodes.All(x => x.Code != lotGoszakupDto.Tru))
+                if (webTruCodes.All(x => x.Code != lotGoszakupDto.TruCode))
                 {
-                    var newWebTruCode = new TruCode()
+                    var newWebTruCode = new TruCode
                     {
-                        Code = lotGoszakupDto.Tru
+                        Code = lotGoszakupDto.TruCode,
+                        Name = lotGoszakupDto.TruName,
+                        Characteristics = lotGoszakupDto.TruDescription
                     };
                     using var ctx = new WebTenderContext();
                     ctx.TruCodes.Add(newWebTruCode);
@@ -352,10 +356,10 @@ namespace DataMigrationSystem.Services
                 Terms = lotGoszakupDto.SupplyDateRu,
                 // Tender location
                 UnitPrice = (double) (lotGoszakupDto.Amount / lotGoszakupDto.Count),
-                TruCode = lotGoszakupDto.Tru,
+                TruCode = lotGoszakupDto.TruCode,
                 Characteristics = lotGoszakupDto.DescriptionRu,
                 TotalAmount = (double) lotGoszakupDto.Amount,
-                MeasureId = measureId,
+                MeasureId = measureId
             };
             if (lotGoszakupDto.Count != null) lot.Quantity = (double) lotGoszakupDto.Count;
             if (lotGoszakupDto.Amount != null) lot.TotalAmount = (double) lotGoszakupDto.Amount;
