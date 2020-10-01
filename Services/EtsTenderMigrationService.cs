@@ -62,6 +62,7 @@ namespace DataMigrationSystem.Services
             var tasks = new List<Task>();
             foreach (var dto in etsTenderDtos)
             {
+                await Task.Delay(20);
                 tasks.Add(Insert(dto));
                 if (tasks.Count >= NumOfThreads)
                 {
@@ -101,7 +102,7 @@ namespace DataMigrationSystem.Services
                         await adataTenderContext.SaveChangesAsync();
                         await adataTenderContext.AdataAnnouncements.Upsert(announcement)
                             .On(x => new {x.SourceNumber, x.SourceId})
-                            .RunAsync();
+                            .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.LotsQuantity != y.LotsQuantity || x.MethodId != y.MethodId || x.TenderPriorityId != y.TenderPriorityId).RunAsync();
                     }
                 }
                 else

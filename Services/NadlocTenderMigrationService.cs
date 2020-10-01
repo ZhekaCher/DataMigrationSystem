@@ -71,7 +71,7 @@ namespace DataMigrationSystem.Services
                         await webTenderContext.SaveChangesAsync();
                         await webTenderContext.AdataAnnouncements.Upsert(announcement)
                             .On(x => new {x.SourceNumber, x.SourceId})
-                            .RunAsync();
+                            .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.LotsQuantity != y.LotsQuantity || x.MethodId != y.MethodId || x.TenderPriorityId != y.TenderPriorityId).RunAsync();
                     }
                 }
                 else
