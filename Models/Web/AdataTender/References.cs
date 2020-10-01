@@ -94,6 +94,8 @@ namespace DataMigrationSystem.Models.Web.AdataTender
         public string Code { get; set; }
         [Column("name")]
         public string Name { get; set; }
+        [Column("characteristics")]
+        public string Characteristics { get; set; }
     }
     [Table("documentation_types")]
     public class DocumentationType

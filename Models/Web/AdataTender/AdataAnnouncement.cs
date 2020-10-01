@@ -48,13 +48,12 @@ namespace DataMigrationSystem.Models.Web.AdataTender
         public long? TenderPriorityId { get; set; }
         public List<AdataLot> Lots { get; set; }
         public List<AnnouncementDocumentation> Documentations { get; set; }
-
     }
     [Table("announcement_documentations")]
     public class AnnouncementDocumentation
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Column("id")]
         public long Id { get; set; }
         [Column("documentation_type_id")]
