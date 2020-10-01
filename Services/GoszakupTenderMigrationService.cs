@@ -77,6 +77,8 @@ namespace DataMigrationSystem.Services
             await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
             await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
 
+            Logger.Info("Successfully refreshed materialized views");
+            
             await webTenderContext.Database.ExecuteSqlRawAsync(@"
 update adata_tender.announcements a
 set status_id=58
@@ -99,7 +101,7 @@ where l.id in (select l.id
                  and application_finish_date < now());
 ");
 
-            Logger.Info("Successfully refreshed materialized views and old statuses");
+            Logger.Info("Successfully refreshed old statuses");
 
             await using var parsedGoszakupContext = new ParsedGoszakupTenderContext();
             await parsedGoszakupContext.Database.ExecuteSqlRawAsync(
