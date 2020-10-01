@@ -36,7 +36,9 @@ namespace DataMigrationSystem.Services
             for (var i = 0; i < NumOfThreads; i++)
                 tasks.Add(Migrate(i));
             await Task.WhenAll(tasks);
+            await web.SaveChangesAsync();
             
+            await CheckAuction();
             await web.SaveChangesAsync();
             
             Logger.Info("End of migration");
@@ -70,6 +72,23 @@ namespace DataMigrationSystem.Services
                 }
             }
 
+        }
+
+        private async Task CheckAuction()
+        {
+            await using var web = new WebTenderContext();
+            var webannouncement = web.AdataAnnouncements.Where(x => x.SourceId == 8);
+            foreach (var adataAnnouncement in webannouncement)
+            {
+                if (adataAnnouncement.RelevanceDate<DateTime.Today)
+                {
+                    var announcement = new AdataAnnouncement
+                    {
+                    StatusId = 19
+                    };
+                    await web.AdataAnnouncements.Upsert(announcement).On(x => new{x.SourceNumber, x.SourceId}).RunAsync();
+                }
+            }
         }
     }
 }
