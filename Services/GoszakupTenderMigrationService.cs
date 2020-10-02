@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,6 +55,7 @@ namespace DataMigrationSystem.Services
                 .Include(x => x.Lots)
                 .ThenInclude(x => x.Files)
                 .Include(x => x.Files)
+                .Where(x => x.Id==1064)
             )
             {
                 tasks.Add(Proceed(dto));
@@ -116,7 +118,10 @@ where l.id in (select l.id
             await using var annoWebTenderContext = new WebTenderContext();
             annoWebTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
             var webAnnouncement = DtoToWebAnnouncement(dto);
-
+            if (dto.Id==1064)
+            {
+                Console.WriteLine(1);
+            }
             annoWebTenderContext.AdataAnnouncements.Upsert(webAnnouncement).On(x => new {x.SourceId, x.SourceNumber})
                 .UpdateIf((x, y) =>
                     x.Title != y.Title ||
@@ -166,7 +171,20 @@ where l.id in (select l.id
                 await using var lotWebTenderContext = new WebTenderContext();
                 lotWebTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
                 lotWebTenderContext.AdataLots.Upsert(webLot).On(x => new {x.SourceId, x.SourceNumber})
-                    .UpdateIf((x, y) => x.SourceNumber != y.SourceNumber).Run();
+                    .UpdateIf((x, y) => 
+                        x.SourceNumber != y.SourceNumber ||
+                        x.Characteristics != y.Characteristics ||
+                        x.Terms != y. Terms ||
+                        x.SupplyLocation != y.SupplyLocation ||
+                        x.TruCode != y.TruCode ||
+                        x.Quantity != y.Quantity ||
+                        x.TotalAmount != y.TotalAmount ||
+                        x.SourceNumber != y.SourceNumber ||
+                        x.SourceLink != y.SourceLink || 
+                        x.ApplicationFinishDate != y.ApplicationFinishDate || 
+                        x.ApplicationStartDate != y.ApplicationStartDate 
+                        )
+                    .Run();
 
                 //Lot docs
                 // var webLotFiles = lotGoszakupDto.Files.Select(DtoToWebLotDocumentation).ToList();
