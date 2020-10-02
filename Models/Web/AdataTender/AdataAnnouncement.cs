@@ -53,7 +53,7 @@ namespace DataMigrationSystem.Models.Web.AdataTender
     public class AnnouncementDocumentation
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id")]
         public long Id { get; set; }
         [Column("documentation_type_id")]

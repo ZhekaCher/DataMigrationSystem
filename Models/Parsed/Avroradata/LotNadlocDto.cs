@@ -7,6 +7,8 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
     public class LotNadlocDto
     {
         [Column("id")] public long? Id{get; set;}
+        [Column("lot_row_id")] public long LotRowId {get; set;}
+        [Column("lot_row_order")] public int LotRowOrder{get; set;}
         [Column("scp_description")] public string ScpDescription{get; set;}
         [Column("scp_code")] public string ScpCode{get; set;}
         [Column("tru_description")] public string TruDescription{get; set;}
