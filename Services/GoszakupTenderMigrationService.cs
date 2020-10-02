@@ -159,7 +159,7 @@ where l.id in (select l.id
 
                 webLot.AnnouncementId = annoId;
                 webLot.MethodId = webAnnouncement.MethodId;
-                webLot.SourceLink = webAnnouncement.SourceLink;
+                webLot.SourceLink = $"{webAnnouncement.SourceLink}?tab=lots";
                 webLot.ApplicationStartDate = webAnnouncement.ApplicationStartDate;
                 webLot.ApplicationFinishDate = webAnnouncement.ApplicationFinishDate;
 
