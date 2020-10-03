@@ -41,7 +41,8 @@ namespace DataMigrationSystem.Services
             var starDate = await parsedEtsTenderContext.AnnouncementEtsTenderDtos.MinAsync(x => x.RelevanceDate);
             await webTenderContext.AdataAnnouncements.Where(x => x.SourceId == 5 && x.RelevanceDate < starDate ).ForEachAsync(x => x.StatusId = 38);
             await webTenderContext.AdataLots.Where(x => x.SourceId == 5 && x.RelevanceDate < starDate ).ForEachAsync(x => x.StatusId = 38);
-           
+            await webTenderContext.SaveChangesAsync();
+            
             await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
             await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
             

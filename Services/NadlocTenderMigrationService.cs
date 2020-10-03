@@ -44,7 +44,7 @@ namespace DataMigrationSystem.Services
 
         private async Task Insert(AnnouncementNadlocDto dto)
         {
-            await Task.Delay(50);
+            // await Task.Delay(50);
             var announcement = DtoToWebAnnouncement(dto);
             try
             {
