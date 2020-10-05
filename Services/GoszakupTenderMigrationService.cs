@@ -55,7 +55,6 @@ namespace DataMigrationSystem.Services
                 .Include(x => x.Lots)
                 .ThenInclude(x => x.Files)
                 .Include(x => x.Files)
-                .Where(x => x.Id==1064)
             )
             {
                 tasks.Add(Proceed(dto));
