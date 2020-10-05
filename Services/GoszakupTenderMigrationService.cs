@@ -53,11 +53,6 @@ namespace DataMigrationSystem.Services
             parsedAnnouncementGoszakupContext.ChangeTracker.AutoDetectChangesEnabled = false;
             foreach (var dto in parsedAnnouncementGoszakupContext.Announcements.AsNoTracking()
                 .Include(x => x.Lots)
-<<<<<<< HEAD
-                .ThenInclude(x => x.Files)
-                .Include(x => x.Files)
-=======
->>>>>>> AD-733
             )
             {
                 tasks.Add(Proceed(dto));
