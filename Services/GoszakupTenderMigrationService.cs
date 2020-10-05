@@ -17,11 +17,11 @@ namespace DataMigrationSystem.Services
         private int _total;
         private readonly object _lock = new object();
         private const int SourceId = 2;
-        private List<Status> webStatuses;
-        private List<Method> webMethods;
-        private List<DocumentationType> webDocTypes;
-        private List<Measure> webMeasures;
-        private List<TruCode> webTruCodes;
+        private readonly List<Status> _webStatuses;
+        private readonly List<Method> _webMethods;
+        private readonly List<DocumentationType> _webDocTypes;
+        private readonly List<Measure> _webMeasures;
+        private readonly List<TruCode> _webTruCodes;
 
         public GoszakupTenderMigrationService(int numOfThreads = 20)
         {
@@ -32,11 +32,11 @@ namespace DataMigrationSystem.Services
 
             using var webTenderContext = new WebTenderContext();
 
-            webStatuses = webTenderContext.Statuses.ToList();
-            webMethods = webTenderContext.Methods.ToList();
-            webDocTypes = webTenderContext.DocumentationTypes.ToList();
-            webMeasures = webTenderContext.Measures.ToList();
-            webTruCodes = webTenderContext.TruCodes.ToList();
+            _webStatuses = webTenderContext.Statuses.ToList();
+            _webMethods = webTenderContext.Methods.ToList();
+            _webDocTypes = webTenderContext.DocumentationTypes.ToList();
+            _webMeasures = webTenderContext.Measures.ToList();
+            _webTruCodes = webTenderContext.TruCodes.ToList();
         }
 
         protected override Logger InitializeLogger()
@@ -53,8 +53,11 @@ namespace DataMigrationSystem.Services
             parsedAnnouncementGoszakupContext.ChangeTracker.AutoDetectChangesEnabled = false;
             foreach (var dto in parsedAnnouncementGoszakupContext.Announcements.AsNoTracking()
                 .Include(x => x.Lots)
+<<<<<<< HEAD
                 .ThenInclude(x => x.Files)
                 .Include(x => x.Files)
+=======
+>>>>>>> AD-733
             )
             {
                 tasks.Add(Proceed(dto));
@@ -117,10 +120,6 @@ where l.id in (select l.id
             await using var annoWebTenderContext = new WebTenderContext();
             annoWebTenderContext.ChangeTracker.AutoDetectChangesEnabled = false;
             var webAnnouncement = DtoToWebAnnouncement(dto);
-            if (dto.Id==1064)
-            {
-                Console.WriteLine(1);
-            }
             annoWebTenderContext.AdataAnnouncements.Upsert(webAnnouncement).On(x => new {x.SourceId, x.SourceNumber})
                 .UpdateIf((x, y) =>
                     x.Title != y.Title ||
@@ -217,9 +216,9 @@ where l.id in (select l.id
                 Name = announcementFile.OriginalName,
                 SourceLink = announcementFile.Link
             };
-            lock (webDocTypes)
+            lock (_webDocTypes)
             {
-                var docTypeId = webDocTypes.FirstOrDefault(x => x.Name == announcementFile.NameRu)?.Id;
+                var docTypeId = _webDocTypes.FirstOrDefault(x => x.Name == announcementFile.NameRu)?.Id;
                 if (docTypeId == null)
                 {
                     var newWebDocType = new DocumentationType()
@@ -229,7 +228,7 @@ where l.id in (select l.id
                     using var ctx = new WebTenderContext();
                     ctx.DocumentationTypes.Add(newWebDocType);
                     ctx.SaveChanges();
-                    webDocTypes.Add(newWebDocType);
+                    _webDocTypes.Add(newWebDocType);
                     docTypeId = newWebDocType.Id;
                 }
 
@@ -246,9 +245,9 @@ where l.id in (select l.id
                 Name = lotFile.OriginalName,
                 SourceLink = lotFile.Link
             };
-            lock (webDocTypes)
+            lock (_webDocTypes)
             {
-                var docTypeId = webDocTypes.FirstOrDefault(x => x.Name == lotFile.NameRu)?.Id;
+                var docTypeId = _webDocTypes.FirstOrDefault(x => x.Name == lotFile.NameRu)?.Id;
                 if (docTypeId == null)
                 {
                     var newWebDocType = new DocumentationType
@@ -258,7 +257,7 @@ where l.id in (select l.id
                     using var ctx = new WebTenderContext();
                     ctx.DocumentationTypes.Add(newWebDocType);
                     ctx.SaveChanges();
-                    webDocTypes.Add(newWebDocType);
+                    _webDocTypes.Add(newWebDocType);
                     docTypeId = newWebDocType.Id;
                 }
 
@@ -274,9 +273,9 @@ where l.id in (select l.id
             long? statusId = null;
             long? methodId = null;
             if (announcementGoszakupDto.BuyStatus != null)
-                lock (webStatuses)
+                lock (_webStatuses)
                 {
-                    statusId = webStatuses.FirstOrDefault(x => x.Name == announcementGoszakupDto.BuyStatus)?.Id;
+                    statusId = _webStatuses.FirstOrDefault(x => x.Name == announcementGoszakupDto.BuyStatus)?.Id;
                     if (statusId == null)
                     {
                         var newWebStatus = new Status()
@@ -286,15 +285,15 @@ where l.id in (select l.id
                         using var ctx = new WebTenderContext();
                         ctx.Statuses.Add(newWebStatus);
                         ctx.SaveChanges();
-                        webStatuses.Add(newWebStatus);
+                        _webStatuses.Add(newWebStatus);
                         statusId = newWebStatus.Id;
                     }
                 }
 
             if (announcementGoszakupDto.TradeMethod != null)
-                lock (webMethods)
+                lock (_webMethods)
                 {
-                    methodId = webMethods.FirstOrDefault(x => x.Name == announcementGoszakupDto.TradeMethod)?.Id;
+                    methodId = _webMethods.FirstOrDefault(x => x.Name == announcementGoszakupDto.TradeMethod)?.Id;
                     if (methodId == null)
                     {
                         var newWebMethod = new Method
@@ -304,7 +303,7 @@ where l.id in (select l.id
                         using var ctx = new WebTenderContext();
                         ctx.Methods.Add(newWebMethod);
                         ctx.SaveChanges();
-                        webMethods.Add(newWebMethod);
+                        _webMethods.Add(newWebMethod);
                         methodId = newWebMethod.Id;
                     }
                 }
@@ -334,11 +333,10 @@ where l.id in (select l.id
         private AdataLot DtoToWebLot(LotGoszakupDto lotGoszakupDto)
         {
             long? statusId;
-
             long? measureId;
-            lock (webStatuses)
+            lock (_webStatuses)
             {
-                statusId = webStatuses.FirstOrDefault(x => x.Name == lotGoszakupDto.LotStatus)?.Id;
+                statusId = _webStatuses.FirstOrDefault(x => x.Name == lotGoszakupDto.LotStatus)?.Id;
                 if (statusId == null)
                 {
                     var newWebStatus = new Status()
@@ -348,14 +346,14 @@ where l.id in (select l.id
                     using var ctx = new WebTenderContext();
                     ctx.Statuses.Add(newWebStatus);
                     ctx.SaveChanges();
-                    webStatuses.Add(newWebStatus);
+                    _webStatuses.Add(newWebStatus);
                     statusId = newWebStatus.Id;
                 }
             }
 
-            lock (webTruCodes)
+            lock (_webTruCodes)
             {
-                if (webTruCodes.All(x => x.Code != lotGoszakupDto.TruCode))
+                if (_webTruCodes.All(x => x.Code != lotGoszakupDto.TruCode))
                 {
                     var newWebTruCode = new TruCode
                     {
@@ -366,13 +364,13 @@ where l.id in (select l.id
                     using var ctx = new WebTenderContext();
                     ctx.TruCodes.Add(newWebTruCode);
                     ctx.SaveChanges();
-                    webTruCodes.Add(newWebTruCode);
+                    _webTruCodes.Add(newWebTruCode);
                 }
             }
 
-            lock (webMeasures)
+            lock (_webMeasures)
             {
-                measureId = webMeasures.FirstOrDefault(x => x.Name == lotGoszakupDto.Units)?.Id;
+                measureId = _webMeasures.FirstOrDefault(x => x.Name == lotGoszakupDto.Units)?.Id;
                 if (measureId == null)
                 {
                     var newWebMeasure = new Measure
@@ -382,7 +380,7 @@ where l.id in (select l.id
                     using var ctx = new WebTenderContext();
                     ctx.Measures.Add(newWebMeasure);
                     ctx.SaveChanges();
-                    webMeasures.Add(newWebMeasure);
+                    _webMeasures.Add(newWebMeasure);
                     measureId = newWebMeasure.Id;
                 }
             }

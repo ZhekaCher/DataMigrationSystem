@@ -7,30 +7,26 @@ namespace DataMigrationSystem.Context.Parsed.Avroradata
     /// @date 24.02.2020 17:52:27
     /// @version 1.0
     /// <summary>
-    /// Контекст для работы с таблицей 'contract_goszakup'
+    /// Контекст для работы с таблицами контрактов госзакупа
     /// </summary>
     public class ParsedContractGoszakupContext : ParsedAvroradataContext
     {
-        public DbSet<ContractGoszakupDto> ContractGoszakupDtos { get; set; }
+        public DbSet<ContractGoszakupDto> Contracts { get; set; }
+        public DbSet<ContractUnitGoszakupDto> Units { get; set; }
+        public DbSet<PlanGoszakupDto> Plans { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ContractGoszakupDto>()
-                .HasOne(x => x.RefStatus)
+                .HasMany(x => x.Units)
                 .WithOne()
-                .HasForeignKey<ContractGoszakupDto>(x => x.RefContractStatusId)
-                .HasPrincipalKey<RefContractStatusGoszakupDto>(x => x.Id);
+                .HasForeignKey(x => x.ContractId)
+                .HasPrincipalKey(x => x.Id);
             
-            modelBuilder.Entity<ContractGoszakupDto>()
-                .HasOne(x => x.RefTradeMethod)
-                .WithOne()
-                .HasForeignKey<ContractGoszakupDto>(x => x.FaktTradeMethodsId)
-                .HasPrincipalKey<RefTradeMethodGoszakupDto>(x => x.Id);
-            
-            modelBuilder.Entity<ContractGoszakupDto>()
-                .HasOne(x => x.RefType)
-                .WithOne()
-                .HasForeignKey<ContractGoszakupDto>(x => x.RefContractTypeId)
-                .HasPrincipalKey<RefContractTypeGoszakupDto>(x => x.Id);
+            modelBuilder.Entity<ContractUnitGoszakupDto>()
+                .HasOne(x => x.Plan)
+                .WithOne(x => x.Unit)
+                .HasForeignKey<PlanGoszakupDto>(x => x.ContractUnitId)
+                .HasPrincipalKey<ContractUnitGoszakupDto>(x => x.Id);
         }
     }
 }

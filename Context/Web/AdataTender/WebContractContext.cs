@@ -11,10 +11,17 @@ namespace DataMigrationSystem.Context.Web.AdataTender
     /// </summary>
     public class WebContractContext : WebAdataTenderContext
     {
-        public DbSet<AdataContract> Contracts { get; set; }    
-        public DbSet<ContractStatuses> ContractStatuses { get; set; }
-        public DbSet<Method> ContractMethods { get; set; }
-        public DbSet<ContractTypes> ContractTypes { get; set; }
+        public DbSet<AdataContracts> Contracts { get; set; }
+        public DbSet<ContractStatus> ContractStatuses { get; set; }
+        public DbSet<Measure> Measures { get; set; }
+        public DbSet<TruCode> TruCodes { get; set; }
+        public DbSet<ContractType> Types { get; set; }
+        public DbSet<ContractYearType> YearTypes { get; set; }
+        public DbSet<ContractAgrForm> AgrForms { get; set; }
+        public DbSet<Method> Methods { get; set; }
+        public DbSet<Bank> Banks { get; set; }
+        public DbSet<ContractUnit> ContractUnits { get; set; }
+        public DbSet<AdataPlan> Plans { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
         }
