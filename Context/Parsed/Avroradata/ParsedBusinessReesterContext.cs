@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DataMigrationSystem.Context.Parsed.Avroradata
 {
-    public partial class ParsedPlanGoszakupContext:ParsedAvroradataContext
+    public class ParsedBusinessReesterContext : ParsedAvroradataContext
     {
-        public DbSet<PlanGoszakupDto> PlanGoszakupDtos { get; set; }
+        public DbSet<BusinessReesterDto> BusinessReesterDtos { get; set; }
     }
 }

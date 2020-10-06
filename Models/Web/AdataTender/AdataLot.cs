@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace DataMigrationSystem.Models.Web.AdataTender
 {
@@ -58,6 +59,53 @@ namespace DataMigrationSystem.Models.Web.AdataTender
         public bool FlagPrequalification { get; set; }  
         public List<LotDocumentation> Documentations { get; set; }
         public PaymentCondition PaymentCondition { get; set; }
+        
+        public static bool operator== (AdataLot obj1, AdataLot obj2)
+        {
+            try
+            {
+                var a = obj1.ToString();
+                try
+                {
+                    var b = obj2.ToString();
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+                try
+                {
+                    var a = obj2.ToString();
+                }
+                catch (Exception)
+                {
+                    return true;
+                }
+                return false;
+            }
+            
+            var type = typeof(AdataLot);
+            var ignoreList = new List<string> {"RelevanceDate", "PaymentCondition", "Documentations","Id"};
+           
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            foreach (var pi in type.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance).Where(x => !ignoreList.Contains(x.Name)))
+            {
+                var selfValue = type.GetProperty(pi.Name)?.GetValue(obj1, null);
+                var toValue = type.GetProperty(pi.Name)?.GetValue(obj2, null);
+
+                if (selfValue != toValue && (selfValue == null || !selfValue.Equals(toValue)))
+                    return false;
+            }
+            return true;
+        }
+
+        public static bool operator !=(AdataLot obj1, AdataLot obj2)
+        {
+            return !(obj1 == obj2);
+        }
     }
 
     [Table("lot_documentations")]
