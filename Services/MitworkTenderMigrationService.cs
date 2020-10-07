@@ -64,6 +64,7 @@ namespace DataMigrationSystem.Services
                 {
                     await webTenderContext.AdataAnnouncements.Upsert(announcement)
                         .On(x => new {x.SourceNumber, x.SourceId})
+                        .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.LotsQuantity != y.LotsQuantity || x.MethodId != y.MethodId)
                         .RunAsync();
                     foreach (var lot in announcement.Lots)
                     {
@@ -73,6 +74,7 @@ namespace DataMigrationSystem.Services
                         if (foundLot != null)
                         {
                             await webTenderContext.AdataLots.Upsert(lot).On(x => new {x.SourceNumber, x.SourceId})
+                                .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.Characteristics != y.Characteristics || x.MethodId != y.MethodId || x.MeasureId != y.MeasureId || x.SupplyLocation != y.SupplyLocation)
                                 .RunAsync();
                             // lot.PaymentCondition.LotId = foundLot.Id;
                             // await webTenderContext.PaymentConditions.Upsert(lot.PaymentCondition).On(x => x.LotId)
