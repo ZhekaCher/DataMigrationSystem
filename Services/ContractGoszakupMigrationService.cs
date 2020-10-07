@@ -114,7 +114,9 @@ namespace DataMigrationSystem.Services
                         x.SupplierBankId != y.SupplierBankId ||
                         x.CustomerBankId != y.CustomerBankId ||
                         x.ContractSumWnds != y.ContractSumWnds ||
-                        x.FaktSumWnds != y.FaktSumWnds
+                        x.FaktSumWnds != y.FaktSumWnds ||
+                        x.DocLink != y.DocLink ||
+                        x.DocName != y.DocName
                 ).RunAsync();
 
             if (dto.Units != null && dto.Units.Count > 0)
@@ -321,7 +323,9 @@ namespace DataMigrationSystem.Services
                 FaktSumWnds = dto.FaktSumWnds,
                 SourceNumberSys = dto.ContractNumberSys,
                 SupplierBankId = supplierBankId,
-                YearTypeId = typeYearId
+                YearTypeId = typeYearId,
+                DocLink = dto.DocLink,
+                DocName = dto.DocName
             };
         }
 

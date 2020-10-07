@@ -30,6 +30,8 @@ namespace DataMigrationSystem.Models.Web.AdataTender
         [Column("source_number")] public string SourceNumber { get; set; }
         [Column("source_number_sys")] public string SourceNumberSys { get; set; }
         [Column("create_date")] public DateTime? CreateDate { get; set; }
+        [Column("doc_link")] public string DocLink { get; set; }
+        [Column("doc_name")] public string DocName { get; set; }
     }
 
     [Table("contract_agr_forms")]
