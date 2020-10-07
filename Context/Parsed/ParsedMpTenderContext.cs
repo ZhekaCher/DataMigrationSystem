@@ -8,9 +8,7 @@ namespace DataMigrationSystem.Context.Parsed
     public class ParsedMpTenderContext : ParsedAvroradataContext
     {
         public DbSet<MpTenderDto> MpTender { get; set; }
-
         public DbSet<MpTenderLotsDto> Lots { get; set; }
-
         public DbSet<MpTenderFilesDto> MpTenderFiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
