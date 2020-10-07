@@ -34,11 +34,14 @@ namespace DataMigrationSystem.Services
         {
             Logger.Info($"Starting migration with '{NumOfThreads}' threads");
 
+            await using var parsedEtsTenderContext = new ParsedEtsTenderContext();
+            _total = await parsedEtsTenderContext.AnnouncementEtsTenderDtos.CountAsync();
             await Migrate();
            
-            await using var parsedEtsTenderContext = new ParsedEtsTenderContext();
+           
             await using var webTenderContext = new  WebTenderContext();
             var starDate = await parsedEtsTenderContext.AnnouncementEtsTenderDtos.MinAsync(x => x.RelevanceDate);
+            
             await webTenderContext.AdataAnnouncements.Where(x => x.SourceId == 5 && x.RelevanceDate < starDate ).ForEachAsync(x => x.StatusId = 38);
             await webTenderContext.AdataLots.Where(x => x.SourceId == 5 && x.RelevanceDate < starDate ).ForEachAsync(x => x.StatusId = 38);
             await webTenderContext.SaveChangesAsync();
@@ -90,8 +93,12 @@ namespace DataMigrationSystem.Services
                     if (announcement.StatusId != 1 && found.StatusId == 1)
                     {
                         found.StatusId = announcement.StatusId;
-                        await adataTenderContext.AdataLots.Where(x => x.AnnouncementId == found.Id)
-                            .ForEachAsync(x => x.StatusId = announcement.StatusId);
+                        found.RelevanceDate = announcement.RelevanceDate;
+                        await adataTenderContext.AdataLots.Where(x => x.AnnouncementId == found.Id).ForEachAsync(x =>
+                        {
+                            x.StatusId = announcement.StatusId;
+                            x.RelevanceDate = announcement.RelevanceDate;
+                        });
                         await adataTenderContext.SaveChangesAsync();
                     }
                     else
@@ -103,7 +110,7 @@ namespace DataMigrationSystem.Services
                         await adataTenderContext.SaveChangesAsync();
                         await adataTenderContext.AdataAnnouncements.Upsert(announcement)
                             .On(x => new {x.SourceNumber, x.SourceId})
-                            .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.LotsQuantity != y.LotsQuantity || x.MethodId != y.MethodId || x.TenderPriorityId != y.TenderPriorityId).RunAsync();
+                            .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.LotsQuantity != y.LotsQuantity || x.MethodId != y.MethodId || x.TenderPriorityId != y.TenderPriorityId || x.RelevanceDate != y.RelevanceDate).RunAsync();
                     }
                 }
                 else
