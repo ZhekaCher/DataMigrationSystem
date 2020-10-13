@@ -18,7 +18,7 @@ namespace DataMigrationSystem.Services
         private readonly Dictionary<string, long?> _measures = new Dictionary<string, long?>();
         private readonly Dictionary<string, long?> _statuses = new Dictionary<string, long?>();
         private readonly Dictionary<string, long?> _methods = new Dictionary<string, long?>();
-        public NadlocTenderMigrationService(int numOfThreads = 5)
+        public NadlocTenderMigrationService(int numOfThreads = 10)
         {
             NumOfThreads = numOfThreads;
         }
@@ -34,12 +34,17 @@ namespace DataMigrationSystem.Services
             await Migrate();
             Logger.Info("End of migration");
           
+            await using var webTenderContext = new WebTenderContext();
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
+            
             await using var parsedAnnouncementNadlocContext = new ParsedNadlocContext();
             await parsedAnnouncementNadlocContext.Database.ExecuteSqlRawAsync("truncate table avroradata.nadloc_tenders, avroradata.nadloc_lots");
         }
 
         private async Task Insert(AnnouncementNadlocDto dto)
         {
+            // await Task.Delay(50);
             var announcement = DtoToWebAnnouncement(dto);
             try
             {
@@ -58,15 +63,36 @@ namespace DataMigrationSystem.Services
                     }
                     else
                     {
-                        webTenderContext.AdataLots.RemoveRange(
-                            webTenderContext.AdataLots.Where(x => x.AnnouncementId == found.Id));
-                        await webTenderContext.SaveChangesAsync();
-                        announcement.Lots.ForEach(x => x.AnnouncementId = found.Id);
-                        await webTenderContext.AdataLots.AddRangeAsync(announcement.Lots);
-                        await webTenderContext.SaveChangesAsync();
-                        await webTenderContext.AdataAnnouncements.Upsert(announcement)
-                            .On(x => new {x.SourceNumber, x.SourceId})
-                            .RunAsync();
+                        await webTenderContext.AdataAnnouncements.Upsert(announcement).On(x => new {x.SourceNumber, x.SourceId})
+                            .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.LotsQuantity != y.LotsQuantity || x.MethodId != y.MethodId || x.TenderPriorityId != y.TenderPriorityId).RunAsync();
+                        foreach (var lot in announcement.Lots)
+                        {
+                            lot.AnnouncementId = found.Id;
+                            var foundLot = webTenderContext.AdataLots.Select(x => new{x.Id, x.SourceNumber, x.SourceId})
+                                .FirstOrDefault(x => x.SourceNumber == lot.SourceNumber && x.SourceId == lot.SourceId);
+                            if (foundLot != null)
+                            {
+                                await webTenderContext.AdataLots.Upsert(lot).On(x => new {x.SourceNumber, x.SourceId})
+                                    .UpdateIf((x, y) =>
+                                        x.StatusId != y.StatusId || x.Characteristics != y.Characteristics ||
+                                        x.MethodId != y.MethodId || x.MeasureId != y.MeasureId ||
+                                        x.SupplyLocation != y.SupplyLocation).RunAsync();
+                            }
+                            else
+                            {
+                                await webTenderContext.AdataLots.AddAsync(lot);
+                                await webTenderContext.SaveChangesAsync();
+                            }
+                        }
+                        // webTenderContext.AdataLots.RemoveRange(
+                        //     webTenderContext.AdataLots.Where(x => x.AnnouncementId == found.Id));
+                        // await webTenderContext.SaveChangesAsync();
+                        // announcement.Lots.ForEach(x => x.AnnouncementId = found.Id);
+                        // await webTenderContext.AdataLots.AddRangeAsync(announcement.Lots);
+                        // await webTenderContext.SaveChangesAsync();
+                        // await webTenderContext.AdataAnnouncements.Upsert(announcement)
+                        //     .On(x => new {x.SourceNumber, x.SourceId})
+                        //     .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.LotsQuantity != y.LotsQuantity || x.MethodId != y.MethodId || x.TenderPriorityId != y.TenderPriorityId).RunAsync();
                     }
                 }
                 else
@@ -154,7 +180,7 @@ namespace DataMigrationSystem.Services
                     announcement.MethodId = temp;
                 }
             }
-
+            
             if (dto.KonkursDocLink != null)
             {
                 announcement.Documentations = new List<AnnouncementDocumentation>
@@ -166,9 +192,8 @@ namespace DataMigrationSystem.Services
                     }
                 };
             }
-
+            
             announcement.Lots = new List<AdataLot>();
-            var lotIndex = 0;
             foreach (var dtoLot in dto.Lots)
             {
                 var lot = new AdataLot
@@ -187,9 +212,10 @@ namespace DataMigrationSystem.Services
                     Quantity = dtoLot.Quantity ?? 0,
                     TotalAmount = dtoLot.FullPrice ?? 0,
                     Terms = dtoLot.RequiredContractTerm,
-                    SourceNumber = announcement.SourceNumber + "-" + (++lotIndex),
+                    SourceNumber = dtoLot.LotRowId + "-" + dtoLot.LotRowOrder,
                     TruCode = dtoLot.ScpCode,
-                    RelevanceDate = dtoLot.RelevanceDate
+                    RelevanceDate = dtoLot.RelevanceDate,
+                    SourceLink = announcement.SourceLink
                 };
                 if (lot.Quantity > 0 && lot.TotalAmount > 0)
                 {

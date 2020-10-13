@@ -34,17 +34,26 @@ namespace DataMigrationSystem.Services
         {
             Logger.Info($"Starting migration with '{NumOfThreads}' threads");
 
+            await using var parsedEtsTenderContext = new ParsedEtsTenderContext();
+            _total = await parsedEtsTenderContext.AnnouncementEtsTenderDtos.CountAsync();
             await Migrate();
            
-            await using var parsedEtsTenderContext = new ParsedEtsTenderContext();
-            await using var adataTenderContext = new  WebTenderContext();
-            DateTime starDate = await parsedEtsTenderContext.AnnouncementEtsTenderDtos.MinAsync(x => x.RelevanceDate);
-            await adataTenderContext.AdataAnnouncements.Where(x => x.SourceId == 5 && x.RelevanceDate < starDate ).ForEachAsync(x => x.StatusId = 38);
-            await adataTenderContext.AdataLots.Where(x => x.SourceId == 5 && x.RelevanceDate < starDate ).ForEachAsync(x => x.StatusId = 38);
+           
+            await using var webTenderContext = new  WebTenderContext();
+            var starDate = await parsedEtsTenderContext.AnnouncementEtsTenderDtos.MinAsync(x => x.RelevanceDate);
+            
+            await webTenderContext.AdataAnnouncements.Where(x => x.SourceId == 5 && x.RelevanceDate < starDate ).ForEachAsync(x => x.StatusId = 38);
+            await webTenderContext.AdataLots.Where(x => x.SourceId == 5 && x.RelevanceDate < starDate ).ForEachAsync(x => x.StatusId = 38);
+            await webTenderContext.SaveChangesAsync();
+            
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
+            
             await parsedEtsTenderContext.Database.ExecuteSqlRawAsync(
                 "truncate table avroradata.ets_announcements ,avroradata.ets_lots ,avroradata.ets_purchasing_positions");
             Logger.Info("Truncated");
             Logger.Info("End of migration");
+            
         }
 
         private async Task Migrate()
@@ -57,6 +66,7 @@ namespace DataMigrationSystem.Services
             var tasks = new List<Task>();
             foreach (var dto in etsTenderDtos)
             {
+                await Task.Delay(20);
                 tasks.Add(Insert(dto));
                 if (tasks.Count >= NumOfThreads)
                 {
@@ -83,8 +93,12 @@ namespace DataMigrationSystem.Services
                     if (announcement.StatusId != 1 && found.StatusId == 1)
                     {
                         found.StatusId = announcement.StatusId;
-                        await adataTenderContext.AdataLots.Where(x => x.AnnouncementId == found.Id)
-                            .ForEachAsync(x => x.StatusId = announcement.StatusId);
+                        found.RelevanceDate = announcement.RelevanceDate;
+                        await adataTenderContext.AdataLots.Where(x => x.AnnouncementId == found.Id).ForEachAsync(x =>
+                        {
+                            x.StatusId = announcement.StatusId;
+                            x.RelevanceDate = announcement.RelevanceDate;
+                        });
                         await adataTenderContext.SaveChangesAsync();
                     }
                     else
@@ -96,7 +110,7 @@ namespace DataMigrationSystem.Services
                         await adataTenderContext.SaveChangesAsync();
                         await adataTenderContext.AdataAnnouncements.Upsert(announcement)
                             .On(x => new {x.SourceNumber, x.SourceId})
-                            .RunAsync();
+                            .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.LotsQuantity != y.LotsQuantity || x.MethodId != y.MethodId || x.TenderPriorityId != y.TenderPriorityId || x.RelevanceDate != y.RelevanceDate).RunAsync();
                     }
                 }
                 else
@@ -131,7 +145,8 @@ namespace DataMigrationSystem.Services
                 LotsQuantity = dto.Lots.Count,
                 SourceId = 5,
                 RelevanceDate = dto.RelevanceDate,
-                PublishDate = dto.StartDate
+                PublishDate = dto.StartDate,
+                PhoneNumber = dto.ContactPerson
             };
 
             if (dto.Status)
@@ -159,13 +174,14 @@ namespace DataMigrationSystem.Services
                     ApplicationFinishDate = announcement.ApplicationFinishDate,
                     CustomerBin = announcement.CustomerBin,
                     SupplyLocation = dto.DeliveryPlace,
-                    TenderLocation = null,
+                    TenderLocation = dto.ProcedurePlace,
                     Characteristics = dto.Rubrics,
                     Quantity = 0,
                     TotalAmount = dtoLot.FullPrice,
                     Terms = dto.PaymentConditions,
                     SourceNumber = announcement.SourceNumber + "-"+ dtoLot.LotNumber,
-                    RelevanceDate = dto.RelevanceDate
+                    RelevanceDate = dto.RelevanceDate,
+                    
                 };
                 if (lot.Quantity > 0 && lot.TotalAmount > 0)
                 {

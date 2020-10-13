@@ -38,6 +38,11 @@ namespace DataMigrationSystem.Services
             await Migrate();
 
             Logger.Info("End of migration");
+            
+            await using var webTenderContext = new WebTenderContext();
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
+            
             await using var parsedSamrukContext = new ParsedSamrukContext();
             await parsedSamrukContext.Database.ExecuteSqlRawAsync("truncate table avroradata.samruk_advert, avroradata.samruk_lots, avroradata.samruk_files restart identity");
         }
@@ -54,7 +59,7 @@ namespace DataMigrationSystem.Services
                 if (found != null)
                 {
                     await webTenderContext.AdataAnnouncements.Upsert(announcement).On(x => new {x.SourceNumber, x.SourceId})
-                        .RunAsync();
+                        .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.LotsQuantity != y.LotsQuantity || x.MethodId != y.MethodId || x.TenderPriorityId != y.TenderPriorityId).RunAsync();
                     foreach (var lot in announcement.Lots)
                     {
                         lot.AnnouncementId = found.Id;
@@ -63,10 +68,10 @@ namespace DataMigrationSystem.Services
                         if (foundLot != null)
                         {
                             await webTenderContext.AdataLots.Upsert(lot).On(x => new {x.SourceNumber, x.SourceId})
-                                .RunAsync();
+                                .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.Characteristics != y.Characteristics || x.MethodId != y.MethodId || x.MeasureId != y.MeasureId || x.SupplyLocation != y.SupplyLocation).RunAsync();
                             lot.PaymentCondition.LotId = foundLot.Id;
                             await webTenderContext.PaymentConditions.Upsert(lot.PaymentCondition).On(x => x.LotId)
-                                .RunAsync();
+                                .UpdateIf((x, y) => x.InterimPayment != y.InterimPayment || x.FinalPayment != y.FinalPayment || x.PrepayPayment != y.PrepayPayment).RunAsync();
                         }
                         else
                         {

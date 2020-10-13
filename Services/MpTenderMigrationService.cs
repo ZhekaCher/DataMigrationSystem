@@ -37,6 +37,11 @@ namespace DataMigrationSystem.Services
             await Migrate();
             
             Logger.Info("End of migration");
+            
+            await using var webTenderContext = new WebTenderContext();
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
+            
             await using var parsedAnnouncementMpContext = new ParsedMpTenderContext();
             await parsedAnnouncementMpContext.Database.ExecuteSqlRawAsync("truncate table avroradata.mp_advert, avroradata.mp_lots, avroradata.mp_lot_file restart identity");
         }
@@ -53,7 +58,7 @@ namespace DataMigrationSystem.Services
                 if (found != null)
                 {
                     await webTenderContext.AdataAnnouncements.Upsert(announcement).On(x => new {x.SourceNumber, x.SourceId})
-                        .RunAsync();
+                        .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.LotsQuantity != y.LotsQuantity || x.MethodId != y.MethodId || x.TenderPriorityId != y.TenderPriorityId).RunAsync();
                     foreach (var lot in announcement.Lots)
                     {
                         lot.AnnouncementId = found.Id;
@@ -62,7 +67,7 @@ namespace DataMigrationSystem.Services
                         if (foundLot != null)
                         {
                             await webTenderContext.AdataLots.Upsert(lot).On(x => new {x.SourceNumber, x.SourceId})
-                                .RunAsync();
+                                .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.Characteristics != y.Characteristics || x.MethodId != y.MethodId || x.MeasureId != y.MeasureId || x.SupplyLocation != y.SupplyLocation).RunAsync();
                             /*lot.PaymentCondition.LotId = foundLot.Id;
                             await webTenderContext.PaymentConditions.Upsert(lot.PaymentCondition).On(x => x.LotId)
                                 .RunAsync();*/
@@ -125,7 +130,7 @@ namespace DataMigrationSystem.Services
                 SourceId = 4,
                 PublishDate = dto.StartAuc
             };
-            announcement.SourceLink = $"https://mp.kz/tenders/{announcement.SourceNumber}-{announcement.Title})";
+            announcement.SourceLink = $"https://mp.kz/tenders/list/{announcement.SourceNumber}-{announcement.Title})";
             if (dto.StatusOfAuc != null)
             {
                 if (_statuses.TryGetValue(dto.StatusOfAuc, out var temp))

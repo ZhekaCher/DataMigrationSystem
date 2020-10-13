@@ -20,8 +20,6 @@ namespace DataMigrationSystem.Services
         public TaxpayerMigrationService(int numOfThreads = 10)
         {
             NumOfThreads = numOfThreads;
-            using var parsedTaxpayerContext = new ParsedTaxpayerContext();
-            _total = parsedTaxpayerContext.TaxpayerDtos.Count();
         }
         protected override Logger InitializeLogger()
         {
@@ -30,8 +28,11 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
+            await using var parsedTaxpayerContext = new ParsedTaxpayerContext();
+            _total = parsedTaxpayerContext.TaxpayerDtos.Count();
             await MigrateReferences();
             await Migrate();
+            await parsedTaxpayerContext.Database.ExecuteSqlRawAsync("truncate avroradata.taxpayer");
         }
         private async Task Insert(Taxpayer taxpayer)
         {

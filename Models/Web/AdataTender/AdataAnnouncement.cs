@@ -31,9 +31,7 @@ namespace DataMigrationSystem.Models.Web.AdataTender
         [Column("source_link")]
         public string SourceLink { get; set; }
         [Column("relevance_date")]
-        
-        public DateTime? RelevanceDate { get; set; } = DateTime.Now;
-        
+        public DateTime RelevanceDate { get; set; } = DateTime.Now;
         [Column("publish_date")]
         public DateTime? PublishDate { get; set; }
         [Column("lots_quantity")]
@@ -50,7 +48,6 @@ namespace DataMigrationSystem.Models.Web.AdataTender
         public long? TenderPriorityId { get; set; }
         public List<AdataLot> Lots { get; set; }
         public List<AnnouncementDocumentation> Documentations { get; set; }
-
     }
     [Table("announcement_documentations")]
     public class AnnouncementDocumentation

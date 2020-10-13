@@ -4,48 +4,69 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataMigrationSystem.Models.Web.AdataTender
 {
-	[Table("contracts")]
-	public class AdataContract
-	{
-		[Key] [Column("id")] public long? Id{get; set;}
-		[Column("id_anno")] public long? IdAnno{get; set;}
-		[Column("anno_number")] public string AnnoNumber{get; set;}
-		[Column("contract_number")] public string ContractNumber{get; set;}
-		[Column("contract_source_number")] public string ContractSourceNumber{get; set;}
-		[Column("source_id")] public long? SourceId{get; set;}
-		[Column("amount_sum")] public double? AmountSum{get; set;}
-		[Column("biin_supplier")] public long? BiinSupplier{get; set;}
-		[Column("status_id")] public long? StatusId{get; set;}
-		[Column("dt_start")] public DateTime? DtStart{get; set;}
-		[Column("dt_end")] public DateTime? DtEnd{get; set;}
-		[Column("type_id")] public long? TypeId{get; set;}
-		[Column("relevance_date")] public DateTime? RelevanceDate{get; set;}
-		[Column("bin_customer")] public long? BinCustomer{get; set;}
-		[Column("fin_year")] public DateTime? FinYear{get; set;}
-		[Column("description_kz")] public string DescriptionKz{get; set;}
-		[Column("description_ru")] public string DescriptionRu{get; set;}
-		[Column("fakt_sum_wnds")] public double? FaktSumWnds{get; set;}
-		[Column("sign_reason_doc_name")] public string SignReasonDocName{get; set;}
-		[Column("supplier_bank_name_ru")] public string SupplierBankNameRu{get; set;}
-		[Column("supplier_bank_name_kz")] public string SupplierBankNameKz{get; set;}
-		[Column("customer_bank_name_ru")] public string CustomerBankNameRu{get; set;}
-		[Column("customer_bank_name_kz")] public string CustomerBankNameKz{get; set;}
-		[Column("method_id")] public long? MethodId{get; set;}
-		
-	}
-	
-	[Table("contract_statuses")]
-	public class ContractStatuses
-	{
-		[Key] [Column("id")] public long? Id{get; set;}
-		[Column("name_ru")] public string NameRu{get; set;}
-	}
-	
-	[Table("contract_types")]
-	public class ContractTypes
-	{
-		[Key] [Column("id")] public long? Id{get; set;}
-		[Column("name_ru")] public string NameRu{get; set;}
-		[Column("name_kz")] public string NameKz{get; set;}
-	}
+    [Table("contracts")]
+    public class AdataContracts
+    {
+        [Key] [Column("id")] public long? Id { get; set; }
+        [Column("source_id")] public int? SourceId { get; set; }
+        [Column("announcement_number")] public string AnnouncementNumber { get; set; }
+        [Column("supplier_biin")] public long? SupplierBiin { get; set; }
+        [Column("customer_bin")] public long? CustomerBin { get; set; }
+        [Column("supplier_iik")] public string SupplierIik { get; set; }
+        [Column("customer_iik")] public string CustomerIik { get; set; }
+        [Column("fin_year")] public int? FinYear { get; set; }
+        [Column("sign_date")] public DateTime? SignDate { get; set; }
+        [Column("ec_end_date")] public DateTime? EcEndDate { get; set; }
+        [Column("description_ru")] public string DescriptionRu { get; set; }
+        [Column("contract_sum_wnds")] public double? ContractSumWnds { get; set; }
+        [Column("fakt_sum_wnds")] public double? FaktSumWnds { get; set; }
+        [Column("supplier_bank_id")] public long? SupplierBankId { get; set; }
+        [Column("customer_bank_id")] public long? CustomerBankId { get; set; }
+        [Column("agr_form_id")] public long? AgrFormId { get; set; }
+        [Column("year_type_id")] public long? YearTypeId { get; set; }
+        [Column("method_id")] public long? MethodId { get; set; }
+        [Column("status_id")] public long? StatusId { get; set; }
+        [Column("type_id")] public long? TypeId { get; set; }
+        [Column("source_number")] public string SourceNumber { get; set; }
+        [Column("source_number_sys")] public string SourceNumberSys { get; set; }
+        [Column("create_date")] public DateTime? CreateDate { get; set; }
+        [Column("doc_link")] public string DocLink { get; set; }
+        [Column("doc_name")] public string DocName { get; set; }
+    }
+
+    [Table("contract_agr_forms")]
+    public class ContractAgrForm
+    {
+        [Key] [Column("id")] public int? Id { get; set; }
+        [Column("name_ru")] public string NameRu { get; set; }
+    }
+
+    [Table("contract_statuses")]
+    public class ContractStatus
+    {
+        [Key] [Column("id")] public int? Id { get; set; }
+        [Column("name_ru")] public string NameRu { get; set; }
+    }
+
+    [Table("contract_types")]
+    public class ContractType
+    {
+        [Key] [Column("id")] public int? Id { get; set; }
+        [Column("name_ru")] public string NameRu { get; set; }
+    }
+
+    [Table("contract_year_types")]
+    public class ContractYearType
+    {
+        [Key] [Column("id")] public int? Id { get; set; }
+        [Column("name_ru")] public string NameRu { get; set; }
+    }
+    
+    [Table("banks")]
+    public class Bank
+    {
+        [Key] [Column("id")] public int? Id{get; set;}
+        [Column("name_ru")] public string NameRu{get; set;}
+        [Column("bik")] public string Bik{get; set;}
+    }
 }
