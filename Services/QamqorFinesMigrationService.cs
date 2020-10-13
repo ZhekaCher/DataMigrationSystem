@@ -52,7 +52,7 @@ namespace DataMigrationSystem.Services
                     MainMeasure = qamqorFinesDto.MainMeasure
                 };
                 await _webQamqorFines.QamqorFineses.Upsert(qamqorFines)
-                    .On(x => new {x.NumAdministrative, x.GosNumber, x.MainMeasure}).RunAsync();
+                    .On(x => new {x.NumAdministrative}).RunAsync();
                 lock (_forLock)
                 {
                     Logger.Trace(_counter--);
