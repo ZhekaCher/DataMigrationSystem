@@ -15,7 +15,7 @@ namespace DataMigrationSystem.Services
         private int _total=0;
         private readonly object _lock = new object();
         
-        public KaspiAuctionMigrationService(int numOfThreads = 5)
+        public KaspiAuctionMigrationService(int numOfThreads = 1)
         {
             NumOfThreads = numOfThreads;
         }
@@ -38,8 +38,7 @@ namespace DataMigrationSystem.Services
             await Task.WhenAll(tasks);
             await web.SaveChangesAsync();
             
-            await CheckAuction();
-            await web.SaveChangesAsync();
+            await web.Database.ExecuteSqlRawAsync($"update announcements set status_id = 19 where source_id = 8 and relevance_date<date(now())");
             
             Logger.Info("End of migration");
             await parsedKaspiAuctionContext.Database.ExecuteSqlRawAsync("truncate table avroradata.kaspi_auction restart identity");
@@ -72,23 +71,6 @@ namespace DataMigrationSystem.Services
                 }
             }
 
-        }
-
-        private async Task CheckAuction()
-        {
-            await using var web = new WebTenderContext();
-            var webannouncement = web.AdataAnnouncements.Where(x => x.SourceId == 8);
-            foreach (var adataAnnouncement in webannouncement)
-            {
-                if (adataAnnouncement.RelevanceDate<DateTime.Today)
-                {
-                    var announcement = new AdataAnnouncement
-                    {
-                    StatusId = 19
-                    };
-                    await web.AdataAnnouncements.Upsert(announcement).On(x => new{x.SourceNumber, x.SourceId}).RunAsync();
-                }
-            }
         }
     }
 }
