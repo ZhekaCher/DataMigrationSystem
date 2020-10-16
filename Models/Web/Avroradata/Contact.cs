@@ -30,6 +30,6 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("biin")] public long? Bin { get; set; }
         [Column("email")] public string Email { get; set; }
         [Column("source")] public string Source { get; set; }
-        [Column("relevance_date")] public DateTime RelevanceDate { get; set ; }
+        [Column("relevance_date")] public DateTime RelevanceDate { get; set; }
     }
 }
