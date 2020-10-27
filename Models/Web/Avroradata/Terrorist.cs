@@ -17,7 +17,7 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("middle_name")]
         public string MiddleName { get; set; }
         [Column("birthday")]
-        public DateTime Birthday { get; set; }
+        public DateTime? Birthday { get; set; }
         [Column("note")]
         public string Note { get; set; }
         [Column("correction")]
