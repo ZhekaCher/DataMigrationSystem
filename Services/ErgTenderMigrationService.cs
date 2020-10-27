@@ -39,6 +39,9 @@ namespace DataMigrationSystem.Services
                 tasks.Add(Migrate(i));
             await Task.WhenAll(tasks);
             await web.SaveChangesAsync();
+            
+            await parsed.Database.ExecuteSqlRawAsync(
+                "truncate avroradata.erg_tender, avroradata.erg_tender_positions restart identity cascade;");
         }
         
 
