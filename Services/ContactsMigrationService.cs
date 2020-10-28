@@ -97,7 +97,7 @@ namespace DataMigrationSystem.Services
         private static List<ContactEmail> AddEmail(string email, long? bin, string source)
         {
             var contactEmails = new List<ContactEmail>();
-            var emails = ValidateEmail(email);
+            var emails = ValidateEmail(email.ToLower());
             foreach (var mail in emails)
             {
                 var contactEmail = new ContactEmail
@@ -116,7 +116,7 @@ namespace DataMigrationSystem.Services
         private static List<ContactWebsite> AddWebsite(string website, long? bin, string source)
         {
             var contactWebsites = new List<ContactWebsite>();
-            var websites = ValidateWebsite(website);
+            var websites = ValidateWebsite(website.ToLower());
             foreach (var web in websites)
             {
                 var contactWebsite = new ContactWebsite
