@@ -86,7 +86,7 @@ namespace DataMigrationSystem.Services
         private async Task MigarteAd(int threadNum)
         {
             var customUnionDeclarationsAdDtos = _parsedCustomUnionDeclarations.CustomUnionDeclarationsAdDtos;
-            foreach (var customUnionDeclarationsAdDto in customUnionDeclarationsAdDtos.Where(x=>x.Id % NumOfThreads == threadNum))
+            foreach (var customUnionDeclarationsAdDto in customUnionDeclarationsAdDtos.Where(x=>x.Id % NumOfThreadsпше  == threadNum))
             {
                 var t = new CustomUnionDeclarationsAd
                 {
