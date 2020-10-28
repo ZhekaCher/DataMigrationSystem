@@ -11,14 +11,14 @@ using NLog;
 
 namespace DataMigrationSystem.Services
 {
-    public class CustomUnionDeclarationsMigrationService : MigrationService
+    public class CustomUnionDeclarationMigrationService : MigrationService
     {
         private readonly WebCustomUnionDeclarationsContext _webCustomUnionDeclarationsContex;
         private readonly ParsedCustomUnionDeclarations _parsedCustomUnionDeclarations;
         private readonly object _forLock;
         private int _counter;
 
-        public CustomUnionDeclarationsMigrationService(int numOfThreads = 1) 
+        public CustomUnionDeclarationMigrationService(int numOfThreads = 1) 
         {
             _webCustomUnionDeclarationsContex = new WebCustomUnionDeclarationsContext();
             _parsedCustomUnionDeclarations = new ParsedCustomUnionDeclarations();
@@ -86,7 +86,7 @@ namespace DataMigrationSystem.Services
         private async Task MigarteAd(int threadNum)
         {
             var customUnionDeclarationsAdDtos = _parsedCustomUnionDeclarations.CustomUnionDeclarationsAdDtos;
-            foreach (var customUnionDeclarationsAdDto in customUnionDeclarationsAdDtos.Where(x=>x.Id % NumOfThreadsпше  == threadNum))
+            foreach (var customUnionDeclarationsAdDto in customUnionDeclarationsAdDtos.Where(x=>x.Id % NumOfThreads == threadNum))
             {
                 var t = new CustomUnionDeclarationsAd
                 {
