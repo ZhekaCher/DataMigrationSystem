@@ -7,8 +7,8 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
 {
     public class ErgTenderDto
     {
-        [Table("erg_bidding_concourse")]
-        public class ErgBiddingConcourse
+        [Table("erg_tender")]
+        public class ErgTender
         {
             [Key][Column("id")] public long Id { get; set; }
             [Column("full_name")] public string FullName { get; set; }
@@ -22,11 +22,11 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
             [Column("purchase")] public string Purchase { get; set; }
             [Column("status")] public string Status { get; set; }
             [Column("concourse_id")] public long ConcourseId { get; set; }
-            public List<ErgBiddingConcoursePositions> ErgBiddingConcoursePositions { get; set; } 
+            public List<ErgTenderPositions> ErgTenderPositionses { get; set; } 
         }
 
-        [Table("erg_bidding_concourse_positions")]
-        public class ErgBiddingConcoursePositions
+        [Table("erg_tender_positions")]
+        public class ErgTenderPositions
         {
             [Key][Column("id")] public long Id { get; set; }
             [Column("concourse_id")] public long ConcourseId { get; set; }

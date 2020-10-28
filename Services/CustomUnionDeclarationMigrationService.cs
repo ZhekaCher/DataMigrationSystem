@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Parsed.Avroradata;
@@ -9,14 +11,14 @@ using NLog;
 
 namespace DataMigrationSystem.Services
 {
-    public class CustomUnionDeclarationsMigrationService : MigrationService
+    public class CustomUnionDeclarationMigrationService : MigrationService
     {
         private readonly WebCustomUnionDeclarationsContext _webCustomUnionDeclarationsContex;
         private readonly ParsedCustomUnionDeclarations _parsedCustomUnionDeclarations;
         private readonly object _forLock;
         private int _counter;
 
-        public CustomUnionDeclarationsMigrationService(int numOfThreads = 30) 
+        public CustomUnionDeclarationMigrationService(int numOfThreads = 1) 
         {
             _webCustomUnionDeclarationsContex = new WebCustomUnionDeclarationsContext();
             _parsedCustomUnionDeclarations = new ParsedCustomUnionDeclarations();
@@ -29,16 +31,25 @@ namespace DataMigrationSystem.Services
         }
         public override async Task StartMigratingAsync()
         {
-            await Migrate();
-            await MigarteAd();
+            var tasks = new List<Task>();
+            for (var i = 0; i < NumOfThreads; i++)
+            {
+                tasks.Add(MigarteAd(i));
+                tasks.Add(Migrate(i));
+                if (tasks.Count < NumOfThreads*2) continue;
+                await Task.WhenAny(tasks);
+                tasks.RemoveAll(x => x.IsCompleted);
+            }
+            await Task.WhenAll(tasks);
+
             await using var parsedCustomUnionDeclarations = new ParsedCustomUnionDeclarations();
             await parsedCustomUnionDeclarations.Database.ExecuteSqlRawAsync("truncate avroradata.custom_union_declarations_ad,avroradata.custom_union_declarations restart identity;");
         }
 
-        private async Task Migrate()
+        private async Task Migrate(int threadNum)
         {
             var parseCud = _parsedCustomUnionDeclarations.CustomUnionDeclarationsDtos;
-            await foreach (var customUnionDeclarationsDto in parseCud)
+            foreach (var customUnionDeclarationsDto in parseCud.Where(x=>x.Id % NumOfThreads == threadNum))
             {
                 var cUnDic = new CustomUnionDeclarations
                 {
@@ -72,10 +83,10 @@ namespace DataMigrationSystem.Services
             }
         }
 
-        private async Task MigarteAd()
+        private async Task MigarteAd(int threadNum)
         {
             var customUnionDeclarationsAdDtos = _parsedCustomUnionDeclarations.CustomUnionDeclarationsAdDtos;
-            await foreach (var customUnionDeclarationsAdDto in customUnionDeclarationsAdDtos)
+            foreach (var customUnionDeclarationsAdDto in customUnionDeclarationsAdDtos.Where(x=>x.Id % NumOfThreads == threadNum))
             {
                 var t = new CustomUnionDeclarationsAd
                 {
