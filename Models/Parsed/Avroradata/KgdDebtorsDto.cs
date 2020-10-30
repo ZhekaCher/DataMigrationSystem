@@ -12,7 +12,7 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
         public long Id { get; set; }
 
         [Column("code")]
-        public long Code { get; set; }
+        public long? Code { get; set; }
 
         [Column("iin_biin")]
         public long? IinBiin { get; set; }
@@ -33,14 +33,14 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
         public double? Fine { get; set; }
         
         [Column("relevance_date")]
-        public DateTime RelevanceDate { get; set; }
+        public DateTime? RelevanceDate { get; set; }
         [Column("category")]
         public string Category { get; set; }
         
         [Column("parse_date")]
         public DateTime ParseDate { get; set; }
         [Column("category_date")]
-        public DateTime CategoryDate { get; set; }
+        public DateTime? CategoryDate { get; set; }
     }
     
     [Table("kgd_debtors_agents")]
@@ -63,14 +63,14 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
         public double? DebtSum { get; set; }
         
         [Column("relevance_date")]
-        public DateTime RelevanceDate { get; set; }
+        public DateTime? RelevanceDate { get; set; }
         [Column("category")]
         public string Category { get; set; }
         
         [Column("parse_date")]
         public DateTime ParseDate { get; set; }
         [Column("category_date")]
-        public DateTime CategoryDate { get; set; }
+        public DateTime? CategoryDate { get; set; }
     }
     [Table("kgd_debtors_customers")]
     public class KgdDebtorsCustomersDto
@@ -89,14 +89,14 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
         public double? DebtSum { get; set; }
         
         [Column("relevance_date")]
-        public DateTime RelevanceDate { get; set; }
+        public DateTime? RelevanceDate { get; set; }
         [Column("category")]
         public string Category { get; set; }
         
         [Column("parse_date")]
         public DateTime ParseDate { get; set; }
         [Column("category_date")]
-        public DateTime CategoryDate { get; set; }
+        public DateTime? CategoryDate { get; set; }
     }
     [Table("kgd_all_debtors_category")]
     public class KgdAllDebtorsCategoryDto
