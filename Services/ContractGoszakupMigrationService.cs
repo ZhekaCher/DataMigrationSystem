@@ -88,10 +88,10 @@ namespace DataMigrationSystem.Services
             Logger.Info("End of migration");
             
             await using var parsedGoszakupContext = new ParsedGoszakupTenderContext();
-            await parsedGoszakupContext.Database.ExecuteSqlRawAsync(
-                "truncate table avroradata.contract_goszakup restart identity cascade");
+            // await parsedGoszakupContext.Database.ExecuteSqlRawAsync(
+                // "truncate table avroradata.contract_goszakup restart identity cascade");
 
-            Logger.Info("Successfully truncated with cascade avroradata.contract_goszakup table");
+            // Logger.Info("Successfully truncated with cascade avroradata.contract_goszakup table");
         }
 
         private async Task Proceed(ContractGoszakupDto dto)
@@ -101,23 +101,24 @@ namespace DataMigrationSystem.Services
 
             var webContract = DtoToWebContract(dto);
             await webContractContext.Contracts.Upsert(webContract).On(x => new {x.SourceId, x.SourceNumberSys})
-                .UpdateIf(
-                    (x, y) =>
-                        x.CustomerIik != y.CustomerIik ||
-                        x.SupplierIik != y.SupplierIik ||
-                        x.DescriptionRu != y.DescriptionRu ||
-                        x.StatusId != y.StatusId ||
-                        x.MethodId != y.MethodId ||
-                        x.TypeId != y.TypeId ||
-                        x.YearTypeId != y.YearTypeId ||
-                        x.AgrFormId != y.AgrFormId ||
-                        x.SupplierBankId != y.SupplierBankId ||
-                        x.CustomerBankId != y.CustomerBankId ||
-                        x.ContractSumWnds != y.ContractSumWnds ||
-                        x.FaktSumWnds != y.FaktSumWnds ||
-                        x.DocLink != y.DocLink ||
-                        x.DocName != y.DocName
-                ).RunAsync();
+                // .UpdateIf(
+                //     (x, y) =>
+                //         x.CustomerIik != y.CustomerIik ||
+                //         x.SupplierIik != y.SupplierIik ||
+                //         x.DescriptionRu != y.DescriptionRu ||
+                //         x.StatusId != y.StatusId ||
+                //         x.MethodId != y.MethodId ||
+                //         x.TypeId != y.TypeId ||
+                //         x.YearTypeId != y.YearTypeId ||
+                //         x.AgrFormId != y.AgrFormId ||
+                //         x.SupplierBankId != y.SupplierBankId ||
+                //         x.CustomerBankId != y.CustomerBankId ||
+                //         x.ContractSumWnds != y.ContractSumWnds ||
+                //         x.FaktSumWnds != y.FaktSumWnds ||
+                //         x.DocLink != y.DocLink ||
+                //         x.DocName != y.DocName
+                // )
+                .RunAsync();
 
             if (dto.Units != null && dto.Units.Count > 0)
             {
@@ -131,14 +132,15 @@ namespace DataMigrationSystem.Services
                     var webUnit = DtoToWebContractUnit(contractUnitGoszakupDto);
                     webUnit.ContractId = webContractId;
                     await webContractContext.ContractUnits.Upsert(webUnit).On(x => new {x.SourceId, x.SourceUniqueId})
-                        .UpdateIf(
-                            (x, y) =>
-                                x.Quantity != y.Quantity ||
-                                x.ItemPrice != y.ItemPrice ||
-                                x.TotalSum != y.TotalSum ||
-                                x.ItemPriceWnds != y.ItemPriceWnds ||
-                                x.TotalSumWnds != y.TotalSumWnds
-                        ).RunAsync();
+                        // .UpdateIf(
+                        //     (x, y) =>
+                        //         x.Quantity != y.Quantity ||
+                        //         x.ItemPrice != y.ItemPrice ||
+                        //         x.TotalSum != y.TotalSum ||
+                        //         x.ItemPriceWnds != y.ItemPriceWnds ||
+                        //         x.TotalSumWnds != y.TotalSumWnds
+                        // )
+                        .RunAsync();
 
                     var unitId = webContractContext.ContractUnits.FirstOrDefault(x =>
                         x.SourceId == SourceId && x.SourceUniqueId == contractUnitGoszakupDto.SourceUniqueId)?.Id;
@@ -147,21 +149,22 @@ namespace DataMigrationSystem.Services
                         var webPlan = DtoToWebPlan(contractUnitGoszakupDto.Plan);
                         webPlan.ContractUnitId = unitId;
                         await webContractContext.Plans.Upsert(webPlan).On(x => new {x.SourceId, x.SourceUniqueId})
-                            .UpdateIf(
-                                (x, y) =>
-                                    x.Amount != y.Amount ||
-                                    x.Count != y.Count ||
-                                    x.ExtraDescription != y.ExtraDescription ||
-                                    x.Prepayment != y.Prepayment ||
-                                    x.Price != y.Price ||
-                                    x.ActNumber != y.ActNumber ||
-                                    x.FinYear != y.FinYear ||
-                                    x.IsQvazi != y.IsQvazi ||
-                                    x.MethodId != y.MethodId ||
-                                    x.TruCode != y.TruCode ||
-                                    x.StatusId != y.StatusId ||
-                                    x.SubjectBiin != y.SubjectBiin
-                            ).RunAsync();
+                            // .UpdateIf(
+                            //     (x, y) =>
+                            //         x.Amount != y.Amount ||
+                            //         x.Count != y.Count ||
+                            //         x.ExtraDescription != y.ExtraDescription ||
+                            //         x.Prepayment != y.Prepayment ||
+                            //         x.Price != y.Price ||
+                            //         x.ActNumber != y.ActNumber ||
+                            //         x.FinYear != y.FinYear ||
+                            //         x.IsQvazi != y.IsQvazi ||
+                            //         x.MethodId != y.MethodId ||
+                            //         x.TruCode != y.TruCode ||
+                            //         x.StatusId != y.StatusId ||
+                            //         x.SubjectBiin != y.SubjectBiin
+                            // )
+                            .RunAsync();
                     }
                 }
             }
