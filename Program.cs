@@ -87,7 +87,11 @@ namespace DataMigrationSystem
                               "       \n");
             Title = "Data Migration System";
             LogManager.Configuration = new XmlLoggingConfiguration($"{AppDomain.CurrentDomain.BaseDirectory}NLog.config");
-            LogManager.Configuration.Variables["sourceAddress"] = GetLocalIpAddress();
+            // Assigning ip address to a logger
+            var host = await Dns.GetHostEntryAsync(Dns.GetHostName());
+            var ip = host.AddressList.LastOrDefault(x => x.AddressFamily == AddressFamily.InterNetwork)?.ToString();
+            LogManager.Configuration.Variables["sourceAddress"] = ip;
+            
             _logger = LogManager.GetCurrentClassLogger();
             try
             {
