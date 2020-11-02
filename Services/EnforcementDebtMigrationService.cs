@@ -20,11 +20,6 @@ namespace DataMigrationSystem.Services
             NumOfThreads = numOfThreads;
         }
 
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
-
         private async Task MigrateAsync(int numThread)
         {
             await using var webEnforcementDebtContext = new WebEnforcementDebtContext();

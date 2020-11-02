@@ -21,10 +21,6 @@ namespace DataMigrationSystem.Services
             _webTerroristContext = new WebTerroristContext();
             _parsedTerroristContext = new ParsedTerroristContext();
         }
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
 
         public override async Task StartMigratingAsync()
         {

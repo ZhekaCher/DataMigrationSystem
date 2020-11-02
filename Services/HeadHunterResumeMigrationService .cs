@@ -23,11 +23,6 @@ namespace DataMigrationSystem.Services
             _total2 = parsedHeadHunterContext.HhResumeBinDtos.Count();
         }
 
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
-
         public override async Task StartMigratingAsync()
         {
             await using var webHeadHunterContext = new WebHeadHunterContext();

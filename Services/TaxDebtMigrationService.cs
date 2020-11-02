@@ -21,10 +21,6 @@ namespace DataMigrationSystem.Services
             
         }
 
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
 
         public override async Task StartMigratingAsync()
         {

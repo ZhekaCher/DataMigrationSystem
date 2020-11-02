@@ -36,11 +36,6 @@ namespace DataMigrationSystem.Services
         private readonly List<ContractAgrForm> _agrForms;
         private readonly List<Bank> _banks;
 
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
-
         public ContractGoszakupMigrationService(int numOfThreads = 20)
         {
             using var parsingContext = new ParsedContractGoszakupContext();

@@ -27,10 +27,6 @@ namespace DataMigrationSystem.Services
         private object _lock = new object();
 
         //TODO(Get source by code 'goszakup')
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
 
         public DirectorGoszakupMigrationService(int numOfThreads = 30)
         {

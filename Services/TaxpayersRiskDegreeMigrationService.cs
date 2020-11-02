@@ -21,11 +21,6 @@ namespace DataMigrationSystem.Services
             _webTaxpayerRiskDegreeContext = new WebTaxpayerRiskDegreeContext();
             _parsedTaxpayerRiskDegreeContext = new ParsedTaxpayerRiskDegreeContext();
         }
-        
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
 
         public override async Task StartMigratingAsync()
         {
