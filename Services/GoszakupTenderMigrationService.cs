@@ -51,7 +51,7 @@ namespace DataMigrationSystem.Services
 
             await using var parsedAnnouncementGoszakupContext = new ParsedGoszakupTenderContext();
             parsedAnnouncementGoszakupContext.ChangeTracker.AutoDetectChangesEnabled = false;
-            foreach (var dto in parsedAnnouncementGoszakupContext.Announcements.AsNoTracking()
+            foreach (var dto in parsedAnnouncementGoszakupContext.Announcements.AsNoTracking().OrderByDescending(x => x.PublishDate)
                 .Include(x => x.Lots)
             )
             {
@@ -103,10 +103,9 @@ where l.id in (select l.id
             Logger.Info("Successfully refreshed old statuses");
 
             await using var parsedGoszakupContext = new ParsedGoszakupTenderContext();
-            await parsedGoszakupContext.Database.ExecuteSqlRawAsync(
-                "truncate table avroradata.announcement_goszakup restart identity cascade");
+            // await parsedGoszakupContext.Database.ExecuteSqlRawAsync("truncate table avroradata.announcement_goszakup restart identity cascade");
 
-            Logger.Info("Successfully truncated with cascade avroradata.announcement_goszakup table");
+            // Logger.Info("Successfully truncated with cascade avroradata.announcement_goszakup table");
         }
 
         private async Task Proceed(AnnouncementGoszakupDto dto)
