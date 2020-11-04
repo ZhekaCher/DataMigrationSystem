@@ -49,6 +49,12 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
+            
+            var parsedGoszakupContext = new ParsedGoszakupTenderContext();
+            await parsedGoszakupContext.Database.ExecuteSqlRawAsync(
+                "truncate table avroradata.tender_document_goszakup restart identity cascade;");
+
+            Logger.Info("Successfully truncated with cascade avroradata.contract_goszakup table");
         }
 
         private async Task Proceed(TenderDocumentGoszakupDto dto)
