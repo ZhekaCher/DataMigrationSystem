@@ -18,7 +18,7 @@ namespace DataMigrationSystem.Services
         private readonly object _forLock;
         private int _counter;
 
-        public CustomUnionDeclarationMigrationService(int numOfThreads = 1) 
+        public CustomUnionDeclarationMigrationService(int numOfThreads = ) 
         {
             _webCustomUnionDeclarationsContex = new WebCustomUnionDeclarationsContext();
             _parsedCustomUnionDeclarations = new ParsedCustomUnionDeclarations();
