@@ -13,14 +13,14 @@ namespace DataMigrationSystem.Services
 {
     public class CustomUnionDeclarationMigrationService : MigrationService
     {
-        private readonly WebCustomUnionDeclarationsContext _webCustomUnionDeclarationsContex;
+        private readonly WebCustomUnionDeclarationsContext _webCustomUnionDeclarationsContext;
         private readonly ParsedCustomUnionDeclarations _parsedCustomUnionDeclarations;
         private readonly object _forLock;
         private int _counter;
 
-        public CustomUnionDeclarationMigrationService(int numOfThreads = 1) 
+        public CustomUnionDeclarationMigrationService(int numOfThreads = 5) 
         {
-            _webCustomUnionDeclarationsContex = new WebCustomUnionDeclarationsContext();
+            _webCustomUnionDeclarationsContext = new WebCustomUnionDeclarationsContext();
             _parsedCustomUnionDeclarations = new ParsedCustomUnionDeclarations();
             NumOfThreads = numOfThreads;
             _forLock = new object();
@@ -70,7 +70,7 @@ namespace DataMigrationSystem.Services
                     Npa = customUnionDeclarationsDto.Npa,
                     RelevanceDate = customUnionDeclarationsDto.RelevanceDate
                 };
-                await _webCustomUnionDeclarationsContex.CustomUnionDeclarationses.Upsert(cUnDic).On(x => x.RegNum)
+                await _webCustomUnionDeclarationsContext.CustomUnionDeclarationses.Upsert(cUnDic).On(x => x.RegNum)
                     .RunAsync();
                 lock (_forLock)
                 {
@@ -93,7 +93,7 @@ namespace DataMigrationSystem.Services
                     Declarations = customUnionDeclarationsAdDto.Declarations,
                     RelevanceDate = customUnionDeclarationsAdDto.RelevanceDate
                 };
-                await _webCustomUnionDeclarationsContex.CustomUnionDeclarationsAds.Upsert(t).On(x => new {x.Name,x.Declarations})
+                await _webCustomUnionDeclarationsContext.CustomUnionDeclarationsAds.Upsert(t).On(x => new {x.Name,x.Declarations})
                     .RunAsync();
                 lock (_forLock)
                 {
