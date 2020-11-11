@@ -86,11 +86,10 @@ namespace DataMigrationSystem.Services
 
             await using var webParsingContext = new WebParsingContext();
             await webParsingContext.RelevanceDates
-                .Upsert(new RelevanceDate {Code = "contracts", Relevance = DateTime.Now}).On(x => x.Code).RunAsync();
+                .Upsert(new RelevanceDate {Code = "Contracts", Relevance = DateTime.Now}).On(x => x.Code).RunAsync();
             await using var parsedGoszakupContext = new ParsedGoszakupTenderContext();
             await parsedGoszakupContext.Database.ExecuteSqlRawAsync(
                 "truncate table avroradata.contract_goszakup restart identity cascade");
-
             Logger.Info("Successfully truncated with cascade avroradata.contract_goszakup table");
         }
 
