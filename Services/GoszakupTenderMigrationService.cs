@@ -73,34 +73,34 @@ namespace DataMigrationSystem.Services
 
             Logger.Info("Successfully refreshed materialized views");
             
-            await webTenderContext.Database.ExecuteSqlRawAsync(@"
-update adata_tender.announcements a
-set status_id=58
-where a.id in (select a.id
-               from adata_tender.announcements a
-                        inner join adata_tender.statuses s on a.status_id = s.id
-               where combined_id < 5
-                 and source_id = 2
-                 and application_finish_date < now());
-");
+             await webTenderContext.Database.ExecuteSqlRawAsync(@"
+ update adata_tender.announcements a
+ set status_id=58
+ where a.id in (select a.id
+                from adata_tender.announcements a
+                         inner join adata_tender.statuses s on a.status_id = s.id
+                where combined_id < 5
+                  and source_id = 2
+                  and application_finish_date < now());
+ ");
 
-            await webTenderContext.Database.ExecuteSqlRawAsync(@"
-update adata_tender.lots l
-set status_id=38
-where l.id in (select l.id
-               from adata_tender.lots l
-                        inner join adata_tender.statuses s on l.status_id = s.id
-               where combined_id < 5
-                 and source_id = 2
-                 and application_finish_date < now());
-");
+             await webTenderContext.Database.ExecuteSqlRawAsync(@"
+ update adata_tender.lots l
+ set status_id=38
+ where l.id in (select l.id
+                from adata_tender.lots l
+                         inner join adata_tender.statuses s on l.status_id = s.id
+                where combined_id < 5
+                  and source_id = 2
+                  and application_finish_date < now());
+ ");
 
             Logger.Info("Successfully refreshed old statuses");
 
             await using var parsedGoszakupContext = new ParsedGoszakupTenderContext();
-            // await parsedGoszakupContext.Database.ExecuteSqlRawAsync("truncate table avroradata.announcement_goszakup restart identity cascade");
+            await parsedGoszakupContext.Database.ExecuteSqlRawAsync("truncate table avroradata.announcement_goszakup restart identity cascade");
 
-            // Logger.Info("Successfully truncated with cascade avroradata.announcement_goszakup table");
+            Logger.Info("Successfully truncated with cascade avroradata.announcement_goszakup table");
         }
 
         private async Task Proceed(AnnouncementGoszakupDto dto)
