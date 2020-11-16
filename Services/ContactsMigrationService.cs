@@ -172,6 +172,11 @@ namespace DataMigrationSystem.Services
                 a = a.Substring(0, 11);
             }
 
+            if (a[0]==7)
+            {
+                a = '8'+a.Substring(1);
+            }
+
             if (a.Length != 11)
             {
                 return null;
