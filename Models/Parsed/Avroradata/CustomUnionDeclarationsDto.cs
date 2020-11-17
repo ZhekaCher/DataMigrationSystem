@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -65,6 +66,8 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
         public string Details { get; set; }
 
         [Column("relevance_date")] public DateTime RelevanceDate { get; set; } = DateTime.Now;
+        
+        public List<CustomUnionDeclarationsAdDto> CustomUnionDeclarationsAdDto { get; set; }
     }
 
     [Table("custom_union_declarations_ad")]

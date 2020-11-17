@@ -31,9 +31,8 @@ namespace DataMigrationSystem.Services
             var tasks = new List<Task>();
             for (var i = 0; i < NumOfThreads; i++)
             {
-                tasks.Add(MigarteAd(i));
                 tasks.Add(Migrate(i));
-                if (tasks.Count < NumOfThreads*2) continue;
+                if (tasks.Count < NumOfThreads) continue;
                 await Task.WhenAny(tasks);
                 tasks.RemoveAll(x => x.IsCompleted);
             }
@@ -70,35 +69,23 @@ namespace DataMigrationSystem.Services
                     Npa = customUnionDeclarationsDto.Npa,
                     RelevanceDate = customUnionDeclarationsDto.RelevanceDate
                 };
+                await _webCustomUnionDeclarationsContext.CustomUnionDeclarationsAds.AddRangeAsync(
+                    _webCustomUnionDeclarationsContext.CustomUnionDeclarationsAds.Select(x =>
+                        new CustomUnionDeclarationsAd
+                        {
+                            Name = x.Name,
+                            CtRk = x.CtRk,
+                            TnVad = x.TnVad,
+                            Declarations = x.Declarations,
+                            RelevanceDate = x.RelevanceDate
+                        }));
                 await _webCustomUnionDeclarationsContext.CustomUnionDeclarationses.Upsert(cUnDic).On(x => x.RegNum)
-                    .RunAsync();
+                   .RunAsync();
                 lock (_forLock)
                 {
                     Logger.Trace(_counter--);
                 }
                 
-            }
-        }
-
-        private async Task MigarteAd(int threadNum)
-        {
-            var customUnionDeclarationsAdDtos = _parsedCustomUnionDeclarations.CustomUnionDeclarationsAdDtos;
-            foreach (var customUnionDeclarationsAdDto in customUnionDeclarationsAdDtos.Where(x=>x.Id % NumOfThreads == threadNum))
-            {
-                var t = new CustomUnionDeclarationsAd
-                {
-                    Name = customUnionDeclarationsAdDto.Name,
-                    CtRk = customUnionDeclarationsAdDto.CtRk,
-                    TnVad = customUnionDeclarationsAdDto.TnVad,
-                    Declarations = customUnionDeclarationsAdDto.Declarations,
-                    RelevanceDate = customUnionDeclarationsAdDto.RelevanceDate
-                };
-                await _webCustomUnionDeclarationsContext.CustomUnionDeclarationsAds.Upsert(t).On(x => new {x.Name,x.Declarations})
-                    .RunAsync();
-                lock (_forLock)
-                {
-                    Logger.Trace(_counter--);
-                }
             }
         }
     }
