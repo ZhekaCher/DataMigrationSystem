@@ -22,6 +22,8 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
             [Column("purchase")] public string Purchase { get; set; }
             [Column("status")] public string Status { get; set; }
             [Column("concourse_id")] public long ConcourseId { get; set; }
+            [Column("contact_tel")] public string ContactTel { get; set; }
+            [Column("contact_email")] public string ContactEmail { get; set; }
             public List<ErgTenderPositions> ErgTenderPositionses { get; set; } 
         }
 

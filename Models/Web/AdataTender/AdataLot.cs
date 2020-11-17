@@ -45,6 +45,8 @@ namespace DataMigrationSystem.Models.Web.AdataTender
         public long? MeasureId { get; set; }
         [Column("tru_code")]
         public string TruCode { get; set; }
+        [Column("delivery_conditions")]
+        public string DeliveryConditions { get; set; }
         [Column("unit_price")]
         public double UnitPrice { get; set; }
         [Column("total_amount")]

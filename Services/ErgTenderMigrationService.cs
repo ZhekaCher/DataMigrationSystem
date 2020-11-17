@@ -154,7 +154,9 @@ namespace DataMigrationSystem.Services
                 PublishDate = ergTender.PublishDate,
                 Title = ergTender.MainCategory,
                 CustomerBin = ergTender.Bin,
-                SourceId = 11
+                SourceId = 11,
+                EmailAddress = ergTender.ContactEmail,
+                PhoneNumber = ergTender.ContactTel,
             };
             if (ergTender.Status != null)
             {
