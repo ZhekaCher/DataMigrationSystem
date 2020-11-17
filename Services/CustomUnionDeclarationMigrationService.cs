@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Parsed.Avroradata;
 using DataMigrationSystem.Context.Web.Avroradata;
+using DataMigrationSystem.Models.Parsed.Avroradata;
 using DataMigrationSystem.Models.Web.Avroradata;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using NLog;
 
 namespace DataMigrationSystem.Services
@@ -18,74 +20,83 @@ namespace DataMigrationSystem.Services
         private readonly object _forLock;
         private int _counter;
 
-        public CustomUnionDeclarationMigrationService(int numOfThreads = 5) 
+        public CustomUnionDeclarationMigrationService(int numOfThreads = 10) 
         {
-            _webCustomUnionDeclarationsContext = new WebCustomUnionDeclarationsContext();
-            _parsedCustomUnionDeclarations = new ParsedCustomUnionDeclarations();
             NumOfThreads = numOfThreads;
             _forLock = new object();
         }
         
         public override async Task StartMigratingAsync()
         {
+
+            await Migrate();
+            await using var parsedCustomUnionDeclarations = new ParsedCustomUnionDeclarations();
+            await parsedCustomUnionDeclarations.Database.ExecuteSqlRawAsync("truncate avroradata.custom_union_declarations_ad,avroradata.custom_union_declarations restart identity;");
+        }
+        
+        
+        private async Task Migrate()
+        {
             var tasks = new List<Task>();
-            for (var i = 0; i < NumOfThreads; i++)
+            await using var parsed = new ParsedCustomUnionDeclarations();
+            var ads = parsed.CustomUnionDeclarationsDtos
+                .AsNoTracking()
+                .Include(x => x.CustomUnionDeclarationsAdDto);
+            
+            foreach (var ad in ads)
             {
-                tasks.Add(Migrate(i));
+                tasks.Add(Insert(ad));
                 if (tasks.Count < NumOfThreads) continue;
                 await Task.WhenAny(tasks);
                 tasks.RemoveAll(x => x.IsCompleted);
             }
             await Task.WhenAll(tasks);
-
-            await using var parsedCustomUnionDeclarations = new ParsedCustomUnionDeclarations();
-            await parsedCustomUnionDeclarations.Database.ExecuteSqlRawAsync("truncate avroradata.custom_union_declarations_ad,avroradata.custom_union_declarations restart identity;");
         }
 
-        private async Task Migrate(int threadNum)
+        private async Task Insert(CustomUnionDeclarationsDto declarationsDto)
         {
-            var parseCud = _parsedCustomUnionDeclarations.CustomUnionDeclarationsDtos;
-            foreach (var customUnionDeclarationsDto in parseCud.Where(x=>x.Id % NumOfThreads == threadNum))
+            await using var web = new WebCustomUnionDeclarationsContext();
+            web.ChangeTracker.AutoDetectChangesEnabled = false;
+            await web.CustomUnionDeclarationses.Upsert(new CustomUnionDeclarations
             {
-                var cUnDic = new CustomUnionDeclarations
-                {
-                    CertOrgAddress = customUnionDeclarationsDto.CertOrgAddress,
-                    CertOrgHeader = customUnionDeclarationsDto.CertOrgHeader,
-                    CertOrgName = customUnionDeclarationsDto.CertOrgName,
-                    DeclarantsAddress = customUnionDeclarationsDto.DeclarantsAddress,
-                    DeclarantsIinBiin = customUnionDeclarationsDto.DeclarantsIinBiin,
-                    DeclarantsName = customUnionDeclarationsDto.DeclarantsName,
-                    Details = customUnionDeclarationsDto.Details,
-                    EvidanceDoc = customUnionDeclarationsDto.EvidanceDoc,
-                    ExtensionInform = customUnionDeclarationsDto.ExtensionInform,
-                    RegNum = customUnionDeclarationsDto.RegNum,
-                    ValFrom = customUnionDeclarationsDto.ValFrom,
-                    ValUntil = customUnionDeclarationsDto.ValUntil ,
-                    ManufacturersName = customUnionDeclarationsDto.ManufacturersName,
-                    ManufacturersAdress = customUnionDeclarationsDto.ManufacturersAdress,
-                    ProductName = customUnionDeclarationsDto.ProductName,
-                    IdentificateInform = customUnionDeclarationsDto.IdentificateInform,
-                    TnCode = customUnionDeclarationsDto.TnCode,
-                    Npa = customUnionDeclarationsDto.Npa,
-                    RelevanceDate = customUnionDeclarationsDto.RelevanceDate
-                };
-                await _webCustomUnionDeclarationsContext.CustomUnionDeclarationsAds.AddRangeAsync(
-                    _webCustomUnionDeclarationsContext.CustomUnionDeclarationsAds.Select(x =>
-                        new CustomUnionDeclarationsAd
-                        {
-                            Name = x.Name,
-                            CtRk = x.CtRk,
-                            TnVad = x.TnVad,
-                            Declarations = x.Declarations,
-                            RelevanceDate = x.RelevanceDate
-                        }));
-                await _webCustomUnionDeclarationsContext.CustomUnionDeclarationses.Upsert(cUnDic).On(x => x.RegNum)
-                   .RunAsync();
-                lock (_forLock)
-                {
-                    Logger.Trace(_counter--);
-                }
-                
+                CertOrgAddress = declarationsDto.CertOrgAddress,
+                CertOrgHeader = declarationsDto.CertOrgHeader,
+                CertOrgName = declarationsDto.CertOrgName,
+                DeclarantsAddress = declarationsDto.DeclarantsAddress,
+                DeclarantsIinBiin = declarationsDto.DeclarantsIinBiin,
+                DeclarantsName = declarationsDto.DeclarantsName,
+                Details = declarationsDto.Details,
+                EvidanceDoc = declarationsDto.EvidanceDoc,
+                ExtensionInform = declarationsDto.ExtensionInform,
+                RegNum = declarationsDto.RegNum,
+                ValFrom = declarationsDto.ValFrom,
+                ValUntil = declarationsDto.ValUntil,
+                ManufacturersName = declarationsDto.ManufacturersName,
+                ManufacturersAdress = declarationsDto.ManufacturersAdress,
+                ProductName = declarationsDto.ProductName,
+                IdentificateInform = declarationsDto.IdentificateInform,
+                TnCode = declarationsDto.TnCode,
+                Npa = declarationsDto.Npa,
+                RelevanceDate = declarationsDto.RelevanceDate
+            }).On(x => x.RegNum).RunAsync();
+            web.CustomUnionDeclarationsAds.RemoveRange(web.CustomUnionDeclarationsAds.Where(x=>x.Declarations == declarationsDto.RegNum));
+            await web.SaveChangesAsync();
+            if (declarationsDto.CustomUnionDeclarationsAdDto != null)
+            {
+                await web.CustomUnionDeclarationsAds.AddRangeAsync(declarationsDto.CustomUnionDeclarationsAdDto.Select(
+                    x => new CustomUnionDeclarationsAd
+                    {
+                        Name = x.Name,
+                        CtRk = x.CtRk,
+                        TnVad = x.TnVad,
+                        Declarations = x.Declarations,
+                        RelevanceDate = x.RelevanceDate
+                    }));
+                await web.SaveChangesAsync();
+            }
+            lock (_forLock)
+            {
+                Logger.Trace(_counter++);
             }
         }
     }
