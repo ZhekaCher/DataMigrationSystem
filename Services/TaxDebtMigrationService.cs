@@ -39,19 +39,26 @@ namespace DataMigrationSystem.Services
         private async Task Insert(TaxDebt taxDebt)
         {
             await using var webTaxDebtContext = new WebTaxDebtContext();
-            await webTaxDebtContext.TaxDebts.Upsert(taxDebt).On(x => x.IinBin).RunAsync();
-            foreach (var taxDebtOrg in taxDebt.TaxDebtOrgs)
+            if (0 < await webTaxDebtContext.TaxDebts.Upsert(taxDebt)
+                .UpdateIf((a, b) => a.RelevanceDate < b.RelevanceDate).On(x => x.IinBin).RunAsync())
             {
-                await webTaxDebtContext.TaxDebtOrgs.Upsert(taxDebtOrg).On(x => new {x.IinBin, x.CharCode}).RunAsync();
-                foreach (var taxDebtPayer in taxDebtOrg.TaxDebtPayers)
+                foreach (var taxDebtOrg in taxDebt.TaxDebtOrgs)
                 {
-                    await webTaxDebtContext.TaxDebtPayers.Upsert(taxDebtPayer).On(x => new {x.IinBin, x.CharCode}).RunAsync();
-                    foreach (var taxDebtBcc in taxDebtPayer.TaxDebtBccs)
+                    await webTaxDebtContext.TaxDebtOrgs.Upsert(taxDebtOrg).On(x => new {x.IinBin, x.CharCode})
+                        .RunAsync();
+                    foreach (var taxDebtPayer in taxDebtOrg.TaxDebtPayers)
                     {
-                        await webTaxDebtContext.TaxDebtBccs.Upsert(taxDebtBcc).On(x => new {x.IinBin, x.CharCode, x.Bcc}).RunAsync();
+                        await webTaxDebtContext.TaxDebtPayers.Upsert(taxDebtPayer).On(x => new {x.IinBin, x.CharCode})
+                            .RunAsync();
+                        foreach (var taxDebtBcc in taxDebtPayer.TaxDebtBccs)
+                        {
+                            await webTaxDebtContext.TaxDebtBccs.Upsert(taxDebtBcc)
+                                .On(x => new {x.IinBin, x.CharCode, x.Bcc}).RunAsync();
+                        }
                     }
                 }
             }
+
             lock (_forLock)
             {
                 Logger.Trace(_counter++);
