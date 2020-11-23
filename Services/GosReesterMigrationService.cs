@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Parsed.Avroradata;
 using DataMigrationSystem.Context.Web.Avroradata;
@@ -15,30 +17,37 @@ namespace DataMigrationSystem.Services
         private readonly object _forLock;
         private int _counter;
         
-        public GosReesterMigrationService(int numOfThreads = 1)
+        public GosReesterMigrationService(int numOfThreads = 5)
         {
             _webGosRessterContext = new WebGosRessterContext();
             _parsedGosReesterContext = new ParsedGosReesterContext();
             NumOfThreads = numOfThreads;
             _forLock = new object();
         }
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
         public override async Task StartMigratingAsync()
         {
-            await Migrate();
+            var tasks = new List<Task>();
+            for(var i = 0; i < NumOfThreads; i++)
+            {
+                tasks.Add(Migrate(i));
+                if (tasks.Count >= NumOfThreads)
+                {
+                    await Task.WhenAny(tasks);
+                    tasks.RemoveAll(x => x.IsCompleted);
+                }
+            }
+            await Task.WhenAll(tasks);
+            
             var gosReesterContext = new ParsedGosReesterContext();
             await gosReesterContext.Database.ExecuteSqlRawAsync(
                 "truncate avroradata.gos_reester restart identity;");
 
         }
 
-        private async Task Migrate()
+        private async Task Migrate(int threads)
         {
             var gosReesterDtos = _parsedGosReesterContext.GosReesterDtos;
-            await foreach (var gosReesterDto in gosReesterDtos)
+            foreach (var gosReesterDto in gosReesterDtos.Where(x=>x.Id%NumOfThreads==threads))
             {
                 var gosRessters = new GosReester
                 {

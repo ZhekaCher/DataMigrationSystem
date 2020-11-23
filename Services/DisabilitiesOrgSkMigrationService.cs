@@ -22,12 +22,6 @@ namespace DataMigrationSystem.Services
             _webDisabilitiesOrgSkContext= new WebDisabilitiesOrgSkContext();
             _parsedDisabilitiesOrgSkContext = new ParsedDisabilitiesOrgSkContext();
         }
-        
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
-
         public override async Task StartMigratingAsync()
         {
             var disabilitiesOrgSkDtos = _parsedDisabilitiesOrgSkContext.DisabilitiesOrgSkDtos

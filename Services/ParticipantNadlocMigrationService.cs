@@ -30,10 +30,6 @@ namespace DataMigrationSystem.Services
             _total3 = parsedParticipantNadlocContext.SupplierNadlocDtos.Count();
 
         }
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
 
         public override async Task StartMigratingAsync()
         {

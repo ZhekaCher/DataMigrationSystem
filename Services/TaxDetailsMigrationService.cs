@@ -24,10 +24,6 @@ namespace DataMigrationSystem.Services
             _parsedTaxDetailsContext = new ParsedTaxDetailsContext();
             _total = _parsedTaxDetailsContext.TaxDetailsDtos.Count();
         }
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
 
         public override async Task StartMigratingAsync()
         {

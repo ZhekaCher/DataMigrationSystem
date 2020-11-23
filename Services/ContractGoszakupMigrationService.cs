@@ -7,9 +7,11 @@ using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Parsed.Avroradata;
 using DataMigrationSystem.Context.Web.AdataTender;
 using DataMigrationSystem.Context.Web.Avroradata;
+using DataMigrationSystem.Context.Web.Parsing;
 using DataMigrationSystem.Models.Parsed;
 using DataMigrationSystem.Models.Parsed.Avroradata;
 using DataMigrationSystem.Models.Web.AdataTender;
+using DataMigrationSystem.Models.Web.Parsing;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -33,11 +35,6 @@ namespace DataMigrationSystem.Services
         private readonly List<ContractYearType> _yearTypes;
         private readonly List<ContractAgrForm> _agrForms;
         private readonly List<Bank> _banks;
-
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
 
         public ContractGoszakupMigrationService(int numOfThreads = 20)
         {
@@ -86,12 +83,14 @@ namespace DataMigrationSystem.Services
 
             await Task.WhenAll(tasks);
             Logger.Info("End of migration");
-            
-            await using var parsedGoszakupContext = new ParsedGoszakupTenderContext();
-            // await parsedGoszakupContext.Database.ExecuteSqlRawAsync(
-                // "truncate table avroradata.contract_goszakup restart identity cascade");
 
-            // Logger.Info("Successfully truncated with cascade avroradata.contract_goszakup table");
+            await using var webParsingContext = new WebParsingContext();
+            await webParsingContext.RelevanceDates
+                .Upsert(new RelevanceDate {Code = "Contracts", Relevance = DateTime.Now}).On(x => x.Code).RunAsync();
+            await using var parsedGoszakupContext = new ParsedGoszakupTenderContext();
+            await parsedGoszakupContext.Database.ExecuteSqlRawAsync(
+                "truncate table avroradata.contract_goszakup restart identity cascade");
+            Logger.Info("Successfully truncated with cascade avroradata.contract_goszakup table");
         }
 
         private async Task Proceed(ContractGoszakupDto dto)

@@ -27,10 +27,6 @@ namespace DataMigrationSystem.Services
             NumOfThreads = numOfThreads;
             _forLock = new object();
         }
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
 
         public override async Task StartMigratingAsync()
         {

@@ -23,11 +23,6 @@ namespace DataMigrationSystem.Services
             _parsedWantedIndividualContext = new ParsedWantedIndividualContext();
         }
 
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
-
         public override async Task StartMigratingAsync()
         {
             await MigrateReferences();

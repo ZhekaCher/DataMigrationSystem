@@ -19,33 +19,6 @@ using Npgsql;
 
 namespace DataMigrationSystem
 {
-    //
-    //                       _oo0oo_
-    //                      o8888888o
-    //                      88" . "88
-    //                      (| -_- |)
-    //                      0\  =  /0
-    //                    ___/`---'\___
-    //                  .' \\|     |// '.
-    //                 / \\|||  :  |||// \
-    //             / _||||| -:- |||||- \
-    //            |   | \\\  -  /// |   |
-    //            | \_|  ''\---/''  |_/ |
-    //            \  .-\__  '-'  ___/-. /
-    //          ___'. .'  /--.--\  `. .'___
-    //       ."" '<  `.___\_<|>_/___.' >' "".
-    //      | | :  `- \`.;`\ _ /`;.`/ - ` : | |
-    //      \  \ `_.   \_ __\ /__ _/   .-` /  /
-    //  =====`-.____`.___ \_____/___.-`___.-'=====
-    //                       `=---='
-    //
-    //
-    //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    //
-    //            God Bless         No Bugs
-    //
-
-
     /// @author Yevgeniy Cherdantsev
     /// @date 24.02.2020 13:34:45
     /// @version 1.0
@@ -280,7 +253,7 @@ namespace DataMigrationSystem
                 if (_args.ContainsKey(ConfigurationElements.List))
                 {
                     var migrations = ((List<string>) _configurations[ConfigurationElements.Migrations]).ToList();
-                    Console.WriteLine("The list of avaliable migrations:");
+                    Console.WriteLine("The list of available migrations:");
                     foreach (var migration in migrations)
                         Console.WriteLine(migration);
                     Environment.Exit(0);

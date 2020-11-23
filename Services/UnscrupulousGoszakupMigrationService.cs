@@ -24,11 +24,6 @@ namespace DataMigrationSystem.Services
         private int _total;
         private object _lock = new object();
 
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
-
         public UnscrupulousGoszakupMigrationService(int numOfThreads = 30)
         {
             NumOfThreads = numOfThreads;

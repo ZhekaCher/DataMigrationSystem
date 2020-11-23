@@ -23,10 +23,6 @@ namespace DataMigrationSystem.Services
             NumOfThreads = numOfThreads;
         }
         
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
 
         private async Task MigrateAsync(int threadNum)
         {

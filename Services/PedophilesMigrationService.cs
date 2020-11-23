@@ -22,10 +22,6 @@ namespace DataMigrationSystem.Services
             _webPedophilesContext = new WebPedophilesContext();
             _parsedPedophilesContext = new ParsedPedophilesContext();
         }
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
 
         public override async Task StartMigratingAsync()
         {

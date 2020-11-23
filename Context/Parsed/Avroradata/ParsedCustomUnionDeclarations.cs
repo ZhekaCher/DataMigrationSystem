@@ -7,6 +7,14 @@ namespace DataMigrationSystem.Context.Parsed.Avroradata
     {
         public DbSet<CustomUnionDeclarationsDto> CustomUnionDeclarationsDtos { get; set; }
         public DbSet<CustomUnionDeclarationsAdDto> CustomUnionDeclarationsAdDtos { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CustomUnionDeclarationsDto>()
+                .HasMany(x => x.CustomUnionDeclarationsAdDto)
+                .WithOne()
+                .HasForeignKey(x => x.Declarations)
+                .HasPrincipalKey(x => x.RegNum);
+        }
     }
 
    

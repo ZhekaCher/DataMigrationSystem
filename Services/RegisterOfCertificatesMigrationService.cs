@@ -26,11 +26,6 @@ namespace DataMigrationSystem.Services
             _forLock = new object();
         }
 
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
-        
         public override async Task StartMigratingAsync()
         {
             var tasks = new List<Task>();
@@ -88,12 +83,8 @@ namespace DataMigrationSystem.Services
                     IssueDate = x.IssueDate,
                     RelevanceDate = DateTime.Now
                 }).ToList();
-                 var oldList = webRegisterOfCertificates.LocalCertificateses
-                     .Where(x => x.ManufacturerIinBiin == binDto.Code).ToList();
-                 webRegisterOfCertificates.LocalCertificateses.RemoveRange(oldList);
-                 await webRegisterOfCertificates.SaveChangesAsync();
 
-                await webRegisterOfCertificates.LocalCertificateses.AddRangeAsync(newlist);
+                await webRegisterOfCertificates.LocalCertificateses.UpsertRange(newlist).On(x=>x.BlankNum).RunAsync();
                 await webRegisterOfCertificates.SaveChangesAsync();
                 lock (_forLock)
                 {
@@ -139,11 +130,7 @@ namespace DataMigrationSystem.Services
                     ChangesDate = x.ChangesDate,
                     ActualizationDate = x.ActualizationDate
                 }).ToList();
-                var oldList = webRegisterOfCertificates.IndustrialCertificateses
-                    .Where(x => x.IinBiin == binDto.Code).ToList();
-                webRegisterOfCertificates.IndustrialCertificateses.RemoveRange(oldList);
-                await webRegisterOfCertificates.SaveChangesAsync();
-                await webRegisterOfCertificates.IndustrialCertificateses.AddRangeAsync(newlist);
+                await webRegisterOfCertificates.IndustrialCertificateses.UpsertRange(newlist).On(x=> new {x.RegistrationNumber, x.GoodsName}).RunAsync();
                 await webRegisterOfCertificates.SaveChangesAsync();
                 lock (_forLock)
                 {
@@ -183,11 +170,7 @@ namespace DataMigrationSystem.Services
                     RelevanceDate = DateTime.Now
 
                 }).ToList();
-                var oldList = webRegisterOfCertificates.ExportCertificateses
-                    .Where(x => x.ManufacturerIinBiin == binDto.Code).ToList();
-                webRegisterOfCertificates.ExportCertificateses.RemoveRange(oldList);
-                await webRegisterOfCertificates.SaveChangesAsync();
-                await webRegisterOfCertificates.ExportCertificateses.AddRangeAsync(newlist);
+                await webRegisterOfCertificates.ExportCertificateses.UpsertRange(newlist).On(x=>x.BlankNum).RunAsync();
                 await webRegisterOfCertificates.SaveChangesAsync();
                 lock (_forLock)
                 {
