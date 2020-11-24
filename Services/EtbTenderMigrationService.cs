@@ -20,15 +20,10 @@ namespace DataMigrationSystem.Services
         private readonly Dictionary<string, long?> _statuses = new Dictionary<string, long?>();
         private readonly Dictionary<string, long?> _methods = new Dictionary<string, long?>();
         
-        public EtbTenderMigrationService(int numOfThreads = 1)
+        public EtbTenderMigrationService(int numOfThreads = 10)
         {
             NumOfThreads = numOfThreads;
         }
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
-
         public override async Task StartMigratingAsync()
         {
             Logger.Info($"Starting migration with '{NumOfThreads}' threads");
@@ -77,6 +72,7 @@ namespace DataMigrationSystem.Services
                                     x.StatusId != y.StatusId || x.Characteristics != y.Characteristics ||
                                     x.MethodId != y.MethodId || x.MeasureId != y.MeasureId ||
                                     x.SupplyLocation != y.SupplyLocation).RunAsync();
+                            if (lot.PaymentCondition == null) continue;
                             lot.PaymentCondition.LotId = foundLot.Id;
                             await webTenderContext.PaymentConditions.Upsert(lot.PaymentCondition).On(x => x.LotId)
                                 .UpdateIf((x, y) =>
@@ -98,7 +94,7 @@ namespace DataMigrationSystem.Services
             }
             catch (Exception e)
             {
-                Logger.Error(e.StackTrace);
+                Logger.Error(e.StackTrace + e.InnerException + e.Message);
                 Console.WriteLine(e.InnerException);
             }
 
@@ -214,7 +210,8 @@ namespace DataMigrationSystem.Services
                     TotalAmount = dtoLot.GroupTotalNoTax,
                     UnitPrice = dtoLot.UnitTotalNoTax ?? 0,
                     Terms = dtoLot.CompletionPeriod,
-                    TruCode = dto.IdGroupFull
+                    TruCode = dto.IdGroupFull,
+                    DeliveryConditions = dtoLot.PaymentCondition,
                 };
                 try
                 {
@@ -232,7 +229,7 @@ namespace DataMigrationSystem.Services
                         lot.StatusId = temp;
                     }
                 }
-                if (dto.CompletionStrategy != null)
+                if (dto.CompletionStrategy != null)    //TODO: payment conditions -> Error reference no object
                 {
                     if (_methods.TryGetValue(dto.CompletionStrategy, out var temp))
                     {

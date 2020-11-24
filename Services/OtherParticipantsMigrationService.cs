@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Parsed.Avroradata;
 using DataMigrationSystem.Context.Web.Avroradata;
+using DataMigrationSystem.Context.Web.Parsing;
 using DataMigrationSystem.Models.Parsed;
 using DataMigrationSystem.Models.Web.Avroradata;
+using DataMigrationSystem.Models.Web.Parsing;
 using Microsoft.EntityFrameworkCore;
 using NLog;
 
@@ -20,10 +23,6 @@ namespace DataMigrationSystem.Services
            
 
         }
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
 
         public override async Task StartMigratingAsync()
         {
@@ -34,6 +33,10 @@ namespace DataMigrationSystem.Services
             for (var i = 0; i < NumOfThreads; i++)
                 tasks.Add(Migrate(i));
             await Task.WhenAll(tasks);
+            
+            await using var webParsingContext = new WebParsingContext();
+            await webParsingContext.RelevanceDates
+                .Upsert(new RelevanceDate {Code = "OtherParticipants", Relevance = DateTime.Now}).On(x => x.Code).RunAsync();
             await parsedOtherParticipantsContext.Database.ExecuteSqlRawAsync("truncate table avroradata.accountants restart identity cascade;");
             await parsedOtherParticipantsContext.Database.ExecuteSqlRawAsync("truncate table avroradata.affiliated_persons restart identity cascade;");
             await parsedOtherParticipantsContext.Database.ExecuteSqlRawAsync("truncate table avroradata.board_of_directors restart identity cascade;");

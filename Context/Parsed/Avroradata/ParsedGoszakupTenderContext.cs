@@ -7,6 +7,7 @@ namespace DataMigrationSystem.Context.Parsed.Avroradata
     {
         public DbSet<AnnouncementGoszakupDto> Announcements { get; set; }
         public DbSet<LotGoszakupDto> Lots { get; set; }
+        public DbSet<TenderDocumentGoszakupDto> Documents { get; set; }
         public DbSet<AnnouncementFileGoszakupDto> AnnouncementFiles { get; set; }
         public DbSet<LotFileGoszakupDto> LotFiles { get; set; }
 

@@ -17,7 +17,7 @@ namespace DataMigrationSystem.Services
         private readonly ParsedKgdDebtorsContext _parsedKgdDebtors;
         private readonly object _forLock;
         private int _counter;
-        private readonly Dictionary<string, long> _dictionary = new Dictionary<string, long>();
+        private readonly Dictionary<string, long?> _dictionary = new Dictionary<string, long?>();
 
 
         public KgdDebtorsMigrationService(int numOfThreads = 30)
@@ -27,10 +27,6 @@ namespace DataMigrationSystem.Services
             NumOfThreads = numOfThreads;
             _forLock = new object();
         }
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
 
         public override async Task StartMigratingAsync()
         {
@@ -38,6 +34,7 @@ namespace DataMigrationSystem.Services
             await Migrate();
             await MigrateAgent();
             await MigrateCutomer();
+            
             await using var parsedKgdDebtorsContext = new ParsedKgdDebtorsContext();
             await parsedKgdDebtorsContext.Database.ExecuteSqlRawAsync(
                 "truncate avroradata.kgd_debtors, avroradata.kgd_debtors_agents,avroradata.kgd_debtors_customers restart identity;");
@@ -64,16 +61,16 @@ namespace DataMigrationSystem.Services
                 }).Distinct().ToListAsync());
             
             await _webKgdDebtors.KgdAllDebtorsCategory.UpsertRange(categories).On(x => x.Category).RunAsync();
-            foreach (var category in _webKgdDebtors.KgdAllDebtorsCategory)
+            foreach (var category in  await _webKgdDebtors.KgdAllDebtorsCategory.ToListAsync())
             {
-                _dictionary[category.Category] = category.Id;
-                Console.WriteLine();
+                if (string.IsNullOrEmpty(category.Category)) continue;
+                _dictionary[category.Category] = category.Id; 
             }
         }
 
         private async Task Migrate()
         {
-            await foreach (var kgdDebtorsDto in _parsedKgdDebtors.KgdDebtorsDtos)
+            foreach (var kgdDebtorsDto in _parsedKgdDebtors.KgdDebtorsDtos)
             {
                 var kgdDebs = new KgdDebtors
                 {
@@ -86,7 +83,7 @@ namespace DataMigrationSystem.Services
                     Code = kgdDebtorsDto.Code,
                     TotalDebt = kgdDebtorsDto.TotalDebt,
                     CategoryDate = kgdDebtorsDto.CategoryDate,
-                    CategoryId = _dictionary[kgdDebtorsDto.Category],
+                    CategoryId = kgdDebtorsDto.Category != null ? _dictionary[kgdDebtorsDto.Category] : (long?) null,
                     ParseDate = kgdDebtorsDto.ParseDate
                 };
                 await _webKgdDebtors.KgdDebtors.Upsert(kgdDebs).On(x => new {x.IinBiin,x.CategoryId,x.Code}).RunAsync();
@@ -109,7 +106,7 @@ namespace DataMigrationSystem.Services
                     RelevanceDate = kgdDebtorsAgentsDto.RelevanceDate,
                     DebtSum = kgdDebtorsAgentsDto.DebtSum,
                     CategoryDate = kgdDebtorsAgentsDto.CategoryDate,
-                    CategoryId = _dictionary[kgdDebtorsAgentsDto.Category],
+                    CategoryId = kgdDebtorsAgentsDto.Category != null ? _dictionary[kgdDebtorsAgentsDto.Category] : (long?) null,
                     ParseDate = kgdDebtorsAgentsDto.ParseDate
                 };
                 await _webKgdDebtors.KgdDebtorsAgents.Upsert(kgdDebtorsAgents).On(x => new{x.IinBiin,x.CategoryId}).RunAsync();
@@ -132,7 +129,7 @@ namespace DataMigrationSystem.Services
                     DebtSum = kgdDebtorsCustomersDto.DebtSum,
                     RelevanceDate = kgdDebtorsCustomersDto.RelevanceDate,
                     CategoryDate = kgdDebtorsCustomersDto.CategoryDate,
-                    CategoryId = _dictionary[kgdDebtorsCustomersDto.Category],
+                    CategoryId = kgdDebtorsCustomersDto.Category != null ? _dictionary[kgdDebtorsCustomersDto.Category] : (long?) null,
                     ParseDate = kgdDebtorsCustomersDto.ParseDate
                 };
                 await _webKgdDebtors.KgdDebtorsCustomers.Upsert(kgdDebtorsCustomers).On(x => new{x.IinBiin,x.CategoryId}).RunAsync();

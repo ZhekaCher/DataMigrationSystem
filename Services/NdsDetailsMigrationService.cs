@@ -26,10 +26,6 @@ namespace DataMigrationSystem.Services
             _total = parsedNdsDetailsContext.NdsDetailsDtos.Count();
             _forLock = new object();
         }
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
 
         private async Task MigrateAsync(int threadNum)
         {

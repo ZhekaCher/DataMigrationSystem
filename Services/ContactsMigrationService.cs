@@ -22,12 +22,6 @@ namespace DataMigrationSystem.Services
         {
             NumOfThreads = numOfThreads;
         }
-
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
-
         public override async Task StartMigratingAsync()
         {
             await using var webContactContext = new WebContactContext();
@@ -176,6 +170,11 @@ namespace DataMigrationSystem.Services
             if (a.Length > 11 && a[0] == '8' || a.Length > 11 && a[0] == '7') //update
             {
                 a = a.Substring(0, 11);
+            }
+
+            if (a[0]==7)
+            {
+                a = '8'+a.Substring(1);
             }
 
             if (a.Length != 11)

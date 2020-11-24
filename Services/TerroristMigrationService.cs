@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DataMigrationSystem.Context.Parsed;
 using DataMigrationSystem.Context.Parsed.Avroradata;
@@ -20,10 +21,6 @@ namespace DataMigrationSystem.Services
             _webTerroristContext = new WebTerroristContext();
             _parsedTerroristContext = new ParsedTerroristContext();
         }
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
 
         public override async Task StartMigratingAsync()
         {
@@ -41,10 +38,10 @@ namespace DataMigrationSystem.Services
                     RelevanceDate = x.RelevanceDate,
                     Type = x.Status
                 });*/
-            var terroristDtos = from terroristDto in _parsedTerroristContext.TerroristDtos
-                join individual in  _parsedTerroristContext.IndividualIins
-                    on terroristDto.Iin equals individual.Code
-                    select new Terrorist
+            var count = 0;
+            var terroristDtos = _parsedTerroristContext.TerroristDtos.Join(_parsedTerroristContext.IndividualIins,
+                terroristDto => terroristDto.Iin, individual => individual.Code,
+                (terroristDto, individual) => new Terrorist
                 {
                     Id = terroristDto.Id,
                     LastName = terroristDto.LastName,
@@ -56,16 +53,17 @@ namespace DataMigrationSystem.Services
                     Iin = terroristDto.Iin,
                     RelevanceDate = terroristDto.RelevanceDate,
                     Type = terroristDto.Status
-                };
+                });
             foreach (var terroristDto in terroristDtos)
-            {
-                await _webTerroristContext.Terrorists.Upsert(terroristDto)
-                    .On(x => new{x.Iin, x.Type}).RunAsync();
-            }
-            var minDate = await _parsedTerroristContext.TerroristDtos.MinAsync(x => x.RelevanceDate);
-            _webTerroristContext.Terrorists.RemoveRange(_webTerroristContext.Terrorists.Where(x=>x.RelevanceDate<minDate));
-            await _webTerroristContext.SaveChangesAsync();
-            await _parsedTerroristContext.Database.ExecuteSqlRawAsync("truncate avroradata.terrorists restart identity;");
+                {
+                    await using var terroristInsertContext =  new WebTerroristContext();
+                    await terroristInsertContext.Terrorists.Upsert(terroristDto).On(x => new{x.Iin, x.Type}).RunAsync();
+                    Logger.Trace(++count);
+                }
+                var minDate = await _parsedTerroristContext.TerroristDtos.MinAsync(x => x.RelevanceDate);
+                _webTerroristContext.Terrorists.RemoveRange(_webTerroristContext.Terrorists.Where(x=>x.RelevanceDate<minDate));
+                await _webTerroristContext.SaveChangesAsync();
+                await _parsedTerroristContext.Database.ExecuteSqlRawAsync("truncate avroradata.terrorists restart identity;");
         }
     }
 }

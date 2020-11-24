@@ -20,11 +20,6 @@ namespace DataMigrationSystem.Services
             _parsedUnreliableSkContext = new ParsedUnreliableSkContext();
         }
 
-        protected override Logger InitializeLogger()
-        {
-            return LogManager.GetCurrentClassLogger();
-        }
-
         public override async Task StartMigratingAsync()
         {
             var unreliableSkDtos = from unreliableSkDto in _parsedUnreliableSkContext.UnreliableSkDtos 
