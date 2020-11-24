@@ -34,6 +34,6 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
         [Column("source_link")] public string SourceLink { get; set; }
         [Column("delivery_address")] public string DeliveryAddress { get; set; }
 
-        public List<MitworkLotFileDto> LotDocumentations { get; set; }
+        public List<MitworkFileDto> LotDocumentations { get; set; }
     }
 }

@@ -135,8 +135,8 @@ namespace DataMigrationSystem.Services
                 .Where(x => x.Name != null && x.Code!=null);
             await webTenderContext.TruCodes.UpsertRange(truCodes).On(x => x.Code).NoUpdate().RunAsync();
             
-            var documentationTypes = parsedMitworkTenderContext.AdvertFiles
-                .Select(x => new DocumentationType {Name = x.AdvertDocCategory}).Distinct().Where(x => x.Name != null);
+            var documentationTypes = parsedMitworkTenderContext.MitworkFiles
+                .Select(x => new DocumentationType {Name = x.DocCategory}).Distinct().Where(x => x.Name != null);
             await webTenderContext.DocumentationTypes.UpsertRange(documentationTypes).On(x => x.Name).NoUpdate()
                 .RunAsync();
            
@@ -192,14 +192,14 @@ namespace DataMigrationSystem.Services
                 {
                     var document = new AnnouncementDocumentation
                     {
-                        Name = documentDto.AdvertDocName,
-                        Location = documentDto.AdvertDocFilePath,
-                        SourceLink = documentDto.AdvertDocSourceLink
+                        Name = documentDto.DocName,
+                        Location = documentDto.DocFilePath,
+                        SourceLink = documentDto.DocSourceLink
                     };
 
-                    if (documentDto.AdvertDocCategory != null)
+                    if (documentDto.DocCategory != null)
                     {
-                        if (_documentationTypes.TryGetValue(documentDto.AdvertDocCategory, out var temp))
+                        if (_documentationTypes.TryGetValue(documentDto.DocCategory, out var temp))
                         {
                             document.DocumentationTypeId = temp;
                         }
@@ -268,13 +268,13 @@ namespace DataMigrationSystem.Services
                     {
                         var document = new LotDocumentation
                         {
-                            Name = documentDto.LotDocName,
-                            Location = documentDto.LotDocFilePath,
-                            SourceLink = documentDto.LotDocSourceLink
+                            Name = documentDto.DocName,
+                            Location = documentDto.DocFilePath,
+                            SourceLink = documentDto.DocSourceLink
                         };
-                        if (documentDto.LotDocCategory != null)
+                        if (documentDto.DocCategory != null)
                         {
-                            if (_documentationTypes.TryGetValue(documentDto.LotDocCategory, out var temp))
+                            if (_documentationTypes.TryGetValue(documentDto.DocCategory, out var temp))
                             {
                                 document.DocumentationTypeId = temp;
                             }
