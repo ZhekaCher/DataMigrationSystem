@@ -7,6 +7,7 @@ namespace DataMigrationSystem.Context.Parsed.Avroradata
     {
         public DbSet<NationalBankTenderDto> NationalBankAdvert { get; set; }
         public DbSet<NationalBankTenderLotDto> Lots { get; set; }
+        public DbSet<NationalBankFileDto> TenderFiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -15,6 +16,16 @@ namespace DataMigrationSystem.Context.Parsed.Avroradata
                 .WithOne()
                 .HasForeignKey(x => x.AdvertId)
                 .HasPrincipalKey(x => x.AdvertId);
+            modelBuilder.Entity<NationalBankTenderDto>()
+                .HasMany(x => x.AdvertDocumentations)
+                .WithOne()
+                .HasForeignKey(x => x.AdvertId)
+                .HasPrincipalKey(x => x.AdvertId);
+            modelBuilder.Entity<NationalBankTenderLotDto>()
+                .HasMany(x => x.LotDocumentations)
+                .WithOne()
+                .HasForeignKey(x => x.LotId)
+                .HasPrincipalKey(x => x.LotId);
         }
     }
 }
