@@ -20,7 +20,7 @@ namespace DataMigrationSystem.Services
         private readonly Dictionary<string, long?> _methods = new Dictionary<string, long?>();
         private readonly Dictionary<string, long?> _documentationTypes = new Dictionary<string, long?>();
 
-        public NationalBankTenderMigrationService(int numOfThreads = 5)
+        public NationalBankTenderMigrationService(int numOfThreads = 1)
         {
             NumOfThreads = numOfThreads;
         }
@@ -58,16 +58,15 @@ namespace DataMigrationSystem.Services
                     await webTenderContext.AdataAnnouncements.Upsert(announcement).On(x => new {x.SourceNumber, x.SourceId})
                         .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.LotsQuantity != y.LotsQuantity || x.MethodId != y.MethodId || x.TenderPriorityId != y.TenderPriorityId).RunAsync();
                     
-                    // webTenderContext.AnnouncementDocumentations.UpsertRange(dto.Documentations.Select(x=>
-                    //     new AnnouncementDocumentation
-                    //     {
-                    //         Name = x.DocName,
-                    //         Location = x.DocFilePath,
-                    //         AnnouncementId = found.Id,
-                    //         SourceLink = x.DocSourceLink,
-                    //         
-                    //     }));
-                    // await webTenderContext.SaveChangesAsync();
+                    webTenderContext.AnnouncementDocumentations.UpdateRange(dto.Documentations.Select(x=>
+                        new AnnouncementDocumentation
+                     {
+                                Name = x.DocName,
+                                Location = x.DocFilePath,
+                                AnnouncementId = found.Id,
+                                SourceLink = x.DocSourceLink,
+                     }));
+                    await webTenderContext.SaveChangesAsync();
                     
                     foreach (var lot in announcement.Lots)
                     {
@@ -216,9 +215,11 @@ namespace DataMigrationSystem.Services
                 {
                     var document = new AnnouncementDocumentation
                     {
+                        AnnouncementId = announcement.Id,
                         Name = documentDto.DocName,
                         Location = documentDto.DocFilePath,
                         SourceLink = documentDto.DocSourceLink
+                        
                     };
 
                     if (documentDto.DocCategory != null)
@@ -292,6 +293,7 @@ namespace DataMigrationSystem.Services
                     {
                         var document = new LotDocumentation
                         {
+                            LotId = lot.Id,
                             Name = documentDto.DocName,
                             Location = documentDto.DocFilePath,
                             SourceLink = documentDto.DocSourceLink

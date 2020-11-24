@@ -6,9 +6,9 @@ namespace DataMigrationSystem.Context.Parsed.Avroradata
     public class ParsedNationalBankTenderContext : ParsedAvroradataContext
     {
         public DbSet<NationalBankTenderDto> NationalBankAdvert { get; set; }
-        public DbSet<NationalBankTenderLotDto> Lots { get; set; }
         public DbSet<NationalBankFileDto> TenderFiles { get; set; }
-
+        public DbSet<NationalBankTenderLotDto> Lots { get; set; }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<NationalBankTenderDto>()
