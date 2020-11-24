@@ -20,7 +20,7 @@ namespace DataMigrationSystem.Services
         private readonly Dictionary<string, long?> _methods = new Dictionary<string, long?>();
         private readonly Dictionary<string, long?> _documentationTypes = new Dictionary<string, long?>();
 
-        public NationalBankTenderMigrationService(int numOfThreads = 1)
+        public NationalBankTenderMigrationService(int numOfThreads = 5)
         {
             NumOfThreads = numOfThreads;
         }
@@ -40,8 +40,8 @@ namespace DataMigrationSystem.Services
             await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
 
             await using var parsedNationalBankTenderContext = new ParsedNationalBankTenderContext();
-           //await parsedNationalBankTenderContext.Database.ExecuteSqlRawAsync(
-           //    "truncate table avroradata.nationalbank_advert, avroradata.nationalbank_lot, avroradata.nationalbank_advert_documentation, avroradata.nationalbank_lot_documentation restart identity");
+            await parsedNationalBankTenderContext.Database.ExecuteSqlRawAsync(
+               "truncate table avroradata.nationalbank_advert, avroradata.nationalbank_lot, avroradata.nationalbank_advert_documentation, avroradata.nationalbank_lot_documentation restart identity");
         }
 
         private async Task Insert(NationalBankTenderDto dto)
