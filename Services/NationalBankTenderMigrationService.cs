@@ -39,9 +39,9 @@ namespace DataMigrationSystem.Services
                 "refresh materialized view adata_tender.announcements_search;");
             await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
 
-            await using var parsedNationalBankTenderContext = new ParsedNationalBankTenderContext();
-            await parsedNationalBankTenderContext.Database.ExecuteSqlRawAsync(
-               "truncate table avroradata.nationalbank_advert, avroradata.nationalbank_lot, avroradata.nationalbank_advert_documentation, avroradata.nationalbank_lot_documentation restart identity");
+            // await using var parsedNationalBankTenderContext = new ParsedNationalBankTenderContext();
+            // await parsedNationalBankTenderContext.Database.ExecuteSqlRawAsync(
+            //    "truncate table avroradata.nationalbank_advert, avroradata.nationalbank_lot, avroradata.nationalbank_files restart identity");
         }
 
         private async Task Insert(NationalBankTenderDto dto)
@@ -57,6 +57,18 @@ namespace DataMigrationSystem.Services
                 {
                     await webTenderContext.AdataAnnouncements.Upsert(announcement).On(x => new {x.SourceNumber, x.SourceId})
                         .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.LotsQuantity != y.LotsQuantity || x.MethodId != y.MethodId || x.TenderPriorityId != y.TenderPriorityId).RunAsync();
+                    
+                    // webTenderContext.AnnouncementDocumentations.UpsertRange(dto.Documentations.Select(x=>
+                    //     new AnnouncementDocumentation
+                    //     {
+                    //         Name = x.DocName,
+                    //         Location = x.DocFilePath,
+                    //         AnnouncementId = found.Id,
+                    //         SourceLink = x.DocSourceLink,
+                    //         
+                    //     }));
+                    // await webTenderContext.SaveChangesAsync();
+                    
                     foreach (var lot in announcement.Lots)
                     {
                         lot.AnnouncementId = found.Id;
@@ -66,6 +78,22 @@ namespace DataMigrationSystem.Services
                         {
                             await webTenderContext.AdataLots.Upsert(lot).On(x => new {x.SourceNumber, x.SourceId})
                                 .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.Characteristics != y.Characteristics || x.MethodId != y.MethodId || x.MeasureId != y.MeasureId || x.SupplyLocation != y.SupplyLocation).RunAsync();
+                           
+                            
+                            /*var dtoLot = dto.Lots;
+                            foreach (var lotDoc in dtoLot )
+                            {
+                                webTenderContext.LotDocumentations.UpsertRange(lotDoc.LotDocumentations.Select(x =>
+                                    new LotDocumentation
+                                    {
+                                        Name = x.DocName,
+                                        Location = x.DocFilePath,
+                                        LotId = foundLot.Id,
+                                        SourceLink = x.DocSourceLink,
+                                    }));
+                                await webTenderContext.SaveChangesAsync();
+                            }*/
+                            
                         }
                         else
                         {
@@ -96,8 +124,8 @@ namespace DataMigrationSystem.Services
             var nationalBankTenderDtos = parsedNationalBankTenderContext.NationalBankAdvert
                 .AsNoTracking()
                 .Include(x => x.Lots)
-                .ThenInclude(x => x.LotDocumentations)
-                .Include(x => x.AdvertDocumentations);
+                .ThenInclude(x => x.Documentations)
+                .Include(x => x.Documentations);
             var tasks = new List<Task>();
             foreach (var dto in nationalBankTenderDtos)
             {
@@ -152,6 +180,7 @@ namespace DataMigrationSystem.Services
         {
             var announcement = new AdataAnnouncement
             {
+                Id = dto.Id,
                 SourceNumber = dto.AdvertId,
                 Title = dto.AdvertNameRu,
                 ApplicationStartDate = dto.StartDate,
@@ -181,9 +210,9 @@ namespace DataMigrationSystem.Services
             }
 
             announcement.Documentations = new List<AnnouncementDocumentation>();
-            if (dto.AdvertDocumentations != null && dto.AdvertDocumentations.Count > 0)
+            if (dto.Documentations != null && dto.Documentations.Count > 0)
             {
-                foreach (var documentDto in dto.AdvertDocumentations)
+                foreach (var documentDto in dto.Documentations)
                 {
                     var document = new AnnouncementDocumentation
                     {
@@ -257,9 +286,9 @@ namespace DataMigrationSystem.Services
                 }
 
                 lot.Documentations = new List<LotDocumentation>();
-                if (dtoLot.LotDocumentations != null && dtoLot.LotDocumentations.Count > 0)
+                if (dtoLot.Documentations != null && dtoLot.Documentations.Count > 0)
                 {
-                    foreach (var documentDto in dtoLot.LotDocumentations)
+                    foreach (var documentDto in dtoLot.Documentations)
                     {
                         var document = new LotDocumentation
                         {

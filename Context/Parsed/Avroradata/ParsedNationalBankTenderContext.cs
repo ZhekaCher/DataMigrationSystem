@@ -17,12 +17,12 @@ namespace DataMigrationSystem.Context.Parsed.Avroradata
                 .HasForeignKey(x => x.AdvertId)
                 .HasPrincipalKey(x => x.AdvertId);
             modelBuilder.Entity<NationalBankTenderDto>()
-                .HasMany(x => x.AdvertDocumentations)
+                .HasMany(x => x.Documentations)
                 .WithOne()
                 .HasForeignKey(x => x.AdvertId)
                 .HasPrincipalKey(x => x.AdvertId);
             modelBuilder.Entity<NationalBankTenderLotDto>()
-                .HasMany(x => x.LotDocumentations)
+                .HasMany(x => x.Documentations)
                 .WithOne()
                 .HasForeignKey(x => x.LotId)
                 .HasPrincipalKey(x => x.LotId);
