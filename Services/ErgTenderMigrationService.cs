@@ -157,6 +157,7 @@ namespace DataMigrationSystem.Services
                 SourceId = 11,
                 EmailAddress = ergTender.ContactEmail,
                 PhoneNumber = ergTender.ContactTel,
+                SourceLink =  $"https://torgi.erg.kz/_layouts/Supp/#/competitions/{ergTender.ErgTenderPositionses.Select(x=>x.ConcourseId)}/offer-positions"
             };
             if (ergTender.Status != null)
             {
