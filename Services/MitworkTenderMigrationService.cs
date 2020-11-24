@@ -20,7 +20,7 @@ namespace DataMigrationSystem.Services
         private readonly Dictionary<string, long?> _methods = new Dictionary<string, long?>();
         private readonly Dictionary<string, long?> _documentationTypes = new Dictionary<string, long?>();
 
-        public MitworkTenderMigrationService(int numOfThreads = 5)
+        public MitworkTenderMigrationService(int numOfThreads = 10)
         {
             NumOfThreads = numOfThreads;
         }
@@ -269,7 +269,7 @@ namespace DataMigrationSystem.Services
                         var document = new LotDocumentation
                         {
                             Name = documentDto.LotDocName,
-                            Location = documentDto.LotDocName,
+                            Location = documentDto.LotDocFilePath,
                             SourceLink = documentDto.LotDocSourceLink
                         };
                         if (documentDto.LotDocCategory != null)
