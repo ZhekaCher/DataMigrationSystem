@@ -7,8 +7,7 @@ namespace DataMigrationSystem.Context.Parsed.Avroradata
     {
         public DbSet<MitworkAdvertDto> MitworkAdvert { get; set; }
         public DbSet<MitworkLotDto> Lots { get; set; }
-        public DbSet<MitworkAdvertFileDto> AdvertFiles { get; set; }
-        public DbSet<MitworkLotFileDto> LotFiles { get; set; }
+        public DbSet<MitworkFileDto> MitworkFiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
