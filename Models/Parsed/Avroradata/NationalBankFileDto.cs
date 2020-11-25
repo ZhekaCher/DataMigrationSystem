@@ -17,6 +17,7 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
         [Column("file_path")] public string DocFilePath { get; set; }
         [Column("source_link")] public string DocSourceLink { get; set; }
         [Column("file_uid")] public string DocFileUid { get; set; }
+        [Column("file_iid")] public string FileIid { get; set; }
         [Column("relevance_time")] public DateTime RelevanceTime { get; set; }
     }
 }

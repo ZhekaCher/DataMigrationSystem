@@ -41,7 +41,7 @@ namespace DataMigrationSystem.Services
 
             await using var parsedNationalBankTenderContext = new ParsedNationalBankTenderContext();
             await parsedNationalBankTenderContext.Database.ExecuteSqlRawAsync(
-               "truncate table avroradata.nationalbank_advert, avroradata.nationalbank_lot, avroradata.nationalbank_advert_documentation, avroradata.nationalbank_lot_documentation restart identity");
+               "truncate table avroradata.nationalbank_advert, avroradata.nationalbank_lot, avroradata.nationalbank_files restart identity");
         }
 
         private async Task Insert(NationalBankTenderDto dto)
@@ -57,6 +57,7 @@ namespace DataMigrationSystem.Services
                 {
                     await webTenderContext.AdataAnnouncements.Upsert(announcement).On(x => new {x.SourceNumber, x.SourceId})
                         .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.LotsQuantity != y.LotsQuantity || x.MethodId != y.MethodId || x.TenderPriorityId != y.TenderPriorityId).RunAsync();
+
                     foreach (var lot in announcement.Lots)
                     {
                         lot.AnnouncementId = found.Id;
@@ -96,8 +97,8 @@ namespace DataMigrationSystem.Services
             var nationalBankTenderDtos = parsedNationalBankTenderContext.NationalBankAdvert
                 .AsNoTracking()
                 .Include(x => x.Lots)
-                .ThenInclude(x => x.LotDocumentations)
-                .Include(x => x.AdvertDocumentations);
+                .ThenInclude(x => x.Documentations)
+                .Include(x => x.Documentations);
             var tasks = new List<Task>();
             foreach (var dto in nationalBankTenderDtos)
             {
@@ -152,6 +153,7 @@ namespace DataMigrationSystem.Services
         {
             var announcement = new AdataAnnouncement
             {
+                Id = dto.Id,
                 SourceNumber = dto.AdvertId,
                 Title = dto.AdvertNameRu,
                 ApplicationStartDate = dto.StartDate,
@@ -181,15 +183,17 @@ namespace DataMigrationSystem.Services
             }
 
             announcement.Documentations = new List<AnnouncementDocumentation>();
-            if (dto.AdvertDocumentations != null && dto.AdvertDocumentations.Count > 0)
+            if (dto.Documentations != null && dto.Documentations.Count > 0)
             {
-                foreach (var documentDto in dto.AdvertDocumentations)
+                foreach (var documentDto in dto.Documentations)
                 {
                     var document = new AnnouncementDocumentation
                     {
+                        AnnouncementId = announcement.Id,
                         Name = documentDto.DocName,
                         Location = documentDto.DocFilePath,
                         SourceLink = documentDto.DocSourceLink
+                        
                     };
 
                     if (documentDto.DocCategory != null)
@@ -257,12 +261,13 @@ namespace DataMigrationSystem.Services
                 }
 
                 lot.Documentations = new List<LotDocumentation>();
-                if (dtoLot.LotDocumentations != null && dtoLot.LotDocumentations.Count > 0)
+                if (dtoLot.Documentations != null && dtoLot.Documentations.Count > 0)
                 {
-                    foreach (var documentDto in dtoLot.LotDocumentations)
+                    foreach (var documentDto in dtoLot.Documentations)
                     {
                         var document = new LotDocumentation
                         {
+                            LotId = lot.Id,
                             Name = documentDto.DocName,
                             Location = documentDto.DocFilePath,
                             SourceLink = documentDto.DocSourceLink
