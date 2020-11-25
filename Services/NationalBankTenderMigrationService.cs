@@ -20,7 +20,7 @@ namespace DataMigrationSystem.Services
         private readonly Dictionary<string, long?> _methods = new Dictionary<string, long?>();
         private readonly Dictionary<string, long?> _documentationTypes = new Dictionary<string, long?>();
 
-        public NationalBankTenderMigrationService(int numOfThreads = 1)
+        public NationalBankTenderMigrationService(int numOfThreads = 5)
         {
             NumOfThreads = numOfThreads;
         }
@@ -39,9 +39,9 @@ namespace DataMigrationSystem.Services
                 "refresh materialized view adata_tender.announcements_search;");
             await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
 
-            // await using var parsedNationalBankTenderContext = new ParsedNationalBankTenderContext();
-            // await parsedNationalBankTenderContext.Database.ExecuteSqlRawAsync(
-            //    "truncate table avroradata.nationalbank_advert, avroradata.nationalbank_lot, avroradata.nationalbank_files restart identity");
+            await using var parsedNationalBankTenderContext = new ParsedNationalBankTenderContext();
+            await parsedNationalBankTenderContext.Database.ExecuteSqlRawAsync(
+               "truncate table avroradata.nationalbank_advert, avroradata.nationalbank_lot, avroradata.nationalbank_files restart identity");
         }
 
         private async Task Insert(NationalBankTenderDto dto)
@@ -57,17 +57,7 @@ namespace DataMigrationSystem.Services
                 {
                     await webTenderContext.AdataAnnouncements.Upsert(announcement).On(x => new {x.SourceNumber, x.SourceId})
                         .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.LotsQuantity != y.LotsQuantity || x.MethodId != y.MethodId || x.TenderPriorityId != y.TenderPriorityId).RunAsync();
-                    
-                    webTenderContext.AnnouncementDocumentations.UpdateRange(dto.Documentations.Select(x=>
-                        new AnnouncementDocumentation
-                     {
-                                Name = x.DocName,
-                                Location = x.DocFilePath,
-                                AnnouncementId = found.Id,
-                                SourceLink = x.DocSourceLink,
-                     }));
-                    await webTenderContext.SaveChangesAsync();
-                    
+
                     foreach (var lot in announcement.Lots)
                     {
                         lot.AnnouncementId = found.Id;
@@ -77,22 +67,6 @@ namespace DataMigrationSystem.Services
                         {
                             await webTenderContext.AdataLots.Upsert(lot).On(x => new {x.SourceNumber, x.SourceId})
                                 .UpdateIf((x, y)=> x.StatusId != y.StatusId || x.Characteristics != y.Characteristics || x.MethodId != y.MethodId || x.MeasureId != y.MeasureId || x.SupplyLocation != y.SupplyLocation).RunAsync();
-                           
-                            
-                            /*var dtoLot = dto.Lots;
-                            foreach (var lotDoc in dtoLot )
-                            {
-                                webTenderContext.LotDocumentations.UpsertRange(lotDoc.LotDocumentations.Select(x =>
-                                    new LotDocumentation
-                                    {
-                                        Name = x.DocName,
-                                        Location = x.DocFilePath,
-                                        LotId = foundLot.Id,
-                                        SourceLink = x.DocSourceLink,
-                                    }));
-                                await webTenderContext.SaveChangesAsync();
-                            }*/
-                            
                         }
                         else
                         {
