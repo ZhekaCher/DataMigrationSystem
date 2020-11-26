@@ -59,6 +59,7 @@ namespace DataMigrationSystem.Services
 
         private async Task Proceed(TenderDocumentGoszakupDto dto)
         {
+           await Task.Delay(50);
             var ctx = new WebTenderContext();
             lock (_lock)
             {
@@ -120,7 +121,7 @@ namespace DataMigrationSystem.Services
 
             lock (_lock)
             {
-                Logger.Trace($"Left {--_total} docs to load");
+                Logger.Trace($"Left {--_total} docs to load into DB");
             }
         }
     }

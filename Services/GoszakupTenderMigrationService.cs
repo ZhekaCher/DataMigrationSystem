@@ -342,7 +342,7 @@ namespace DataMigrationSystem.Services
 
             lock (_webTruCodes)
             {
-                if (_webTruCodes.All(x => x.Code != lotGoszakupDto.TruCode))
+                if ( lotGoszakupDto.TruCode != null && _webTruCodes.All(x => x.Code != lotGoszakupDto.TruCode))
                 {
                     var newWebTruCode = new TruCode
                     {
