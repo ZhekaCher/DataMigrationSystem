@@ -24,7 +24,7 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
         [Column("advert_method")]public string AdvertMethod { get; set; }
             
         public List<MitworkLotDto> Lots { get; set; }
-        public List<MitworkAdvertFileDto> AdvertDocumentations { get; set; }
+        public List<MitworkFileDto> AdvertDocumentations { get; set; }
         
     }
 }

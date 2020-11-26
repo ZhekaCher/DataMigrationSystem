@@ -26,6 +26,7 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
         [Column("advertiser_name")]public string AdvertiserName { get; set; }
             
         public List<NationalBankTenderLotDto> Lots { get; set; }
-        
+        public List<NationalBankFileDto> Documentations  { get; set; }
+
     }
 }
