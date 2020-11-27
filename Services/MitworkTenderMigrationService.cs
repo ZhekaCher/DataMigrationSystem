@@ -41,7 +41,7 @@ namespace DataMigrationSystem.Services
 
             await using var parsedMitworkTenderContext = new ParsedMitworkTenderContext();
             await parsedMitworkTenderContext.Database.ExecuteSqlRawAsync(
-                "truncate table avroradata.mitwork_advert, avroradata.mitwork_lot, avroradata.mitwork_advert_documentation, avroradata.mitwork_lot_documentation restart identity");
+                "truncate table avroradata.mitwork_advert, avroradata.mitwork_lot, avroradata.mitwork_files restart identity");
             
         }
 
