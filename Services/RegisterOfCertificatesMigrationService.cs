@@ -84,13 +84,21 @@ namespace DataMigrationSystem.Services
                     RelevanceDate = DateTime.Now
                 }).ToList();
 
-                await webRegisterOfCertificates.LocalCertificateses.UpsertRange(newlist).On(x=>x.BlankNum)
-                    .UpdateIf((x,y) => x.IssueDate != y.IssueDate || x.CodeTn != y.CodeTn || x.CertificateStatus != y.CertificateStatus).RunAsync();
-                await webRegisterOfCertificates.SaveChangesAsync();
-                lock (_forLock)
+                try
                 {
-                    Logger.Trace(_counter--);
+                    await webRegisterOfCertificates.LocalCertificateses.UpsertRange(newlist).On(x=>x.BlankNum)
+                        .UpdateIf((x,y) => x.IssueDate != y.IssueDate || x.CodeTn != y.CodeTn || x.CertificateStatus != y.CertificateStatus).RunAsync();
+                    await webRegisterOfCertificates.SaveChangesAsync();
+                    lock (_forLock)
+                    {
+                        Logger.Trace(_counter--);
+                    }
                 }
+                catch (Exception e)
+                {
+                    // ignore
+                }
+                
             }
         }
 
@@ -131,12 +139,20 @@ namespace DataMigrationSystem.Services
                     ChangesDate = x.ChangesDate,
                     ActualizationDate = x.ActualizationDate
                 }).ToList();
-                await webRegisterOfCertificates.IndustrialCertificateses.UpsertRange(newlist).On(x=> new {x.RegistrationNumber, x.GoodsName})
-                    .UpdateIf((x,y)=>x.IssueDate != y.IssueDate || x.Tn != y.Tn).RunAsync();
-                await webRegisterOfCertificates.SaveChangesAsync();
-                lock (_forLock)
+
+                try
                 {
-                    Logger.Trace(_counter--);
+                    await webRegisterOfCertificates.IndustrialCertificateses.UpsertRange(newlist).On(x=> new {x.RegistrationNumber, x.GoodsName})
+                        .UpdateIf((x,y)=>x.IssueDate != y.IssueDate || x.Tn != y.Tn).RunAsync();
+                    await webRegisterOfCertificates.SaveChangesAsync();
+                    lock (_forLock)
+                    {
+                        Logger.Trace(_counter--);
+                    }
+                }
+                catch (Exception e)
+                {
+                    // ignore
                 }
             }
 
@@ -172,13 +188,20 @@ namespace DataMigrationSystem.Services
                     RelevanceDate = DateTime.Now
 
                 }).ToList();
-                
-                await webRegisterOfCertificates.ExportCertificateses.UpsertRange(newlist).On(x=>x.BlankNum)
-                    .UpdateIf((x,y) =>x.IssueDate != y.IssueDate || x.CodeTn != y.CodeTn || x.CertificateStatus != y.CertificateStatus).RunAsync();
-                await webRegisterOfCertificates.SaveChangesAsync();
-                lock (_forLock)
+
+                try
                 {
-                    Logger.Trace(_counter--);
+                    await webRegisterOfCertificates.ExportCertificateses.UpsertRange(newlist).On(x=>x.BlankNum)
+                        .UpdateIf((x,y) =>x.IssueDate != y.IssueDate || x.CodeTn != y.CodeTn || x.CertificateStatus != y.CertificateStatus).RunAsync();
+                    await webRegisterOfCertificates.SaveChangesAsync();
+                    lock (_forLock)
+                    {
+                        Logger.Trace(_counter--);
+                    }
+                }
+                catch (Exception e)
+                {
+                    // ignore
                 }
             }
         }
