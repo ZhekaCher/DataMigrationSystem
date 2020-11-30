@@ -153,7 +153,7 @@ namespace DataMigrationSystem.Services
         {
             var announcement = new AdataAnnouncement
             {
-                Id = dto.Id,
+               
                 SourceNumber = dto.AdvertId,
                 Title = dto.AdvertNameRu,
                 ApplicationStartDate = dto.StartDate,
