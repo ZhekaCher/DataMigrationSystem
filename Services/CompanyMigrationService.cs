@@ -78,7 +78,7 @@ namespace DataMigrationSystem.Services
                     Id = distinct.KrpCode,
                     NameKz = distinct.KrpNameKz,
                     NameRu = distinct.KrpNameRu,
-                }).On(x=>x.Id).RunAsync();
+                }).On(x=>x.Id).NoUpdate().RunAsync();
             }
             var secondOkeds = parsedCompanyContext.CompanyDtos.Select(x => new {x.SecondOkedCode}).Distinct();
             foreach (var secondOked in secondOkeds)
