@@ -94,7 +94,7 @@ namespace DataMigrationSystem.Services
                                 Id = oked,
                                 NameKz = "",
                                 NameRu = "",
-                            }).On(x => x.Id).RunAsync();
+                            }).On(x => x.Id).NoUpdate().RunAsync();
                     }
                 }
             }
@@ -108,7 +108,7 @@ namespace DataMigrationSystem.Services
                         Id = distinct.OkedCode,
                         NameKz = distinct.ActivityNameKz,
                         NameRu = distinct.ActivityNameRu,
-                    }).On(x=>x.Id).RunAsync();
+                    }).On(x=>x.Id).NoUpdate().RunAsync();
             }
             var katos = parsedCompanyContext.CompanyDtos
                 .Select(x => new {x.KatoCode, x.SettlementNameKz, x.SettlementNameRu}).Distinct();
