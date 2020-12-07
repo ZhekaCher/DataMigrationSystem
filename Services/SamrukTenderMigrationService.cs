@@ -36,8 +36,8 @@ namespace DataMigrationSystem.Services
             Logger.Info("End of migration");
             
             await using var webTenderContext = new WebTenderContext();
-            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
-            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
+            // await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
+            // await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
             
             await using var parsedSamrukContext = new ParsedSamrukContext();
             await parsedSamrukContext.Database.ExecuteSqlRawAsync("truncate table avroradata.samruk_advert, avroradata.samruk_lots, avroradata.samruk_files restart identity");
