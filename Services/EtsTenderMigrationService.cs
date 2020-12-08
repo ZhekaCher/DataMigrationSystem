@@ -41,8 +41,8 @@ namespace DataMigrationSystem.Services
             await webTenderContext.AdataLots.Where(x => x.SourceId == 5 && x.RelevanceDate < starDate ).ForEachAsync(x => x.StatusId = 38);
             await webTenderContext.SaveChangesAsync();
             
-            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
-            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
+            // await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
+            // await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
             
             await parsedEtsTenderContext.Database.ExecuteSqlRawAsync(
                 "truncate table avroradata.ets_announcements ,avroradata.ets_lots ,avroradata.ets_purchasing_positions");
