@@ -33,7 +33,8 @@ namespace DataMigrationSystem.Services
             await web.SaveChangesAsync();
             
             await web.Database.ExecuteSqlRawAsync($"update announcements set status_id = 19 where source_id = 8 and relevance_date<date(now())");
-            
+            await web.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
+            await web.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
             Logger.Info("End of migration");
             await parsedKaspiAuctionContext.Database.ExecuteSqlRawAsync("truncate table avroradata.kaspi_auction restart identity");
         }

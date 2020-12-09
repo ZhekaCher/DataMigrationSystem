@@ -29,9 +29,6 @@ namespace DataMigrationSystem.Services
         {
             Logger.Info($"Starting migration with '{NumOfThreads}' threads");
             
-            await using var parsed = new ParsedErgTenderContext();
-            await using var web = new WebTenderContext();
-
             await MigrateReferences();
             
             var tasks = new List<Task>();
@@ -46,6 +43,11 @@ namespace DataMigrationSystem.Services
             }
             
             await Task.WhenAll(tasks);
+            
+            await using var parsed = new ParsedErgTenderContext();
+            await using var webTenderContext = new WebTenderContext();
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
             await parsed.Database.ExecuteSqlRawAsync(
                 "truncate avroradata.erg_tender, avroradata.erg_tender_positions, avroradata.erg_tender_docs restart identity cascade;");
         }
