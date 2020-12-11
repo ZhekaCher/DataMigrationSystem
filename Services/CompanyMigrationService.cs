@@ -58,6 +58,12 @@ namespace DataMigrationSystem.Services
                 {
                     await webCompanyContext.CompaniesOkeds.Upsert(oked).On(x=>new {x.CompanyId, x.OkedId}).RunAsync();
                 }
+
+                if (company.CompanyOkeds != null && company.CompanyOkeds.Count > 0)
+                {
+                    await webCompanyContext.Database.ExecuteSqlInterpolatedAsync(
+                        $"delete from avroradata.companies_oked where c_id = {company.Bin} and relevance < {company.CompanyOkeds.First().Relevance};");
+                }
                 lock (_forLock)
                 {
                     Logger.Trace(_total--);
@@ -154,9 +160,7 @@ namespace DataMigrationSystem.Services
                     {
                         company.CompanyOkeds.Add(new CompanyOked
                         {
-                            CompanyId = dto.Bin,
-                            OkedId = oked,
-                            Type = 2
+                            CompanyId = dto.Bin, OkedId = oked, Type = 2
                         });
                     }
                 }
