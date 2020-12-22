@@ -47,7 +47,7 @@ namespace DataMigrationSystem.Services
             await web.Statuses.UpsertRange(statuses).On(x => x.Name).NoUpdate().RunAsync();
             
             foreach (var dict in web.Statuses)
-                _statuses.Add(dict.Name, dict.Id);
+                _statuses.TryAdd(dict.Name, dict.Id);
         }
         
         private async Task Migrate()

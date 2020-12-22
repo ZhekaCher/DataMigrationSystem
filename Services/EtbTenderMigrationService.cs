@@ -139,11 +139,11 @@ namespace DataMigrationSystem.Services
             var statuses = parsedEtbContext.EtbTenders.Select(x => new Status{Name = x.Status}).Distinct().Where(x=>x.Name!=null);
             await webTenderContext.Statuses.UpsertRange(statuses).On(x => x.Name).NoUpdate().RunAsync();
             foreach (var dict in webTenderContext.Measures)
-                _measures.Add(dict.Name, dict.Id);
+                _measures.TryAdd(dict.Name, dict.Id);
             foreach (var dict in webTenderContext.Statuses)
-                _statuses.Add(dict.Name, dict.Id);
+                _statuses.TryAdd(dict.Name, dict.Id);
             foreach (var dict in webTenderContext.Methods) 
-                _methods.Add(dict.Name, dict.Id);
+                _methods.TryAdd(dict.Name, dict.Id);
         }
         
         /// <summary>

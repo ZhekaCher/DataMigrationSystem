@@ -138,13 +138,13 @@ namespace DataMigrationSystem.Services
             await webTenderContext.Statuses.UpsertRange(statuses).On(x => x.Name).NoUpdate().RunAsync();
 
             foreach (var dict in webTenderContext.Measures)
-                _measures.Add(dict.Name, dict.Id);
+                _measures.TryAdd(dict.Name, dict.Id);
             foreach (var dict in webTenderContext.Statuses)
-                _statuses.Add(dict.Name, dict.Id);
+                _statuses.TryAdd(dict.Name, dict.Id);
             foreach (var dict in webTenderContext.Methods)
-                _methods.Add(dict.Name, dict.Id);
+                _methods.TryAdd(dict.Name, dict.Id);
             foreach (var dict in webTenderContext.DocumentationTypes)
-                _documentationTypes.Add(dict.Name, dict.Id);
+                _documentationTypes.TryAdd(dict.Name, dict.Id);
         }
 
 
