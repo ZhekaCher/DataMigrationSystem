@@ -35,8 +35,7 @@ namespace DataMigrationSystem.Services
             Logger.Info("End of migration");
 
             await using var webTenderContext = new WebTenderContext();
-            await webTenderContext.Database.ExecuteSqlRawAsync(
-                "refresh materialized view adata_tender.announcements_search;");
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
             await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
 
             await using var parsedNationalBankTenderContext = new ParsedNationalBankTenderContext();
@@ -153,7 +152,7 @@ namespace DataMigrationSystem.Services
         {
             var announcement = new AdataAnnouncement
             {
-                Id = dto.Id,
+               
                 SourceNumber = dto.AdvertId,
                 Title = dto.AdvertNameRu,
                 ApplicationStartDate = dto.StartDate,

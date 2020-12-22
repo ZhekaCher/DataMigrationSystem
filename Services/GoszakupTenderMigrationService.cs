@@ -68,10 +68,10 @@ namespace DataMigrationSystem.Services
             Logger.Info("End of migration");
 
             await using var webTenderContext = new WebTenderContext();
-            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
-            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
+            // await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
+            // await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
 
-            Logger.Info("Successfully refreshed materialized views");
+            // Logger.Info("Successfully refreshed materialized views");
             
              await webTenderContext.Database.ExecuteSqlRawAsync(@"
  update adata_tender.announcements a

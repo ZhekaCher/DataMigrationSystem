@@ -35,13 +35,12 @@ namespace DataMigrationSystem.Services
             Logger.Info("End of migration");
 
             await using var webTenderContext = new WebTenderContext();
-            await webTenderContext.Database.ExecuteSqlRawAsync(
-                "refresh materialized view adata_tender.announcements_search;");
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
             await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
 
             await using var parsedMitworkTenderContext = new ParsedMitworkTenderContext();
             await parsedMitworkTenderContext.Database.ExecuteSqlRawAsync(
-                "truncate table avroradata.mitwork_advert, avroradata.mitwork_lot, avroradata.mitwork_advert_documentation, avroradata.mitwork_lot_documentation restart identity");
+                "truncate table avroradata.mitwork_advert, avroradata.mitwork_lot, avroradata.mitwork_files restart identity");
             
         }
 

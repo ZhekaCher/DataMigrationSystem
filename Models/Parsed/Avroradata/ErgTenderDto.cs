@@ -25,6 +25,7 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
             [Column("contact_tel")] public string ContactTel { get; set; }
             [Column("contact_email")] public string ContactEmail { get; set; }
             public List<ErgTenderPositions> ErgTenderPositionses { get; set; } 
+            public List<ErgTenderDocs> ErgTenderDocses { get; set; } 
         }
 
         [Table("erg_tender_positions")]
@@ -38,6 +39,18 @@ namespace DataMigrationSystem.Models.Parsed.Avroradata
             [Column("unit")] public string Unit { get; set; }
             [Column("count")] public double Count { get; set; }
             [Column("tru_code")] public string TruCode { get; set; }
+        }
+        
+        [Table("erg_tender_docs")]
+        public class ErgTenderDocs
+        {
+            [Key][Column("id")] public long Id { get; set; }
+            [Column("name")] public string Name { get; set; }
+            [Column("auction_id")] public long AuctionId { get; set; }
+            [Column("doc_link")] public string DocLink { get; set; }
+            [Column("doc_path")] public string DocPath { get; set; }
+            [Column("doc_id")] public long DocId { get; set; }
+            [Column("relevance_date")] public DateTime RelevanceDate { get; set; }
         }
     }
 }

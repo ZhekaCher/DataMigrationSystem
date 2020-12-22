@@ -60,6 +60,8 @@ namespace DataMigrationSystem.Models.Web.Avroradata
         [Column("type")]
         public int Type { get; set; }
         public Company Company { get; set; }
+        [Column("relevance")]
+        public DateTime? Relevance { get; set; } = DateTime.Now;
     }
 
     [Table("oked")]

@@ -18,8 +18,9 @@ namespace DataMigrationSystem.Services
         private readonly Dictionary<string, long?> _measures = new Dictionary<string, long?>();
         private readonly Dictionary<string, long?> _statuses = new Dictionary<string, long?>();
         private readonly Dictionary<string, long?> _methods = new Dictionary<string, long?>();
+        private readonly Dictionary<string, long?> _documentationTypes = new Dictionary<string, long?>();
 
-        public ErgTenderMigrationService(int numOfThreads = 1)
+        public ErgTenderMigrationService(int numOfThreads = 5)
         {
             NumOfThreads = numOfThreads;
         }
@@ -28,37 +29,44 @@ namespace DataMigrationSystem.Services
         {
             Logger.Info($"Starting migration with '{NumOfThreads}' threads");
             
-            await using var parsed = new ParsedErgTenderContext();
-            await using var web = new WebTenderContext();
-
             await MigrateReferences();
-            await Migrate();
             
-            await parsed.Database.ExecuteSqlRawAsync(
-                "truncate avroradata.erg_tender, avroradata.erg_tender_positions restart identity cascade;");
-        }
-
-
-        private async Task Migrate()
-        {
-            Logger.Info("Started Thread");
-            await using var parsed = new ParsedErgTenderContext();
-            var ergTenders = parsed.ErgTenderes
-                .AsNoTracking()
-                .Include(x => x.ErgTenderPositionses);
-
             var tasks = new List<Task>();
-            foreach (var ergTender in ergTenders)
+            for(var i = 0; i < NumOfThreads; i++)
             {
-                tasks.Add(Insert(ergTender));
+                tasks.Add(Migrate(i));
                 if (tasks.Count >= NumOfThreads)
                 {
                     await Task.WhenAny(tasks);
                     tasks.RemoveAll(x => x.IsCompleted);
                 }
             }
-
+            
             await Task.WhenAll(tasks);
+            
+            await using var parsed = new ParsedErgTenderContext();
+            await using var webTenderContext = new WebTenderContext();
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
+            await parsed.Database.ExecuteSqlRawAsync(
+                "truncate avroradata.erg_tender, avroradata.erg_tender_positions, avroradata.erg_tender_docs restart identity cascade;");
+        }
+
+
+        private async Task Migrate(int threadNum)
+        {
+            Logger.Info("Started Thread");
+            await using var parsed = new ParsedErgTenderContext();
+            var ergTenders = parsed.ErgTenderes
+                .AsNoTracking()
+                .Include(x => x.ErgTenderPositionses)
+                .Include(x=>x.ErgTenderDocses);
+            foreach (var ergTender in ergTenders.Where(x=>x.Id%NumOfThreads == threadNum))
+            {
+               await Insert(ergTender);
+               
+            }
+            
         }
         
         private async Task Insert(ErgTenderDto.ErgTender ergTender)
@@ -104,7 +112,7 @@ namespace DataMigrationSystem.Services
             }
             catch (Exception e)
             {
-                // ignore
+               Logger.Error(e,"In the Insert method");
             }
             
             lock (_lock)
@@ -133,6 +141,10 @@ namespace DataMigrationSystem.Services
             var methods = parsed.ErgTenderes.Select(x => new Method {Name = x.Purchase}).Distinct()
                 .Where(x => x.Name != null);
             await web.Methods.UpsertRange(methods).On(x => x.Name).NoUpdate().RunAsync();
+
+            var docTypes = parsed.ErgTenderDocses.Select(x => new DocumentationType {Name = x.Name}).Distinct()
+                .Where(x => x.Name != null);
+            await web.DocumentationTypes.UpsertRange(docTypes).On(x => x.Name).NoUpdate().RunAsync();
            
             foreach (var measure in web.Measures)
                 _measures.Add(measure.Name,measure.Id);
@@ -142,6 +154,10 @@ namespace DataMigrationSystem.Services
 
             foreach (var method in web.Methods)
                 _methods.Add(method.Name,method.Id);
+            
+            await foreach (var type in web.DocumentationTypes)
+                _documentationTypes.Add(type.Name,type.Id);
+            
         }
 
         private AdataAnnouncement DtoToWebAnnoucement(ErgTenderDto.ErgTender ergTender)
@@ -174,11 +190,39 @@ namespace DataMigrationSystem.Services
                     announcement.MethodId = temp;
                 }
             }
+            
+            announcement.Documentations = new List<AnnouncementDocumentation>();
+            foreach (var ergTenderErgTenderDocse in ergTender.ErgTenderDocses)
+            {
+                var doc = new AnnouncementDocumentation
+                {
+                    AnnouncementId = ergTenderErgTenderDocse.AuctionId,
+                    Location = ergTenderErgTenderDocse.DocPath,
+                    SourceLink = ergTenderErgTenderDocse.DocLink,
+                    RelevanceDate = ergTenderErgTenderDocse.RelevanceDate,
+                    Name = ergTenderErgTenderDocse.Name,
+                };
+
+                if (ergTenderErgTenderDocse.Name != null)
+                {
+                    if (_documentationTypes.TryGetValue(ergTenderErgTenderDocse.Name, out var temp))
+                    {
+                        doc.DocumentationTypeId = temp;
+                    }
+                }
+                
+                announcement.Documentations.Add(doc);
+            }
+            
             announcement.Lots = new List<AdataLot>();
             foreach (var ergTenderErgTenderPositionse in ergTender.ErgTenderPositionses)
             {
+                if(announcement.Lots.Exists(x=>x.AnnouncementId == ergTenderErgTenderPositionse.ConcourseId))
+                    continue;
+                
                 var lot = new AdataLot
                 {
+                    AnnouncementId = ergTenderErgTenderPositionse.ConcourseId,
                     SourceNumber = ergTender.Num,
                     Title = ergTenderErgTenderPositionse.ItemName,
                     ApplicationFinishDate = ergTender.EndDate,
