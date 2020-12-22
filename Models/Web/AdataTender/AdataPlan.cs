@@ -9,7 +9,7 @@ namespace DataMigrationSystem.Models.Web.AdataTender
 	{
 		[Key] [Column("id")] public int? Id{get; set;}
 		[Column("source_id")] public int? SourceId{get; set;}
-		[Column("source_unique_id")] public long? SourceUniqueId{get; set;}
+		[Column("source_unique_id")] public string SourceUniqueId{get; set;}
 		[Column("act_number")] public string ActNumber{get; set;}
 		[Column("fin_year")] public int? FinYear{get; set;}
 		[Column("date_approved")] public DateTime? DateApproved{get; set;}

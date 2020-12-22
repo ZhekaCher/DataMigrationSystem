@@ -69,6 +69,11 @@ namespace DataMigrationSystem.Services
             if (unreliableTaxpayer.BinCompany != null && unreliableTaxpayer.IinHead != null)
                 try
                 {
+                    await using var webCompanyContext = new WebCompanyContext();
+                    webCompanyContext.ChangeTracker.AutoDetectChangesEnabled = false;
+                    await webCompanyContext.Database.ExecuteSqlRawAsync(
+                        $"UPDATE avroradata.companies SET fullname_director='{unreliableTaxpayer.NameHead}', relevance_date = now() WHERE biin = {unreliableTaxpayer.BinCompany}");
+
                     await using var webCompanyDirectorContext = new WebCompanyDirectorContext();
                     webCompanyDirectorContext.ChangeTracker.AutoDetectChangesEnabled = false;
                     await webCompanyDirectorContext.Upsert(new CompanyDirector
@@ -83,7 +88,7 @@ namespace DataMigrationSystem.Services
                 {
                     Logger.Trace($"BIN: {unreliableTaxpayer.BinCompany}; {e.Message}");
                 }
-            
+
             lock (_forLock)
                 Logger.Trace(--_count);
         }

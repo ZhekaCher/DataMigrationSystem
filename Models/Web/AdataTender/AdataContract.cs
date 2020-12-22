@@ -36,7 +36,7 @@ namespace DataMigrationSystem.Models.Web.AdataTender
 
     [Table("contract_agr_forms")]
     public class ContractAgrForm
-    {
+    {    
         [Key] [Column("id")] public int? Id { get; set; }
         [Column("name_ru")] public string NameRu { get; set; }
     }
