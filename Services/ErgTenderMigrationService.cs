@@ -155,7 +155,7 @@ namespace DataMigrationSystem.Services
             foreach (var method in web.Methods)
                 _methods.TryAdd(method.Name,method.Id);
             
-            await foreach (var type in web.DocumentationTypes)
+            foreach (var type in web.DocumentationTypes)
                 _documentationTypes.TryAdd(type.Name,type.Id);
             
         }

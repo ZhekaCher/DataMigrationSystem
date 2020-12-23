@@ -136,11 +136,11 @@ namespace DataMigrationSystem.Services
             var truCodes = parsedAnnouncementNadlocContext.LotNadlocDtos.Select(x=> new TruCode {Code = x.ScpCode, Name = x.ScpDescription}).Distinct().Where(x=>x.Name!=null);
             await webTenderContext.TruCodes.UpsertRange(truCodes).On(x => x.Code).NoUpdate().RunAsync();
             foreach (var dict in webTenderContext.Measures)
-                _measures.Add(dict.Name, dict.Id);
+                _measures.TryAdd(dict.Name, dict.Id);
             foreach (var dict in webTenderContext.Statuses)
-                _statuses.Add(dict.Name, dict.Id);
+                _statuses.TryAdd(dict.Name, dict.Id);
             foreach (var dict in webTenderContext.Methods)
-                _methods.Add(dict.Name, dict.Id);
+                _methods.TryAdd(dict.Name, dict.Id);
         }
         private AdataAnnouncement DtoToWebAnnouncement(AnnouncementNadlocDto dto)
         {
