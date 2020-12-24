@@ -43,7 +43,7 @@ namespace DataMigrationSystem.Services
 
         private async Task Insert(EtbTenderDto dto)
         {
-            // This is supposed to mean tender
+            // This is supposed to mean tenders.
             var announcement = DtoToWebAnnouncement(dto);
             try
             {
@@ -139,11 +139,11 @@ namespace DataMigrationSystem.Services
             var statuses = parsedEtbContext.EtbTenders.Select(x => new Status{Name = x.Status}).Distinct().Where(x=>x.Name!=null);
             await webTenderContext.Statuses.UpsertRange(statuses).On(x => x.Name).NoUpdate().RunAsync();
             foreach (var dict in webTenderContext.Measures)
-                _measures.Add(dict.Name, dict.Id);
+                _measures.TryAdd(dict.Name, dict.Id);
             foreach (var dict in webTenderContext.Statuses)
-                _statuses.Add(dict.Name, dict.Id);
+                _statuses.TryAdd(dict.Name, dict.Id);
             foreach (var dict in webTenderContext.Methods) 
-                _methods.Add(dict.Name, dict.Id);
+                _methods.TryAdd(dict.Name, dict.Id);
         }
         
         /// <summary>
@@ -166,6 +166,7 @@ namespace DataMigrationSystem.Services
                 EmailAddress = dto.ContactMail,
                 PhoneNumber = dto.ContactPhone,
                 PublishDate = dto.DatePublished,
+                Lots = new List<AdataLot>(),
             };
             announcement.SourceLink = $"https://etbemp.kz/ru/Protocol/Get/{dto.IdGroup}?status=1";
             
@@ -186,8 +187,6 @@ namespace DataMigrationSystem.Services
             
             // Documentation is empty, for now
             //announcement.Documentations = new List<AnnouncementDocumentation>();
-            
-            announcement.Lots = new List<AdataLot>();
             foreach (var dtoLot in dto.EtbLots)
             {
                 var detailsRequired = dtoLot.Dkc == null

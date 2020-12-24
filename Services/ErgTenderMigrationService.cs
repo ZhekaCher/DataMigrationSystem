@@ -29,9 +29,6 @@ namespace DataMigrationSystem.Services
         {
             Logger.Info($"Starting migration with '{NumOfThreads}' threads");
             
-            await using var parsed = new ParsedErgTenderContext();
-            await using var web = new WebTenderContext();
-
             await MigrateReferences();
             
             var tasks = new List<Task>();
@@ -46,6 +43,11 @@ namespace DataMigrationSystem.Services
             }
             
             await Task.WhenAll(tasks);
+            
+            await using var parsed = new ParsedErgTenderContext();
+            await using var webTenderContext = new WebTenderContext();
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.announcements_search;");
+            await webTenderContext.Database.ExecuteSqlRawAsync("refresh materialized view adata_tender.lots_search;");
             await parsed.Database.ExecuteSqlRawAsync(
                 "truncate avroradata.erg_tender, avroradata.erg_tender_positions, avroradata.erg_tender_docs restart identity cascade;");
         }
@@ -145,16 +147,16 @@ namespace DataMigrationSystem.Services
             await web.DocumentationTypes.UpsertRange(docTypes).On(x => x.Name).NoUpdate().RunAsync();
            
             foreach (var measure in web.Measures)
-                _measures.Add(measure.Name,measure.Id);
+                _measures.TryAdd(measure.Name,measure.Id);
             
             foreach (var statuse in web.Statuses)
-                _statuses.Add(statuse.Name,statuse.Id);
+                _statuses.TryAdd(statuse.Name,statuse.Id);
 
             foreach (var method in web.Methods)
-                _methods.Add(method.Name,method.Id);
+                _methods.TryAdd(method.Name,method.Id);
             
-            await foreach (var type in web.DocumentationTypes)
-                _documentationTypes.Add(type.Name,type.Id);
+            foreach (var type in web.DocumentationTypes)
+                _documentationTypes.TryAdd(type.Name,type.Id);
             
         }
 

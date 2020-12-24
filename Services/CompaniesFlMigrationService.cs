@@ -1,3 +1,5 @@
+using System;
+
 namespace DataMigrationSystem.Services
 {
     using System.Collections.Generic;
@@ -139,7 +141,8 @@ namespace DataMigrationSystem.Services
                 IdKato = dto.KatoCode,
                 LegalAddress = dto.KatoAddress,
                 FullnameDirector = dto.NameHead,
-                RelevanceDate = dto.RelevanceDate
+                RelevanceDate = DateTime.Now,
+                IdType = dto.Ip ? 2 : 1,    //ИП = 2, ЮЛ = 1
             };
 
             if (dto.OkedCode != null)

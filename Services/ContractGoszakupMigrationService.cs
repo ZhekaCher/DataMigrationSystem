@@ -147,6 +147,7 @@ namespace DataMigrationSystem.Services
                     {
                         var webPlan = DtoToWebPlan(contractUnitGoszakupDto.Plan);
                         webPlan.ContractUnitId = unitId;
+                        webPlan.SourceUniqueId = $"{webPlan.SourceUniqueId}-{webPlan.ContractUnitId}";
                         await webContractContext.Plans.Upsert(webPlan).On(x => new {x.SourceId, x.SourceUniqueId})
                             // .UpdateIf(
                             //     (x, y) =>
@@ -442,8 +443,7 @@ namespace DataMigrationSystem.Services
                 StatusId = statusId,
                 SubjectBiin = dto.SubjectBiin,
                 SupplyDate = dto.SupplyDate,
-                TruCode = dto.TruCode,
-                SourceUniqueId = dto.SourceUniqueId
+                TruCode = dto.TruCode
             };
         }
     }
