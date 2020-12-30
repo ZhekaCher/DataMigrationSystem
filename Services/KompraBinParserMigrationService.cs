@@ -15,7 +15,7 @@ namespace DataMigrationSystem.Services
         private readonly object _forlock;
         private int _counter;
 
-        public KompraBinParserMigrationService(int numOfThreads = 10)
+        public KompraBinParserMigrationService(int numOfThreads = 1)
         {
             _web = new WebKompraBinParserContext();
             _parsed = new ParsedKompraBinParserContext();
@@ -25,28 +25,15 @@ namespace DataMigrationSystem.Services
         
         public override async Task StartMigratingAsync()
         {
-            Logger.Info($"Starting migration with '{NumOfThreads}' threads");
-            
-            var tasks = new List<Task>();
-            for (var i = 0; i < NumOfThreads; i++)
-            {
-                tasks.Add(Migrate(i));
-                if (tasks.Count>=NumOfThreads)
-                {
-                    await Task.WhenAny(tasks);
-                    tasks.RemoveAll(x => x.IsCompleted);
-                }
-            }
-
-            await Task.WhenAll(tasks);
+            await Migrate();
             await _parsed.Database.ExecuteSqlRawAsync(
-                "truncate avroradata.kompra_bin_parser restart identity cascade;");
+               "truncate avroradata.kompra_bin_parser restart identity cascade;");
         }
         
         
-        private async Task Migrate(int threadNum)
+        private async Task Migrate()
         {
-            foreach (var kompraBinParserDto in _parsed.KompraBinParserDto.Where(x=> x.Id % NumOfThreads == threadNum))
+            foreach (var kompraBinParserDto in _parsed.KompraBinParserDto)
             {
                 var kompraBinParser = new KompraBinParser
                 {
