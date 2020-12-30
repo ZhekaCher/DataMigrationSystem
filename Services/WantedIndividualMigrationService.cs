@@ -25,7 +25,7 @@ namespace DataMigrationSystem.Services
 
         public override async Task StartMigratingAsync()
         {
-            await MigrateReferences();
+            // await MigrateReferences();
             var wantedIndividualsDtos = _parsedWantedIndividualContext.WantedIndividualDtos.Where(x=>x.Iin>999999);
             foreach (var wantedIndividualDto in wantedIndividualsDtos)
             {
