@@ -2,7 +2,7 @@
 
 ## Details
 
-System that moves data from **parsing DB* to **production DB*
+System that moves data from **parsing DB** to **production DB**
 
 ### List of Avaliable Migrations:
 
