@@ -2,7 +2,7 @@
 
 ## Details
 
-Система переноса данных из **базы данных парсинга** в **базу данных веба**
+System that moves data from **parsing DB* to **production DB*
 
 ### List of Avaliable Migrations:
 
