@@ -51,6 +51,6 @@ System that moves data from **parsing DB* to **production DB*
 ## Authors
 
 * **Кенжетаев Галымжан** - *Initial work* - [capomafiosoken](https://github.com/capomafiosoken)
-* **Евгений Черданцев** - *Initial work* - [ZhekaCher](https://github.com/ZhekaCher)
+* **Yevgeniy Cherdantsev** - *Initial work* - [y-cherdantsev](https://github.com/y-cherdantsev)
 * **Yersin Abdirazak** - *Initial work* - [yerss](https://github.com/yerss)
 * **Айбекич** - *Not Initial work* - [aibekzh](https://github.com/aibekzh)
